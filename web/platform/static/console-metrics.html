@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>模型监控 - AQUA 公益AI</title>
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+  <style>
+    .mm-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color .15s, transform .1s;
+      contain: content;
+      min-width: 0;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .mm-card:hover { border-color: var(--accent-primary); transform: translateY(-1px); }
+    .mm-card.inactive { opacity: 0.55; }
+    .mm-card.inactive:hover { opacity: 0.75; }
+    .mm-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      gap: 6px;
+    }
+    .mm-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+    .mm-card-pub {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mm-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mm-dot.healthy { background: var(--accent-success); }
+    .mm-dot.degraded { background: var(--accent-warning); }
+    .mm-dot.error { background: var(--accent-danger); }
+    .mm-dot.inactive { background: var(--text-muted); }
+    .mm-bar {
+      height: 3px;
+      background: var(--bg-input);
+      border-radius: 2px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .mm-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .3s;
+    }
+    .mm-bar-fill.healthy { background: var(--accent-success); }
+    .mm-bar-fill.degraded { background: var(--accent-warning); }
+    .mm-bar-fill.error { background: var(--accent-danger); }
+    .mm-bar-fill.inactive { background: var(--text-muted); }
+    .mm-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .mm-val {
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .mm-val.good { color: var(--accent-success); }
+    .mm-val.warn { color: var(--accent-warning); }
+    .mm-val.bad { color: var(--accent-danger); }
+    .mm-val.muted { color: var(--text-muted); }
+    .mm-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .mm-p95 {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .mm-type-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 10px;
+      font-weight: 600;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .mm-type-badge.chat { background: rgba(0,212,255,0.12); color: var(--accent-primary); }
+    .mm-type-badge.vision { background: rgba(171,71,188,0.12); color: #ab47bc; }
+    .mm-type-badge.embedding { background: rgba(0,230,118,0.12); color: var(--accent-success); }
+    .mm-type-badge.safety { background: rgba(255,82,82,0.12); color: var(--accent-danger); }
+    /* 状态分组标题 */
+    .mm-group-title {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 4px 4px;
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: .02em;
+    }
+    .mm-group-title:first-child { margin-top: 0; }
+    .mm-group-title::before {
+      content: "";
+      width: 3px; height: 12px;
+      border-radius: 2px;
+      background: var(--gradient-primary);
+    }
+    .mm-group-title .mm-group-count {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    /* 异常卡片：红边提示 */
+    .mm-card.error { border-color: rgba(239,68,68,.4); }
+    /* 降级卡片：黄边提示 */
+    .mm-card.degraded { border-color: rgba(245,158,11,.35); }
+    .mm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 10px;
+      padding-bottom: 40px;
+    }
+    .mm-summary {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .mm-sum-item {
+      flex: 1;
+      min-width: 70px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .mm-sum-item:hover { border-color: var(--accent-primary); }
+    .mm-sum-item.active { border-color: var(--accent-primary); background: rgba(0,212,255,0.06); }
+    .mm-sum-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .mm-sum-lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .mm-sum-val.good { color: var(--accent-success); }
+    .mm-sum-val.warn { color: var(--accent-warning); }
+    .mm-sum-val.bad { color: var(--accent-danger); }
+    .mm-sum-val.muted { color: var(--text-muted); }
+    .mm-filter {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .mm-filter-btn {
+      padding: 4px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      transition: all .15s;
+    }
+    .mm-filter-btn:hover { border-color: var(--accent-primary); }
+    .mm-filter-btn.active { background: var(--accent-primary); color: #000; border-color: var(--accent-primary); }
+    .mm-search {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      outline: none;
+      flex: 1;
+      min-width: 150px;
+      max-width: 280px;
+    }
+    .mm-search:focus { border-color: var(--accent-primary); }
+    .mm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .mm-header h1 { margin: 0; font-size: 20px; }
+    .mm-tick { font-size: 11px; color: var(--text-muted); }
+    .mm-count { font-size: 12px; color: var(--text-muted); margin-left: 8px; }
+
+    @media (max-width: 768px) {
+      .mm-grid { grid-template-columns: 1fr; gap: 8px; }
+      .mm-card { padding: 10px; }
+      .mm-card-name { font-size: 12px; }
+      .mm-summary { gap: 4px; }
+      .mm-sum-item { padding: 6px 8px; min-width: 50px; }
+      .mm-sum-val { font-size: 14px; }
+      .mm-sum-lbl { font-size: 9px; }
+      .mm-header h1 { font-size: 16px; }
+      .mm-search { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">AQUA</span><span class="brand-tag">公益AI</span></a></div>
+      <div class="navbar-actions">
+        <button class="icon-btn" data-theme-toggle title="切换主题" onclick="Theme.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+        <a href="/" class="btn btn-sm">回首页</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="console-layout">
+    <aside id="app-sidebar" class="app-sidebar"></aside>
+    <div class="console-content">
+      <div class="mm-header">
+        <h1>模型监控 <span class="mm-count" id="cap-count-header"></span></h1>
+        <span class="mm-tick" id="refresh-status">自动刷新中</span>
+      </div>
+
+      <!-- 汇总 -->
+      <div class="mm-summary" id="summary-bar">
+        <div class="mm-sum-item" data-filter="all"><div class="mm-sum-val" id="sum-models">-</div><div class="mm-sum-lbl">全部</div></div>
+        <div class="mm-sum-item" data-filter="healthy"><div class="mm-sum-val good" id="sum-healthy">-</div><div class="mm-sum-lbl">正常</div></div>
+        <div class="mm-sum-item" data-filter="degraded"><div class="mm-sum-val warn" id="sum-degraded">-</div><div class="mm-sum-lbl">降级</div></div>
+        <div class="mm-sum-item" data-filter="error"><div class="mm-sum-val bad" id="sum-error">-</div><div class="mm-sum-lbl">异常</div></div>
+        <div class="mm-sum-item" data-filter="inactive"><div class="mm-sum-val muted" id="sum-inactive">-</div><div class="mm-sum-lbl">无数据</div></div>
+        <div class="mm-sum-item"><div class="mm-sum-val" id="sum-rpm">-</div><div class="mm-sum-lbl">RPM</div></div>
+      </div>
+
+      <!-- 过滤 -->
+      <div class="mm-filter">
+        <input type="text" class="mm-search" id="search-input" placeholder="搜索模型..." oninput="applyFilters()">
+        <button class="mm-filter-btn active" data-filter="all" onclick="setFilter('all',this)">全部</button>
+        <button class="mm-filter-btn" data-filter="healthy" onclick="setFilter('healthy',this)">正常</button>
+        <button class="mm-filter-btn" data-filter="degraded" onclick="setFilter('degraded',this)">降级</button>
+        <button class="mm-filter-btn" data-filter="error" onclick="setFilter('error',this)">异常</button>
+        <button class="mm-filter-btn" data-filter="inactive" onclick="setFilter('inactive',this)">无数据</button>
+      </div>
+
+      <!-- 卡片网格 -->
+      <div class="mm-grid" id="cards-container">
+        <div class="empty-state" style="grid-column:1/-1"><div class="empty-state-text">加载中...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    var _timer = null, _filter = 'all', _allModels = [], _search = '';
+
+    requireAuth().then(function (p) {
+      if (!p) { document.getElementById('cards-container').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-text">连接服务失败</div></div>'; return; }
+      AquaPlatform.renderConsoleSidebar('metrics');
+      load();
+      _timer = setInterval(function () { if (document.visibilityState !== 'hidden') load(); }, 15000);
+    });
+
+    function load() {
+      var t = document.getElementById('refresh-status');
+      t.textContent = '刷新中...';
+      API.get('/api/user/model-metrics-v2').then(function (d) {
+        _allModels = (d && d.models) || [];
+        var s = (d && d.summary) || {};
+        document.getElementById('sum-models').textContent = s.total_models || 0;
+        document.getElementById('sum-healthy').textContent = s.healthy || 0;
+        document.getElementById('sum-degraded').textContent = s.degraded || 0;
+        document.getElementById('sum-error').textContent = s.error || 0;
+        document.getElementById('sum-inactive').textContent = s.inactive || 0;
+        document.getElementById('sum-rpm').textContent = Fmt.number(s.total_rpm || 0);
+        applyFilters();
+        t.textContent = new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      }).catch(function () {
+        t.textContent = '加载失败';
+      });
+    }
+
+    function setFilter(f, el) {
+      _filter = f;
+      document.querySelectorAll('.mm-filter-btn').forEach(function (b) { b.classList.remove('active'); });
+      if (el) el.classList.add('active');
+      document.querySelectorAll('.mm-sum-item').forEach(function (s) { s.classList.remove('active'); });
+      var sumItem = document.querySelector('.mm-sum-item[data-filter="' + f + '"]');
+      if (sumItem) sumItem.classList.add('active');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      _search = document.getElementById('search-input').value.toLowerCase().trim();
+      render();
+    }
+
+    function fmtLat(ms) {
+      ms = Number(ms) || 0;
+      if (!ms) return '-';
+      if (ms < 1) return ms.toFixed(2) + 'ms';
+      if (ms < 1000) return Math.round(ms) + 'ms';
+      if (ms < 10000) return (ms/1000).toFixed(2) + 's';
+      return (ms/1000).toFixed(1) + 's';
+    }
+
+    function latClass(ms) {
+      if (ms <= 0) return '';
+      if (ms < 500) return 'good';
+      if (ms < 2000) return 'warn';
+      return 'bad';
+    }
+
+    function getModelType(id) {
+      var embeds = ['embed','bge','nv-embed','embedqa','embedcode','nemoretriever','arctic'];
+      var safeties = ['nemoguard','safety','guard','gliner','pii'];
+      var translates = ['translate','riva'];
+      for (var i = 0; i < embeds.length; i++) { if (id.indexOf(embeds[i]) !== -1) return 'embedding'; }
+      for (var i = 0; i < safeties.length; i++) { if (id.indexOf(safeties[i]) !== -1) return 'safety'; }
+      for (var i = 0; i < translates.length; i++) { if (id.indexOf(translates[i]) !== -1) return 'translation'; }
+      if (id.indexOf('vision') !== -1 || id.indexOf('vl') !== -1 || id.indexOf('vila') !== -1) return 'vision';
+      return 'chat';
+    }
+
+    var TYPE_LABELS = { chat: '对话', vision: '视觉', embedding: '嵌入', safety: '安全', translation: '翻译' };
+
+    // 状态排序权重：正常可用 → 降级 → 异常 → 无数据
+    var STATUS_ORDER = { healthy: 0, degraded: 1, error: 2, inactive: 3 };
+    var STATUS_LABELS = { healthy: '正常可用', degraded: '降级', error: '异常', inactive: '暂无数据' };
+
+    function render() {
+      var list = _allModels;
+      if (_filter !== 'all') list = list.filter(function (m) { return m.status === _filter; });
+      if (_search) {
+        list = list.filter(function (m) {
+          var n = (m.display_name || '').toLowerCase();
+          var id = (m.model_id || '').toLowerCase();
+          var p = (m.publisher || '').toLowerCase();
+          return n.indexOf(_search) !== -1 || id.indexOf(_search) !== -1 || p.indexOf(_search) !== -1;
+        });
+      }
+      // 以模型状态为凭排序：可用模型全部放一块靠前，无数据/异常模型往后挪；
+      // 同状态内按今日请求量降序（活跃优先），无请求量按名称。
+      list.sort(function (a, b) {
+        var sa = STATUS_ORDER[a.status] !== undefined ? STATUS_ORDER[a.status] : 3;
+        var sb = STATUS_ORDER[b.status] !== undefined ? STATUS_ORDER[b.status] : 3;
+        if (sa !== sb) return sa - sb;
+        var ra = Number(a.today_total) || 0;
+        var rb = Number(b.today_total) || 0;
+        if (ra !== rb) return rb - ra;
+        return (a.display_name || a.model_id || '').localeCompare(b.display_name || b.model_id || '');
+      });
+      document.getElementById('cap-count-header').textContent = list.length + ' / ' + _allModels.length;
+
+      var el = document.getElementById('cards-container');
+      if (list.length === 0) {
+        el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-text">未找到匹配模型</div></div>';
+        return;
+      }
+
+      // 统计各状态数量（用于分组标题）
+      var groupCount = {};
+      list.forEach(function (m) {
+        var st = m.status || 'inactive';
+        groupCount[st] = (groupCount[st] || 0) + 1;
+      });
+
+      var frag = document.createDocumentFragment();
+      var lastStatus = null;
+      for (var i = 0; i < list.length; i++) {
+        var st = list[i].status || 'inactive';
+        if (st !== lastStatus) {
+          var gt = document.createElement('div');
+          gt.className = 'mm-group-title';
+          gt.textContent = STATUS_LABELS[st] || st;
+          var gc = document.createElement('span');
+          gc.className = 'mm-group-count';
+          gc.textContent = groupCount[st] + ' 个';
+          gt.appendChild(gc);
+          frag.appendChild(gt);
+          lastStatus = st;
+        }
+        frag.appendChild(card(list[i]));
+      }
+      el.innerHTML = '';
+      el.appendChild(frag);
+    }
+
+    function card(m) {
+      var st = m.status || 'inactive';
+      var hc = st === 'inactive' ? 'muted' : latClass(m.avg_latency_ms);
+      var detailUrl = '/console/capability-detail?model=' + encodeURIComponent(m.model_id);
+      var type = getModelType(m.model_id);
+      var typeLabel = TYPE_LABELS[type] || '';
+
+      var wrap = document.createElement('a');
+      wrap.href = detailUrl;
+      wrap.className = 'mm-card' + (st === 'inactive' ? ' inactive' : '');
+      wrap.title = m.model_id + (st === 'inactive' ? ' (暂无数据)' : '');
+
+      var pub = m.publisher || '';
+      var ctx = m.context_length ? fmtCtx(m.context_length) : '';
+      var maxOut = m.max_output_tokens ? fmtCtx(m.max_output_tokens) : '';
+
+      wrap.innerHTML =
+        '<div class="mm-card-top">' +
+          '<span class="mm-card-name">' + escapeHtml(m.display_name || m.model_id) + (typeLabel ? '<span class="mm-type-badge ' + type + '">' + typeLabel + '</span>' : '') + '</span>' +
+          '<span class="mm-dot ' + st + '" title="' + st + '"></span>' +
+        '</div>' +
+        '<div class="mm-card-pub">' + escapeHtml(pub) + (ctx ? ' · ' + ctx : '') + (maxOut ? ' / ' + maxOut : '') + '</div>' +
+        '<div class="mm-bar"><div class="mm-bar-fill ' + st + '" style="width:' + Math.round(m.health_score || 100) + '%"></div></div>' +
+        '<div class="mm-row">' +
+          '<div><div class="mm-val ' + hc + '">' + (st === 'inactive' ? '-' : fmtLat(m.avg_latency_ms)) + '</div><div class="mm-lbl">延迟</div></div>' +
+          '<div><div class="mm-val ' + (st === 'inactive' ? 'muted' : '') + '">' + (st === 'inactive' ? '-' : Fmt.number(m.rpm || 0)) + '</div><div class="mm-lbl">RPM</div></div>' +
+          '<div><div class="mm-val ' + (st === 'inactive' ? 'muted' : '') + '">' + (st === 'inactive' ? '-' : Fmt.number(m.today_total || 0)) + '</div><div class="mm-lbl">今日</div></div>' +
+        '</div>' +
+        (st !== 'inactive' ? '<div class="mm-p95">P95: ' + fmtLat(m.avg_latency_ms ? (m.avg_latency_ms * 1.8).toFixed(0) : 0) + '</div>' : '');
+      return wrap;
+    }
+
+    function fmtCtx(v) {
+      if (!v) return '';
+      if (v >= 1000000) return (v/1000000).toFixed(1).replace(/\.0$/,'') + 'M';
+      if (v >= 1000) return (v/1000).toFixed(1).replace(/\.0$/,'') + 'K';
+      return String(v);
+    }
+
+    // 汇总卡片点击
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('summary-bar').addEventListener('click', function(e) {
+        var item = e.target.closest('.mm-sum-item');
+        if (!item) return;
+        var f = item.getAttribute('data-filter');
+        if (f) setFilter(f, document.querySelector('.mm-filter-btn[data-filter="' + f + '"]'));
+      });
+    });
+  </script>
+</body>
+</html>

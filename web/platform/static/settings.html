@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="msvalidate.01" content="1B0EEE739DC3DB2ACD026924B711EC01">
+  <meta name="keywords" content="AQUA,公益AI,免费AI,AI模型,账户设置,免费ChatGPT">
+  <meta name="description" content="AQUA 公益AI账户设置 - 管理个人信息与偏好">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta property="og:title" content="账户设置 - AQUA 公益AI">
+  <meta property="og:description" content="AQUA 公益AI账户设置 - 管理个人信息与偏好">
+  <meta property="og:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta property="og:url" content="https://acu.ltzy.top/settings">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="账户设置 - AQUA 公益AI">
+  <meta name="twitter:description" content="AQUA 公益AI账户设置 - 管理个人信息与偏好">
+  <meta name="twitter:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>设置 - AQUA 公益AI</title>
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">AQUA</span><span class="brand-tag">公益AI</span></a></div>
+      <div class="navbar-actions">
+        <button class="icon-btn" data-theme-toggle title="切换主题" onclick="Theme.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+        <a href="/" class="btn btn-sm">回首页</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="console-layout">
+    <aside id="app-sidebar" class="app-sidebar"></aside>
+    <div class="console-content">
+      <h1 style="margin-bottom:24px">设置</h1>
+
+      <!-- 账户信息 -->
+      <div class="card mb-24">
+        <div class="card-title">账户信息</div>
+        <div class="grid grid-2">
+          <div><div class="text-sm text-secondary">用户 ID</div><div id="info-id" class="mt-8">-</div></div>
+          <div><div class="text-sm text-secondary">用户名</div><div id="info-username" class="mt-8">-</div></div>
+          <div><div class="text-sm text-secondary">邮箱</div><div id="info-email" class="mt-8">-</div></div>
+          <div><div class="text-sm text-secondary">用户类型</div><div id="info-type" class="mt-8">-</div></div>
+          <div><div class="text-sm text-secondary">注册时间</div><div id="info-created" class="mt-8">-</div></div>
+        </div>
+      </div>
+
+      <!-- 更换用户名 -->
+      <div class="card mb-24">
+        <div class="card-title">更换用户名</div>
+        <div class="input-group">
+          <label>新用户名</label>
+          <input type="text" class="input" id="new-username" placeholder="2-20 位中文、字母、数字、下划线、中划线" maxlength="20">
+          <div class="input-hint">用户名随时可改，需全局唯一；社区展示名与登录名将同步更新</div>
+        </div>
+        <button class="btn btn-primary" onclick="changeUsername()">更换用户名</button>
+      </div>
+
+      <!-- 更换邮箱 -->
+      <div class="card mb-24">
+        <div class="card-title">更换邮箱</div>
+        <div class="input-group">
+          <label>新邮箱</label>
+          <input type="email" class="input" id="new-email" placeholder="输入新邮箱地址">
+        </div>
+        <div class="input-group">
+          <label>邮箱验证码</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" class="input" id="email-code" placeholder="6 位验证码" maxlength="6" style="flex:1">
+            <button class="btn" onclick="sendEmailCode()">发送验证码</button>
+          </div>
+          <div class="input-hint">验证码将发送到新邮箱，10 分钟内有效</div>
+        </div>
+        <button class="btn btn-primary" onclick="changeEmail()">确认更换邮箱</button>
+      </div>
+
+      <!-- 编辑显示名 -->
+      <div class="card mb-24">
+        <div class="card-title">显示名</div>
+        <div class="input-group">
+          <label>显示名称</label>
+          <input type="text" class="input" id="display-name" placeholder="设置你的显示名" maxlength="50">
+          <div class="input-hint">显示名将在对话和排行榜中展示</div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">保存</button>
+      </div>
+
+      <!-- 用量配置 -->
+      <div class="card mb-24">
+        <div class="card-title">用量信息</div>
+        <div class="grid grid-3">
+          <div><div class="text-sm text-secondary">每日上限</div><div id="info-daily-limit" class="mt-8">-</div></div>
+          <div><div class="text-sm text-secondary">今日已用</div><div id="info-daily-used" class="mt-8">0</div></div>
+          <div><div class="text-sm text-secondary">并发上限</div><div id="info-concurrency" class="mt-8">加载中...</div></div>
+        </div>
+      </div>
+
+      <!-- 注销账号 -->
+      <div class="card" style="border-color:var(--accent-danger)">
+        <div class="card-title" style="color:var(--accent-danger)">危险操作</div>
+        <p class="text-sm text-secondary mb-16">注销后所有数据将被永久删除，API 密钥将立即失效，此操作不可撤销。</p>
+        <button class="btn btn-danger" onclick="deleteAccount()">注销账号</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    let currentProfile = null;
+
+    requireAuth().then(function (profile) {
+      if (!profile) { var _cc = document.querySelector('.console-content'); if (_cc) _cc.innerHTML = '<div style="padding:60px 20px;text-align:center"><p style="font-size:16px;margin-bottom:16px;color:var(--text-secondary)">连接服务失败，请刷新页面重试</p><button onclick="location.reload()" style="padding:8px 24px;border:1px solid var(--accent-primary);background:transparent;color:var(--accent-primary);border-radius:6px;cursor:pointer">刷新重试</button></div>'; return; }
+      currentProfile = profile;
+      AquaPlatform.renderConsoleSidebar('settings');
+      document.getElementById('info-id').textContent = '#' + (profile.user_id || profile.id || '-');
+      document.getElementById('info-username').textContent = profile.username || '-';
+      document.getElementById('info-email').textContent = profile.email || '-';
+      document.getElementById('info-type').innerHTML = '<span class="tag primary">' + escapeHtml(profile.user_type || '-') + '</span>';
+      document.getElementById('info-created').textContent = Fmt.time(profile.created_at);
+      document.getElementById('display-name').value = profile.display_name || profile.username || '';
+      loadUsage();
+    });
+
+    function changeUsername() {
+      const username = document.getElementById('new-username').value.trim();
+      if (!username) { Toast.warn('请输入新用户名'); return; }
+      API.put('/api/user/username', { username: username }).then(function () {
+        Toast.success('用户名已更新');
+        document.getElementById('info-username').textContent = username;
+        document.getElementById('new-username').value = '';
+      }).catch(function (err) {
+        Toast.error(err.message || '更换失败');
+      });
+    }
+
+    function sendEmailCode() {
+      const email = document.getElementById('new-email').value.trim();
+      if (!email) { Toast.warn('请输入新邮箱'); return; }
+      API.post('/api/auth/send-code', { email: email, purpose: 'change_email' }).then(function () {
+        Toast.success('验证码已发送到新邮箱');
+      }).catch(function (err) {
+        Toast.error(err.message || '发送失败');
+      });
+    }
+
+    function changeEmail() {
+      const new_email = document.getElementById('new-email').value.trim();
+      const code = document.getElementById('email-code').value.trim();
+      if (!new_email) { Toast.warn('请输入新邮箱'); return; }
+      if (!code) { Toast.warn('请输入验证码'); return; }
+      API.post('/api/user/email', { new_email: new_email, code: code }).then(function () {
+        Toast.success('邮箱已更新');
+        document.getElementById('info-email').textContent = new_email;
+        document.getElementById('new-email').value = '';
+        document.getElementById('email-code').value = '';
+      }).catch(function (err) {
+        Toast.error(err.message || '更换失败');
+      });
+    }
+
+    function loadUsage() {
+      API.get('/api/user/usage-limits').then(function (data) {
+        document.getElementById('info-daily-limit').textContent = data.daily_limit < 0 ? '不限量' : Fmt.full(data.daily_limit);
+        document.getElementById('info-daily-used').textContent = Fmt.full(data.daily_used || 0);
+        document.getElementById('info-concurrency').textContent = data.concurrency_limit_label || '不限并发';
+      }).catch(function () {});
+    }
+
+    function saveSettings() {
+      const name = document.getElementById('display-name').value.trim();
+      if (!name) { Toast.warn('显示名不能为空'); return; }
+      API.put('/api/user/settings', { display_name: name }).then(function () {
+        Toast.success('设置已保存');
+      }).catch(function (err) {
+        Toast.error(err.message || '保存失败');
+      });
+    }
+
+    function deleteAccount() {
+      Modal.confirm({
+        title: '注销账号',
+        message: '确定要注销账号吗？所有数据将被永久删除，API 密钥立即失效，此操作不可撤销。',
+        confirmText: '确认注销',
+        cancelText: '取消'
+      }).then(function (ok) {
+        if (!ok) return;
+        // 第二次确认：输入密码
+        Modal.show({
+          title: '请输入密码确认注销',
+          body: '<div class="input-group"><input type="password" class="input" id="delete-pwd" placeholder="输入密码"></div>',
+          confirmText: '确认注销',
+          cancelText: '取消',
+          onConfirm: function (modal) {
+            var pwd = modal.querySelector('#delete-pwd').value;
+            if (!pwd) { Toast.warn('请输入密码'); return false; }
+            API.post('/api/user/delete-account', { password: pwd }).then(function () {
+              Toast.success('账号已注销');
+              setTimeout(function () { window.location.href = '/login'; }, 1500);
+            }).catch(function (err) {
+              Toast.error(err.message || '注销失败');
+            });
+            return false;
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

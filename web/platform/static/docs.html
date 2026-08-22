@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>API 文档 - AQUA 公益AI</title>
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container">
+    <h1 style="margin-bottom:8px">API 文档</h1>
+    <p class="text-secondary mb-24">兼容 OpenAI / Anthropic / Google Gemini / OpenAI Responses 多种 API 格式</p>
+
+    <!-- 反滥用声明 -->
+    <div class="card mb-16" style="border-left:4px solid #e74c3c;background:linear-gradient(90deg,rgba(231,76,60,.07),rgba(231,76,60,0) 70%)">
+      <div class="card-title" style="color:#e74c3c;font-size:14px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>反滥用声明</div>
+      <p style="margin:6px 0 0 0;font-size:13px;line-height:1.8;color:var(--text-primary)">本平台免费资源，是给真正需要的人用的。<strong style="color:#e74c3c">拿公益去倒卖、去中转赚钱的，吃相难看，良心更难看。</strong>一经发现永久封号、永不申诉——不是我们狠，是你自己把自己的路走绝了。缺钱有手有脚，别把脸丢在公益地上。</p>
+    </div>
+
+    <!-- Base URL -->
+    <div class="card mb-16">
+      <div class="card-title">Base URL</div>
+      <pre class="code-block mono">https://api.example.com/v1</pre>
+      <p class="input-hint mt-8">所有 API 请求均需在路径前加上 /v1（Gemini 协议使用 /v1beta）</p>
+    </div>
+
+    <!-- 认证方式 -->
+    <div class="card mb-16">
+      <div class="card-title">认证方式</div>
+      <p class="mb-8">支持多种认证方式，根据协议选择：</p>
+      <div class="mb-16"><strong>1. OpenAI / Responses 协议</strong></div>
+      <pre class="code-block mono">Authorization: Bearer sk-your-api-key</pre>
+      <div class="mb-16 mt-16"><strong>2. Anthropic 协议</strong></div>
+      <pre class="code-block mono">x-api-key: sk-your-api-key</pre>
+      <div class="mb-16 mt-16"><strong>3. Google Gemini 协议</strong></div>
+      <pre class="code-block mono">x-goog-api-key: sk-your-api-key</pre>
+      <p class="input-hint mt-8">在控制台「密钥管理」页面创建密钥获取 API Key</p>
+    </div>
+
+    <!-- cURL 示例 -->
+    <div class="card mb-16">
+      <div class="card-title">cURL 示例</div>
+      <pre class="code-block mono">curl https://api.example.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "minimaxai/minimax-m3",
+    "messages": [
+      {"role": "user", "content": "你好，介绍一下你自己"}
+    ],
+    "stream": true
+  }'</pre>
+    </div>
+
+    <!-- Python SDK -->
+    <div class="card mb-16">
+      <div class="card-title">Python SDK 示例</div>
+      <pre class="code-block mono">from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-your-api-key",
+    base_url="https://api.example.com/v1"
+)
+
+response = client.chat.completions.create(
+    model="minimaxai/minimax-m3",
+    messages=[
+        {"role": "user", "content": "你好"}
+    ],
+    stream=True
+)
+
+for chunk in response:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="")</pre>
+    </div>
+
+    <!-- Node.js SDK -->
+    <div class="card mb-16">
+      <div class="card-title">Node.js SDK 示例</div>
+      <pre class="code-block mono">import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "sk-your-api-key",
+  baseURL: "https://api.example.com/v1"
+});
+
+const response = await client.chat.completions.create({
+  model: "minimaxai/minimax-m3",
+  messages: [{ role: "user", content: "你好" }],
+  stream: true
+});
+
+for await (const chunk of response) {
+  const content = chunk.choices[0]?.delta?.content || "";
+  process.stdout.write(content);
+}</pre>
+    </div>
+
+    <!-- 热门模型 -->
+    <div class="card mb-16">
+      <div class="card-title">热门模型</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>模型 ID</th><th>厂商</th><th>说明</th></tr></thead>
+          <tbody id="popular-models">
+            <tr><td colspan="3" class="text-center text-muted">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 错误码表 -->
+    <div class="card mb-16">
+      <div class="card-title">错误码表</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>状态码</th><th>错误类型</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>200</td><td>success</td><td>请求成功</td></tr>
+            <tr><td>400</td><td>invalid_request</td><td>请求参数错误</td></tr>
+            <tr><td>401</td><td>auth_failed</td><td>认证失败，密钥无效或未登录</td></tr>
+            <tr><td>403</td><td>forbidden</td><td>无权限访问（账号被封禁或无可用密钥）</td></tr>
+            <tr><td>404</td><td>not_found</td><td>资源不存在</td></tr>
+            <tr><td>429</td><td>rate_limit</td><td>请求频率超限或每日用量已达上限</td></tr>
+            <tr><td>500</td><td>server_error</td><td>服务器内部错误</td></tr>
+            <tr><td>502</td><td>gateway_error</td><td>网关错误，上游服务不可用</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- API 端点列表 -->
+    <div class="card mb-16">
+      <div class="card-title">API 端点（全部协议）</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>协议</th><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="3"><strong>OpenAI</strong></td><td>POST</td><td class="mono">/v1/chat/completions</td><td>对话补全（流式+非流式）</td></tr>
+            <tr><td>GET</td><td class="mono">/v1/models</td><td>获取模型列表</td></tr>
+            <tr><td>POST</td><td class="mono">/v1/embeddings</td><td>嵌入向量生成</td></tr>
+            <tr><td rowspan="1"><strong>Anthropic</strong></td><td>POST</td><td class="mono">/v1/messages</td><td>Claude Messages API 兼容</td></tr>
+            <tr><td rowspan="1"><strong>Responses</strong></td><td>POST</td><td class="mono">/v1/responses</td><td>OpenAI Responses API 兼容</td></tr>
+            <tr><td rowspan="1"><strong>Gemini</strong></td><td>POST</td><td class="mono">/v1beta/models/{model}:generateContent</td><td>Google Gemini API 兼容</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 多协议 SDK 示例 -->
+    <div class="card mb-16">
+      <div class="card-title">多协议 SDK 使用示例</div>
+
+      <div class="mb-16"><strong>Anthropic SDK (Claude)</strong></div>
+      <pre class="code-block mono">import anthropic
+
+client = anthropic.Anthropic(
+    api_key="sk-your-api-key",
+    base_url="https://api.example.com/v1"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "你好"}]
+)
+print(message.content[0].text)</pre>
+
+      <div class="mb-16 mt-16"><strong>Google Gemini SDK</strong></div>
+      <pre class="code-block mono">import google.generativeai as genai
+
+genai.configure(
+    api_key="sk-your-api-key",
+    client_options={"api_endpoint": "api.example.com/v1beta"}
+)
+
+model = genai.GenerativeModel("gemini-2.0-flash")
+response = model.generate_content("你好")
+print(response.text)</pre>
+
+      <div class="mb-16 mt-16"><strong>OpenAI Responses API</strong></div>
+      <pre class="code-block mono">from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-your-api-key",
+    base_url="https://api.example.com/v1"
+)
+
+response = client.responses.create(
+    model="gpt-5-codex",
+    input="你好，介绍一下你自己"
+)
+print(response.output_text)</pre>
+    </div>
+  </div>
+
+  <!-- 广告位 -->
+  <div class="ads-section">
+    <div class="ads-title">— 赞助商 —</div>
+    <div class="ads-row">
+      <a class="ad-card" href="https://idc.61nb.cn/aff/PRISUTPY" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/61nb.png" alt="安逸云"><div class="ad-info"><div class="ad-name">安逸云</div><div class="ad-desc">高性价比云服务器 · 特价9.9起</div></div>
+      </a>
+      <a class="ad-card" href="https://www.tokenlinks.cn/sign-up?aff=o4JN" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/tokenlinks.svg" alt="TokenLinks"><div class="ad-info"><div class="ad-name">TokenLinks</div><div class="ad-desc">主流高性能模型，更快接入，更低成本。</div></div>
+      </a></div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    // 登录态感知导航：已登录显示 控制台/退出
+    AquaPlatform.mountPublicNavbar('docs');
+    document.getElementById('footer').innerHTML = AquaPlatform.renderFooter();
+
+    // 获取热门模型
+    API.get('/api/chat/models').then(function (data) {
+      const models = (data && data.data) || (Array.isArray(data) ? data : []);
+      const tbody = document.getElementById('popular-models');
+      if (!models.length) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">暂无模型数据</td></tr>';
+        return;
+      }
+      // 取前 8 个
+      const popular = models.slice(0, 8);
+      tbody.innerHTML = popular.map(function (m) {
+        const id = m.id || m.model || '';
+        const provider = id.split('/')[0] || '-';
+        const name = m.name || id;
+        return '<tr><td class="mono">' + escapeHtml(id) + '</td><td>' + escapeHtml(provider) + '</td><td>' + escapeHtml(name) + '</td></tr>';
+      }).join('');
+    }).catch(function () {
+      document.getElementById('popular-models').innerHTML =
+        '<tr><td colspan="3" class="text-center text-muted">加载模型列表失败</td></tr>';
+    });
+  </script>
+</body>
+</html>

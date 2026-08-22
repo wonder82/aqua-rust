@@ -1,0 +1,44 @@
+# ===== 开源版强制忽略：绝不提交敏感/本地文件 =====
+.env
+.env.*
+*.env
+/backup
+/deploy/backup
+/docs/ACU_ACCOUNTS_TEST_REPORT_2026-08-09.md
+
+# ===== Rust 构建产物 =====
+/target
+
+# ===== 日志与临时文件 =====
+*.log
+*.tmp
+*.bak
+.DS_Store
+
+# ===== 工作/调试脚本（2026-08-11 整改：Python 工具脚本不得进入开源版）=====
+/scripts/**/*.py
+
+# 敏感文件
+acugw/config.toml
+token.txt
+*.env
+.env
+*.log
+credentials.json
+state.json
+
+# 上传文件
+web/uploads/*
+
+# 敏感文件 - 永远不要提交到开源仓库
+acugw/config.toml
+token.txt
+*.env
+/.env
+credentials.json
+state.json
+*.log
+web/uploads/*
+
+# 部署脚本中的敏感引用（如有）
+# 注意：deploy/ 下的脚本可能需要手动审查
