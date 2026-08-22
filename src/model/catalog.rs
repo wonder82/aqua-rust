@@ -1607,3 +1607,31 @@ pub fn deprecated_models() -> Vec<&'static ModelInfo> {
 pub fn available_model_count() -> usize {
     NIMMODEL_CATALOG.len() - DEPRECATED_MODELS.len()
 }
+
+static SPECIAL_SUSPENDED: AtomicBool = AtomicBool::new(false);
+static SPECIAL_CALL_ALLOWED: AtomicBool = AtomicBool::new(false);
+static SUSPENDED_MODELS: std::sync::RwLock<Vec<String>> = std::sync::RwLock::new(Vec::new());
+
+pub fn set_special_suspended(v: bool) {
+    SPECIAL_SUSPENDED.store(v, Ordering::Relaxed);
+}
+
+pub fn set_special_call_allowed(v: bool) {
+    SPECIAL_CALL_ALLOWED.store(v, Ordering::Relaxed);
+}
+
+pub fn is_special_call_allowed() -> bool {
+    SPECIAL_CALL_ALLOWED.load(Ordering::Relaxed)
+}
+
+pub fn set_suspended_models(val: Option<&str>) {
+    let models: Vec<String> = val
+        .unwrap_or("")
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+    if let Ok(mut w) = SUSPENDED_MODELS.write() {
+        *w = models;
+    }
+}

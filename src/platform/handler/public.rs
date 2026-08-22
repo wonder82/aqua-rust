@@ -35,6 +35,19 @@ pub async fn robots_txt() -> Response {
     (StatusCode::OK, "User-agent: *\nAllow: /\nDisallow: /console/\nDisallow: /api/\n").into_response()
 }
 
+/// GET /sitemap.xml
+pub async fn sitemap() -> Response {
+    let xml = r#"<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>/</loc><priority>1.0</priority></url>
+  <url><loc>/models</loc><priority>0.8</priority></url>
+  <url><loc>/docs</loc><priority>0.8</priority></url>
+  <url><loc>/quick-start</loc><priority>0.7</priority></url>
+  <url><loc>/capabilities</loc><priority>0.7</priority></url>
+</urlset>"#;
+    (StatusCode::OK, [("content-type", "application/xml")], xml).into_response()
+}
+
 /// GET /favicon.ico
 pub async fn favicon() -> Response {
     StatusCode::NO_CONTENT.into_response()
