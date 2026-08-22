@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="msvalidate.01" content="1B0EEE739DC3DB2ACD026924B711EC01">
+  <meta name="keywords" content="AQUA,公益AI,免费AI,AI模型,控制台,功能详情,免费ChatGPT">
+  <meta name="description" content="AQUA 公益AI控制台功能详情 - 查看功能配置详情">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta property="og:title" content="控制台 - 功能详情 - AQUA 公益AI">
+  <meta property="og:description" content="AQUA 公益AI控制台功能详情 - 查看功能配置详情">
+  <meta property="og:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta property="og:url" content="https://acu.ltzy.top/console-capability-detail">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="控制台 - 功能详情 - AQUA 公益AI">
+  <meta name="twitter:description" content="AQUA 公益AI控制台功能详情 - 查看功能配置详情">
+  <meta name="twitter:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>模型详情 - AQUA 公益AI</title>
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+  <style>
+    /* === 详情页专用样式 === */
+    .detail-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 16px;
+      transition: color .15s;
+    }
+    .detail-back:hover { color: var(--accent-primary); }
+
+    .detail-header {
+      margin-bottom: 24px;
+    }
+    .detail-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 4px 0;
+    }
+    .detail-id {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: "SF Mono", Consolas, monospace;
+      word-break: break-all;
+    }
+
+    .detail-meta-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .detail-publisher {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(0,212,255,0.08);
+      color: var(--accent-primary);
+      border: 1px solid rgba(0,212,255,0.2);
+    }
+    .detail-family {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .detail-deprecated {
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(255,82,82,0.1);
+      color: var(--accent-danger);
+      border: 1px solid rgba(255,82,82,0.2);
+    }
+    .detail-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      max-width: 700px;
+    }
+    .detail-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .detail-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(0,212,255,0.06);
+      border: 1px solid rgba(0,212,255,0.15);
+      color: var(--text-secondary);
+    }
+
+    .detail-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .detail-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 12px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* 上下文窗口 */
+    .ctx-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .ctx-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      text-align: center;
+      position: relative;
+    }
+    .ctx-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .ctx-raw {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: "SF Mono", Consolas, monospace;
+      margin-top: 2px;
+      word-break: break-all;
+      user-select: all;
+      cursor: text;
+    }
+    .ctx-copy {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 10px;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .ctx-item:hover .ctx-copy { opacity: 1; }
+    .ctx-copy:hover { color: var(--accent-primary); background: rgba(0,212,255,0.1); }
+    .ctx-copy.copied { color: var(--accent-success); }
+    .ctx-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* 能力徽章 */
+    .cap-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .cap-badge {
+      font-size: 12px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .cap-badge.on {
+      background: rgba(0,230,118,0.12);
+      color: var(--accent-success);
+      border: 1px solid rgba(0,230,118,0.25);
+    }
+    .cap-badge.off {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    /* 参数矩阵表 */
+    .param-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .param-table th {
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .param-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(42,48,82,0.4);
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+    .param-table tr:last-child td { border-bottom: none; }
+    .param-table .name-cell {
+      font-family: "SF Mono", Consolas, monospace;
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+    .param-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .param-dot.yes { background: var(--accent-success); }
+    .param-dot.no { background: var(--accent-danger); }
+    .param-dot.partial { background: var(--accent-warning); }
+
+    /* 禁止参数 */
+    .banned-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .banned-badge {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(255,82,82,0.1);
+      color: var(--accent-danger);
+      border: 1px solid rgba(255,82,82,0.2);
+      font-family: "SF Mono", Consolas, monospace;
+    }
+
+    /* 输入限制 */
+    .limit-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .limit-tag {
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .limit-tag strong { color: var(--text-primary); }
+
+    /* 推荐配置 */
+    .config-json {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    /* 空状态 */
+    .detail-empty {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .detail-empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .detail-empty-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .detail-loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* ============ 移动端适配 ============ */
+    @media (max-width: 768px) {
+      .detail-name { font-size: 18px; }
+      .detail-id { font-size: 11px; }
+      .detail-desc { font-size: 12px; }
+      .detail-section { padding: 12px; }
+      .detail-section-title { font-size: 13px; }
+      .detail-meta-row { gap: 4px; }
+      .detail-publisher, .detail-family { font-size: 11px; padding: 2px 8px; }
+      .detail-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .detail-stat-item { padding: 10px; }
+      .detail-stat-val { font-size: 16px; }
+      .detail-stat-lbl { font-size: 10px; }
+      .cap-badges { gap: 4px; }
+      .cap-badge { font-size: 10px; padding: 2px 6px; }
+      .cap-param-table { font-size: 11px; }
+      .cap-param-table th, .cap-param-table td { padding: 4px 6px; }
+      .console-content { padding: 12px; }
+      .console-content h1 { font-size: 18px; }
+    }
+
+    @media (max-width: 400px) {
+      .detail-stats { grid-template-columns: 1fr 1fr; }
+      .detail-stat-val { font-size: 14px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/static/css/icons.css?v=1.0">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">AQUA</span><span class="brand-tag">公益AI</span></a></div>
+      <div class="navbar-actions">
+        <button class="icon-btn" data-theme-toggle title="切换主题" onclick="Theme.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+        <a href="/" class="btn btn-sm">回首页</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="console-layout">
+    <aside id="app-sidebar" class="app-sidebar"></aside>
+    <div class="console-content" id="main-content">
+      <div class="detail-loading" id="loading-state">加载模型数据中...</div>
+    </div>
+  </div>
+
+  <div class="ads-section">
+    <div class="ads-title">— 赞助商 —</div>
+  </div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    var PARAM_DEFS = [
+      { key: 'temperature', label: 'temperature' },
+      { key: 'top_p', label: 'top_p' },
+      { key: 'top_k', label: 'top_k' },
+      { key: 'frequency_penalty', label: 'frequency_penalty' },
+      { key: 'presence_penalty', label: 'presence_penalty' },
+      { key: 'repetition_penalty', label: 'repetition_penalty' },
+      { key: 'min_p', label: 'min_p' },
+      { key: 'seed', label: 'seed' },
+      { key: 'stop', label: 'stop' },
+      { key: 'logprobs', label: 'logprobs' },
+      { key: 'n', label: 'n' },
+      { key: 'response_format', label: 'response_format' },
+      { key: 'stream', label: 'stream' },
+      { key: 'tools', label: 'tools' },
+      { key: 'reasoning', label: 'reasoning' },
+      { key: 'chat_template_kwargs', label: 'chat_template_kwargs' },
+      { key: 'reasoning_budget', label: 'reasoning_budget' },
+      { key: 'enable_thinking', label: 'enable_thinking' }
+      ,{ key: 'max_tokens', label: 'max_tokens / max_output_tokens' }
+    ];
+
+    var PROVIDER_CN_NAMES = {
+      '01': '零一万物', '01-ai': '零一万物', '01ai': '零一万物',
+      'abacus': 'Abacus AI', 'abacusai': 'Abacus AI',
+      'acu': 'AQUA自营', 'adept': 'Adept AI', 'ai21': 'AI21 Labs',
+      'ai21labs': 'AI21 Labs', 'aisingapore': 'AI Singapore',
+      'anthropic': 'Anthropic', 'baai': '智源研究院',
+      'bigcode': 'BigCode 开源社区', 'byte': '字节跳动 豆包',
+      'bytedance': '字节跳动 豆包', 'databricks': 'Databricks',
+      'dbrx': 'Databricks DBRX', 'deepseek-ai': '深度求索',
+      'ds': '深度求索', 'goog': '谷歌 Google', 'google': '谷歌 Google',
+      'ibm': 'IBM', 'meta': 'Meta 元宇宙', 'microsoft': '微软 Microsoft',
+      'minimax': 'MiniMax 稀宇', 'minimaxai': 'MiniMax 稀宇',
+      'mis': 'Mistral AI', 'mistralai': 'Mistral AI',
+      'moon': '月之暗面 Kimi', 'moonshotai': '月之暗面 Kimi',
+      'ms': '微软 Microsoft', 'nv': '英伟达 NVIDIA',
+      'nv-mistralai': 'NVIDIA × Mistral', 'nvidia': '英伟达 NVIDIA',
+      'nvm': 'NVIDIA × Mistral', 'oai': 'OpenAI', 'openai': 'OpenAI',
+      'pool': 'Poolside AI', 'poolside': 'Poolside AI',
+      'qwen': '通义千问', 'sarvam': 'Sarvam AI', 'sarvamai': 'Sarvam AI',
+      'sf': '阶跃星辰', 'sg': 'AI Singapore', 'snow': 'Snowflake',
+      'snowflake': 'Snowflake', 'step': '阶跃星辰',
+      'stepfun-ai': '阶跃星辰', 'think': 'Thinking Machines',
+      'thinkingmachines': 'Thinking Machines', 'upstage': 'Upstage AI',
+      'writer': 'Writer AI', 'z-ai': '智谱 AI', 'zai': '智谱 AI',
+      'zyphra': 'Zyphra AI',
+    };
+    function getProviderName(p) {
+      return PROVIDER_CN_NAMES[p] || p;
+    }
+
+    var CAP_BADGES = [
+      { key: 'streaming', label: '流式' },
+      { key: 'tools', label: '工具调用' },
+      { key: 'vision', label: '视觉' },
+      { key: 'json_mode', label: 'JSON模式' },
+      { key: 'reasoning', label: '推理' },
+      { key: 'seed', label: '种子' },
+      { key: 'logprobs', label: 'Logprobs' }
+    ];
+
+    requireAuth().then(function(p) {
+      if (!p) {
+        document.getElementById('main-content').innerHTML =
+          '<div class="detail-empty"><div class="detail-empty-title">连接服务失败</div><div class="detail-empty-sub">无法连接到 AQUA 服务，请检查网络连接后刷新页面重试</div><a href="/console/capabilities" class="btn btn-sm">← 返回模型列表</a></div>';
+        return;
+      }
+      AquaPlatform.renderConsoleSidebar('capabilities');
+      loadDetail();
+    });
+
+    function getModelIdFromURL() {
+      var params = new URLSearchParams(window.location.search);
+      return params.get('model') || '';
+    }
+
+    function loadDetail() {
+      var modelId = getModelIdFromURL();
+      if (!modelId) {
+        renderNotFound();
+        return;
+      }
+
+      Promise.all([
+        API.get('/api/user/model-capabilities'),
+        API.get('/v1/models').catch(function() { return { data: [] }; })
+      ]).then(function(results) {
+        var merged = mergeModelSources(results[0], results[1]);
+        var normalizedId = String(modelId).toLowerCase();
+        var found = null;
+        for (var i = 0; i < merged.length; i++) {
+          if (String(merged[i].model_id || '').toLowerCase() === normalizedId) {
+            found = merged[i];
+            break;
+          }
+        }
+        if (!found) {
+          renderNotFound();
+          return;
+        }
+        applyCanonicalLimits(found);
+        applyAuditEvidence(found);
+        normalizeModelLimits(found);
+        document.title = found.display_name + ' - 模型详情 - AQUA 公益AI';
+        renderDetail(found);
+      }).catch(function() {
+        document.getElementById('main-content').innerHTML =
+          '<div class="detail-empty"><div class="detail-empty-title">加载失败</div><div class="detail-empty-sub">加载模型数据失败，请稍后重试</div><a href="/console/capabilities" class="btn btn-sm">← 返回模型列表</a></div>';
+      });
+    }
+
+    function renderNotFound() {
+      document.getElementById('main-content').innerHTML =
+        '<div class="detail-empty">' +
+        '<div class="detail-empty-title">模型未找到</div>' +
+        '<div class="detail-empty-sub">未找到指定的模型，请检查模型ID是否正确，或该模型可能已下线</div>' +
+        '<a href="/console/capabilities" class="btn btn-sm">← 返回模型列表</a>' +
+        '</div>';
+    }
+
+    function mergeModelSources(capabilityData, officialData) {
+      var capabilityModels = (capabilityData && capabilityData.models) || (capabilityData && capabilityData.capabilities && capabilityData.capabilities.models) || [];
+      var officialModels = (officialData && officialData.data) || (Array.isArray(officialData) ? officialData : []);
+      var byId = {};
+      capabilityModels.forEach(function(raw) {
+        var id = raw.model_id || raw.id || raw.model || '';
+        if (!id) return;
+        var item = Object.assign({}, raw);
+        item._hasCapabilityData = true;
+        item.model_id = id;
+        item.display_name = item.display_name || item.name || id;
+        item.publisher = item.publisher || item.owned_by || id.split('/')[0] || '未知';
+        item.capabilities = Array.isArray(item.capabilities) ? item.capabilities : [];
+        item.totalContext = item.totalContext || item.context_length || 0;
+        item.maxOutput = item.maxOutput || item.max_output_tokens || 0;
+        item.estimatedInput = item.estimatedInput || item.max_input_tokens || 0;
+        byId[String(id).toLowerCase()] = item;
+      });
+      officialModels.forEach(function(raw) {
+        var id = raw.id || raw.model_id || raw.model || '';
+        if (!id) return;
+        var key = String(id).toLowerCase();
+        if (!byId[key]) {
+          byId[key] = {
+            model_id: id,
+            display_name: raw.name || id,
+            publisher: raw.owned_by || String(id).split('/')[0] || '未知',
+            capabilities: [],
+            basic_available: true,
+            availability: true,
+            evidence_status: '暂无实测限制'
+          };
+        }
+        byId[key].official = true;
+        byId[key].official_name = raw.name || id;
+      });
+      return Object.keys(byId).map(function(key) { return byId[key]; });
+    }
+
+    function applyCanonicalLimits(model) {
+      var normalizedId = String(model.model_id || '').toLowerCase();
+      if (normalizedId === 'deepseek-ai/deepseek-v4-pro') {
+        model.totalContext = 262144;
+        model.maxOutput = 32768;
+        model.evidence_status = '上游实测/明确上限';
+        model.evidence = ['262144/256K', '独立审计实测/明确上限'];
+      }
+      if (normalizedId === 'minimaxai/minimax-m3') {
+        model.totalContext = 262144;
+        model.evidence_status = '上游实测/官方声明';
+        model.evidence = ['上游实测256K（官方声明1M）', '上游实测/官方声明'];
+      }
+      if (normalizedId === 'z-ai/glm-5.2') {
+        model.totalContext = 202752;
+        model.maxOutput = 16000;
+        model.evidence_status = '官方目录/独立数据';
+        model.evidence = ['202752/约198K', '官方目录/独立数据'];
+        model.outputEvidence = ['16000/16K', '官方目录/独立数据'];
+      }
+      if (normalizedId === 'deepseek-ai/deepseek-v4-flash') {
+        model.totalContext = 0;
+        model.maxOutput = 0;
+        model.evidence_status = '暂态过载，边界未完成';
+        model.evidence = ['暂态过载，边界未完成', '独立审计状态'];
+      }
+      return model;
+    }
+
+    function applyAuditEvidence(model) {
+      var id = String(model.model_id || '').toLowerCase();
+      var audit200 = {
+        'deepseek-ai/deepseek-v4-pro': ['parallel_tool_calls', 'json_object', 'json_schema', 'logprobs', 'n', 'reasoning_none', 'reasoning_high', 'reasoning_max', 'top_k', 'min_p', 'repetition_penalty', 'chat_template_kwargs'],
+        'z-ai/glm-5.2': ['temperature', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop', 'seed', 'stream', 'stream_options', 'tools', 'tool_choice', 'parallel_tool_calls', 'json_object', 'json_schema', 'logprobs', 'n', 'reasoning_none', 'reasoning_high', 'reasoning_max', 'top_k', 'min_p', 'repetition_penalty', 'chat_template_kwargs']
+      };
+      var audit400 = ['reasoning_budget', 'enable_thinking'];
+      var keys = audit200[id] || [];
+      model.params = model.params || {};
+      keys.forEach(function(key) { model.params[key] = Object.assign({}, model.params[key], { supported: true, status: 200 }); });
+      audit400.forEach(function(key) { model.params[key] = Object.assign({}, model.params[key], { supported: false, status: 400 }); });
+      if (id === 'deepseek-ai/deepseek-v4-flash') {
+        model.evidence = ['暂态过载，边界未完成', '独立审计状态'];
+        ['temperature', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop', 'seed', 'stream', 'stream_options', 'tool_choice', 'parallel_tool_calls', 'json_schema', 'logprobs', 'n', 'min_p', 'repetition_penalty', 'chat_template_kwargs'].forEach(function(key) {
+          model.params[key] = Object.assign({}, model.params[key], { supported: undefined, status: 529 });
+        });
+        ['reasoning_budget', 'enable_thinking'].forEach(function(key) { model.params[key] = Object.assign({}, model.params[key], { supported: false, status: 400 }); });
+      }
+      return model;
+    }
+
+    function renderDetail(m) {
+      var html = '';
+
+      // 返回按钮
+      html += '<a href="/console/capabilities" class="detail-back">← 返回模型列表</a>';
+
+      // 头部
+      html += '<div class="detail-header">';
+      html += '<h1 class="detail-name">' + escapeHtml(m.display_name || m.model_id) + '</h1>';
+      html += '<div class="detail-id">' + escapeHtml(m.model_id) + '</div>';
+      html += '</div>';
+
+      // 元信息行
+      var modelIdLower = String(m.model_id || '').toLowerCase();
+      var isAcu = modelIdLower.indexOf('acu/') === 0;
+      html += '<div class="detail-meta-row">';
+      html += '<span class="detail-publisher">' + escapeHtml(getProviderName(m.publisher) || '未知') + '</span>';
+      if (isAcu) html += '<span class="detail-publisher" style="background:linear-gradient(135deg,#3b82f6,#00d4ff);color:#fff;border:none">官方自营</span>';
+      html += '<span class="detail-' + (m.basic_available === false ? 'deprecated' : 'family') + '">' + escapeHtml(m.basic_available === false ? '基础不可用' : '基础可用') + '</span>';
+      if (m.evidence_status) html += '<span class="detail-family">' + escapeHtml(m.evidence_status) + '</span>';
+      if (m.model_family) {
+        html += '<span class="detail-family">' + escapeHtml(m.model_family) + '</span>';
+      }
+      if (m.cn_name) {
+        html += '<span class="detail-family">' + escapeHtml(m.cn_name) + '</span>';
+      }
+      if (m.is_deprecated) {
+        html += '<span class="detail-deprecated">已弃用</span>';
+      }
+      html += '</div>';
+
+      // 描述
+      if (m.description) {
+        html += '<div class="detail-desc">' + escapeHtml(m.description) + '</div>';
+      }
+
+      // 标签
+      if (m.tags && m.tags.length > 0) {
+        html += '<div class="detail-tags">';
+        for (var t = 0; t < m.tags.length; t++) {
+          html += '<span class="detail-tag">' + escapeHtml(m.tags[t]) + '</span>';
+        }
+        html += '</div>';
+      }
+
+      // 上下文窗口
+      html += '<div class="detail-section">';
+      html += '<h3 class="detail-section-title">上下文窗口</h3>';
+      html += '<div class="ctx-grid">';
+      html += buildCtxItem('上下文长度', m.totalContext, m.evidence, m.totalContext > 0 ? '' : '未测');
+      html += buildCtxItem('最大输出', m.maxOutput, m.outputEvidence, m.maxOutput > 0 ? '' : '未测');
+      html += buildCtxItem('最大输入（估算，已预留4096安全余量）', m.estimatedInput, null, m.estimatedInput > 0 ? '' : '未测');
+      html += '</div></div>';
+
+      // 能力徽章
+      html += '<div class="detail-section">';
+      html += '<h3 class="detail-section-title">能力</h3>';
+      html += '<div class="cap-badges">';
+      var caps = m.capabilities || [];
+      for (var b = 0; b < CAP_BADGES.length; b++) {
+        var badge = CAP_BADGES[b];
+        var supported = caps.indexOf(badge.key) !== -1;
+        html += '<span class="cap-badge ' + (supported ? 'on' : 'off') + '">' + escapeHtml(badge.label) + '</span>';
+      }
+      html += '</div></div>';
+
+      html += '<div class="detail-section"><h3 class="detail-section-title">调用说明</h3>';
+      html += '<div class="detail-desc">支持 OpenAI 兼容 Chat Completions；流式请求使用 SSE。上下文和输出上限来自当前能力目录，具体可用性还受上游状态影响。</div></div>';
+
+      // 参数支持矩阵
+      var params = m.params || {};
+      html += '<div class="detail-section">';
+      html += '<h3 class="detail-section-title">参数支持矩阵</h3>';
+      html += '<table class="param-table">';
+      html += '<thead><tr><th>参数名</th><th>支持状态</th><th>范围 / 默认值</th></tr></thead>';
+      html += '<tbody>';
+      for (var pi = 0; pi < PARAM_DEFS.length; pi++) {
+        var pd = PARAM_DEFS[pi];
+        var info = params[pd.key] || {};
+        var supported = info.supported;
+        if (info.status !== undefined && info.status !== 200) supported = undefined;
+        var statusClass = supported === true ? 'yes' : (supported === false ? 'no' : 'partial');
+        var statusText = supported === true ? '<span class="icon-ok">&#10003;</span> 支持' : (supported === false ? '<span class="icon-xmark">&#10007;</span> 不支持' : '未判定');
+        var rangeText = '';
+
+        if (pd.key === 'max_tokens') {
+          statusClass = 'yes';
+          statusText = '<span class="icon-ok">&#10003;</span> 支持';
+          rangeText = '最大输出: ' + (m.maxOutput || m.max_output_tokens || '-') + ' tokens';
+        } else if (pd.key === 'reasoning_budget' || pd.key === 'enable_thinking') {
+          statusClass = 'no';
+          statusText = '<span class="icon-xmark">&#10007;</span> 明确不支持';
+          rangeText = '400 Validation: Unsupported parameter';
+        } else if (pd.key === 'response_format' && info.json_schema) {
+          statusClass = 'partial';
+          statusText = '◐ 部分支持';
+          rangeText = 'JSON Schema: ' + (info.json_schema ? '<span class="icon-ok">&#10003;</span>' : '<span class="icon-xmark">&#10007;</span>');
+        } else if (pd.key === 'stream' && info.stream_options) {
+          statusClass = 'partial';
+          statusText = '◐ 部分支持';
+          rangeText = 'stream_options: ' + (info.stream_options ? '<span class="icon-ok">&#10003;</span>' : '<span class="icon-xmark">&#10007;</span>');
+        } else if (pd.key === 'tools' && info.tool_choice) {
+          statusClass = 'partial';
+          statusText = '◐ 部分支持';
+          rangeText = 'tool_choice: ' + (info.tool_choice ? '<span class="icon-ok">&#10003;</span>' : '<span class="icon-xmark">&#10007;</span>') + ', 并行: ' + (info.parallel_tool_calls ? '<span class="icon-ok">&#10003;</span>' : '<span class="icon-xmark">&#10007;</span>');
+        } else if (pd.key === 'reasoning') {
+          if (info.effort || info.budget) {
+            statusClass = 'partial';
+            statusText = '◐ 部分支持';
+            var parts = [];
+            if (info.effort) parts.push('effort');
+            if (info.budget) {
+              parts.push('budget' + (info.budget_max ? ' (max ' + info.budget_max + ')' : ''));
+            }
+            rangeText = parts.join(', ');
+          }
+        } else if (pd.key === 'chat_template_kwargs') {
+          if (info.enable_thinking) {
+            statusClass = 'partial';
+            statusText = '◐ 部分支持';
+            rangeText = 'enable_thinking: <span class="icon-ok">&#10003;</span>';
+          }
+        } else if (supported) {
+          rangeText = info.range || '';
+          if (info.default !== undefined && info.default !== null) {
+            rangeText += (rangeText ? ' / 默认: ' : '默认: ') + info.default;
+          }
+          if (info.max !== undefined && info.max !== null) {
+            rangeText += (rangeText ? ' / 最大: ' : '最大: ') + info.max;
+          }
+          if (info.top_logprobs_max !== undefined) {
+            rangeText += (rangeText ? ' / top_logprobs: ' : 'top_logprobs: ') + info.top_logprobs_max;
+          }
+        }
+
+        html += '<tr>';
+        html += '<td><span class="name-cell">' + escapeHtml(pd.label) + '</span></td>';
+        html += '<td><span class="param-dot ' + statusClass + '"></span>' + statusText + '</td>';
+        html += '<td>' + escapeHtml(rangeText || '-') + '</td>';
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      html += '</div>';
+
+      // 禁止参数
+      var banned = m.banned_params || [];
+      if (banned.length > 0) {
+        html += '<div class="detail-section">';
+        html += '<h3 class="detail-section-title">禁止参数</h3>';
+        html += '<div class="banned-badges">';
+        for (var bi = 0; bi < banned.length; bi++) {
+          html += '<span class="banned-badge">' + escapeHtml(banned[bi]) + '</span>';
+        }
+        html += '</div></div>';
+      }
+
+      // 输入限制
+      html += '<div class="detail-section">';
+      html += '<h3 class="detail-section-title">输入限制</h3>';
+      html += '<div class="limit-list">';
+      if (m.max_messages !== undefined && m.max_messages !== null) {
+        html += '<span class="limit-tag">最大消息数: <strong>' + escapeHtml(String(m.max_messages)) + '</strong></span>';
+      }
+      if (m.supported_roles && m.supported_roles.length > 0) {
+        html += '<span class="limit-tag">支持角色: <strong>' + escapeHtml(m.supported_roles.join(', ')) + '</strong></span>';
+      }
+      if (m.supported_content_types && m.supported_content_types.length > 0) {
+        html += '<span class="limit-tag">内容类型: <strong>' + escapeHtml(m.supported_content_types.join(', ')) + '</strong></span>';
+      }
+      if (m.max_images !== undefined && m.max_images !== null && m.max_images > 0) {
+        html += '<span class="limit-tag">最大图片: <strong>' + escapeHtml(String(m.max_images)) + '</strong></span>';
+      }
+      html += '</div></div>';
+
+      // 推荐配置 JSON
+      html += '<div class="detail-section">';
+      html += '<h3 class="detail-section-title">推荐配置</h3>';
+      var config = buildRecommendedConfig(m);
+      html += '<div class="config-json">' + escapeHtml(JSON.stringify(config, null, 2)) + '</div>';
+      html += '</div>';
+
+      document.getElementById('main-content').innerHTML = html;
+    }
+
+    function buildRecommendedConfig(m) {
+      var params = m.params || {};
+      var config = { model: m.model_id };
+
+      if (params.temperature && params.temperature.supported) {
+        config.temperature = params.temperature.default || 0.7;
+      }
+      if (params.top_p && params.top_p.supported) {
+        config.top_p = params.top_p.default || 1.0;
+      }
+      if (m.maxOutput || m.max_output_tokens) config.max_output_tokens = m.maxOutput || m.max_output_tokens;
+      if (params.stream && params.stream.supported) {
+        config.stream = true;
+      }
+      if (params.tools && params.tools.supported) {
+        config.tools = [];
+      }
+      if (params.response_format && params.response_format.supported) {
+        config.response_format = { type: 'text' };
+      }
+      if (params.seed && params.seed.supported) {
+        config.seed = 42;
+      }
+      if (params.stop && params.stop.supported) {
+        config.stop = [];
+      }
+      if (params.frequency_penalty && params.frequency_penalty.supported) {
+        config.frequency_penalty = 0;
+      }
+      if (params.presence_penalty && params.presence_penalty.supported) {
+        config.presence_penalty = 0;
+      }
+      if (params.logprobs && params.logprobs.supported) {
+        config.logprobs = false;
+      }
+      if (params.n && params.n.supported) {
+        config.n = 1;
+      }
+
+      return config;
+    }
+
+    function buildCtxItem(label, val, evidence, emptyText) {
+      if (evidence && evidence[0] === '202752/约198K') val = 202752;
+      var raw = Number(val) || 0;
+      var formatted = fmtContext(raw);
+      var display = raw > 0 ? formatted : (emptyText || '-');
+      var rawText = raw > 0 ? raw.toLocaleString('en-US') : '';
+      return '<div class="ctx-item">' +
+        '<button class="ctx-copy" onclick="copyCtxValue(this,' + raw + ')" title="复制实际数值">复制</button>' +
+        '<div class="ctx-val">' + escapeHtml(display) + '</div>' +
+        (rawText ? '<div class="ctx-raw" title="实际配置值（可直接复制）">' + escapeHtml(rawText) + '</div>' : '') +
+        (evidence ? '<div class="ctx-lbl">证据：' + escapeHtml(evidence[1]) + '</div>' : '') +
+        '<div class="ctx-lbl">' + escapeHtml(label) + '</div>' +
+        '</div>';
+    }
+
+    function normalizeModelLimits(model) {
+      var totalContext = Number(model.totalContext || model.context_length);
+      var maxOutput = Number(model.maxOutput || model.max_output_tokens);
+      if (!Number.isFinite(totalContext) || totalContext <= 0) totalContext = 0;
+      if (!Number.isFinite(maxOutput) || maxOutput <= 0) maxOutput = 0;
+      var estimatedInput = Number(model.estimatedInput || model.max_input_tokens);
+      if (!Number.isFinite(estimatedInput) || estimatedInput <= 0) {
+        estimatedInput = totalContext > 0 && maxOutput > 0 ? Math.max(0, totalContext - maxOutput - 4096) : 0;
+      }
+      model.totalContext = totalContext;
+      model.maxOutput = maxOutput;
+      model.estimatedInput = estimatedInput;
+      return model;
+    }
+
+    function copyCtxValue(btn, val) {
+      copyToClipboard(String(val)).then(function(ok) {
+        if (ok) {
+          btn.textContent = '已复制';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = '复制';
+            btn.classList.remove('copied');
+          }, 1500);
+        }
+      });
+    }
+
+    function fmtContext(val) {
+      if (val === undefined || val === null || val === 0) return '-';
+      var n = Number(val);
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1024) return Math.round(n / 1024) + 'K';
+      return String(n);
+    }
+  </script>
+</body>
+</html>

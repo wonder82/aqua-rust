@@ -1,0 +1,39 @@
+# AQUA Server systemd 服务单元（Rust 单二进制双服务）
+# 安装：cp acu-rust-server.service /etc/systemd/system/ && systemctl daemon-reload
+# 说明：平台 :8000 + 网关 :8001（生产灰度时改为 8006/8007 等）
+
+[Unit]
+Description=AQUA Platform & Gateway (Rust)
+Documentation=https://example.com
+After=network.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/aqua-rust
+# 应用内部通过 dotenvy 加载 ./.env（避免 systemd $ 展开破坏 bcrypt 哈希）
+ExecStart=/opt/aqua-rust/target/release/aqua-server
+# K3 内存：mimalloc 快速归还释放页
+Environment=MIMALLOC_PAGE_RESET=1
+Environment=MIMALLOC_PURGE_DELAY=10
+Restart=always
+RestartSec=3
+# K3 内存上限（M7 实测稳态 ~21MB / 峰值 ~27MB，预留 4 倍余量）
+MemoryMax=128M
+# 优雅关闭（与 main.rs 30s 超时配合）
+TimeoutStopSec=35
+KillSignal=SIGTERM
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=acu-rust-server
+
+# 加固
+NoNewPrivileges=false
+ProtectSystem=full
+ReadWritePaths=/opt/aqua-rust
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

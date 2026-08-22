@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>统计面板 - AQUA 公益AI</title>
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+  <style>
+    .st-range-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .st-range-btn {
+      padding: 6px 18px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      transition: all .18s;
+    }
+    .st-range-btn:hover { border-color: var(--accent-primary); }
+    .st-range-btn.active { background: var(--gradient-primary); color: #fff; border-color: transparent; box-shadow: 0 3px 10px rgba(59,130,246,.28); }
+    .st-refresh { font-size: 12px; color: var(--text-muted); }
+    .st-chart { display: flex; align-items: flex-end; gap: 6px; height: 220px; padding: 12px 0 4px; overflow-x: auto; }
+    .st-chart-col { flex: 1; min-width: 26px; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .st-chart-bar {
+      width: 70%; border-radius: 4px 4px 0 0;
+      background: var(--gradient-primary);
+      transition: height .4s ease;
+      min-height: 2px;
+    }
+    .st-chart-bar.success { background: linear-gradient(180deg, rgba(34,197,94,.85), rgba(34,197,94,.35)); }
+    .st-chart-val { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+    .st-chart-label { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+    .st-chart-legend { display: flex; gap: 16px; justify-content: center; font-size: 11px; color: var(--text-secondary); margin-top: 8px; }
+    .st-legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+    .st-error-bad { color: var(--accent-danger); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">AQUA</span><span class="brand-tag">公益AI</span></a></div>
+      <div class="navbar-actions">
+        <button class="icon-btn" data-theme-toggle title="切换主题" onclick="Theme.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+        <a href="/" class="btn btn-sm">回首页</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="console-layout">
+    <aside id="app-sidebar" class="app-sidebar"></aside>
+    <div class="console-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+        <h1 style="margin:0">用量监视</h1>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="st-range-bar">
+            <button class="st-range-btn" data-range="today" onclick="setRange('today')">今天</button>
+            <button class="st-range-btn active" data-range="7d" onclick="setRange('7d')">7天</button>
+            <button class="st-range-btn" data-range="30d" onclick="setRange('30d')">30天</button>
+          </div>
+          <span class="st-refresh" id="refresh-status">每 30 秒自动刷新</span>
+        </div>
+      </div>
+
+      <!-- 汇总卡片 -->
+      <div class="grid grid-4 mb-24">
+        <div class="stat-card"><div class="stat-card-label">请求数</div><div class="stat-card-value" id="stat-requests">-</div><div class="stat-card-sub" id="stat-requests-sub">成功率 -</div></div>
+        <div class="stat-card"><div class="stat-card-label">消耗 Token</div><div class="stat-card-value" id="stat-tokens">-</div><div class="stat-card-sub">输入/输出/缓存</div></div>
+        <div class="stat-card"><div class="stat-card-label">平均延迟</div><div class="stat-card-value" id="stat-latency">-</div><div class="stat-card-sub" id="stat-ttft">首字延迟 -</div></div>
+        <div class="stat-card"><div class="stat-card-label">错误请求</div><div class="stat-card-value st-error-bad" id="stat-errors">-</div><div class="stat-card-sub" id="stat-errors-sub">4xx/5xx/限流</div></div>
+      </div>
+
+      <!-- Token 明细 -->
+      <div class="grid grid-4 mb-24">
+        <div class="stat-card"><div class="stat-card-label">输入 Token</div><div class="stat-card-value" id="stat-prompt">-</div></div>
+        <div class="stat-card"><div class="stat-card-label">输出 Token</div><div class="stat-card-value" id="stat-completion">-</div></div>
+        <div class="stat-card"><div class="stat-card-label">缓存 Token</div><div class="stat-card-value" id="stat-cached">-</div></div>
+        <div class="stat-card"><div class="stat-card-label">流式/非流式</div><div class="stat-card-value" id="stat-stream">-</div><div class="stat-card-sub">流式 / 非流式请求</div></div>
+      </div>
+
+      <!-- 趋势图 -->
+      <div class="card mb-24">
+        <div class="card-title">请求趋势（真实聚合数据）</div>
+        <div class="st-chart" id="trend-chart"><div class="text-muted" style="padding:40px">加载中...</div></div>
+        <div class="st-chart-legend">
+          <span><span class="st-legend-dot" style="background:var(--gradient-primary)"></span>请求数</span>
+          <span><span class="st-legend-dot" style="background:rgba(34,197,94,.7)"></span>成功请求</span>
+        </div>
+      </div>
+
+      <!-- 模型用量分布 -->
+      <div class="card mb-24">
+        <div class="card-title">模型用量分布 Top</div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>排名</th><th>模型</th><th>请求数</th><th>Token 数</th><th>成功率</th><th>平均延迟</th></tr></thead>
+            <tbody id="models-tbody">
+              <tr><td colspan="6" class="text-center text-muted">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 平台总览 -->
+      <div class="card">
+        <div class="card-title">平台总览（7天活跃排行榜）</div>
+        <div class="grid grid-3 mb-16" id="platform-total">
+          <div class="stat-card"><div class="stat-card-label">总请求数</div><div class="stat-card-value" id="total-requests">-</div></div>
+          <div class="stat-card"><div class="stat-card-label">总 Token</div><div class="stat-card-value" id="total-tokens">-</div></div>
+          <div class="stat-card"><div class="stat-card-label">活跃用户</div><div class="stat-card-value" id="active-users">-</div></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>排名</th><th>用户</th><th>请求数</th><th>Token 数</th><th>平均延迟</th><th>成功率</th></tr></thead>
+            <tbody id="leaderboard-tbody">
+              <tr><td colspan="6" class="text-center text-muted">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    var _range = '7d';
+    var _timer = null;
+
+    requireAuth().then(function (profile) {
+      if (!profile) { var _cc = document.querySelector('.console-content'); if (_cc) _cc.innerHTML = '<div style="padding:60px 20px;text-align:center"><p style="font-size:16px;margin-bottom:16px;color:var(--text-secondary)">连接服务失败，请刷新页面重试</p><button onclick="location.reload()" style="padding:8px 24px;border:1px solid var(--accent-primary);background:transparent;color:var(--accent-primary);border-radius:6px;cursor:pointer">刷新重试</button></div>'; return; }
+      AquaPlatform.renderConsoleSidebar('stats');
+      loadAll();
+      // 每 30 秒自动刷新全部用量数据（及时性）
+      _timer = setInterval(function () { if (document.visibilityState !== 'hidden') loadAll(); }, 30000);
+    });
+
+    function setRange(r) {
+      _range = r;
+      document.querySelectorAll('.st-range-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.range === r); });
+      loadAll();
+    }
+
+    function loadAll() {
+      loadOverview();
+      loadConcurrency();
+      loadLeaderboard();
+    }
+
+    function loadOverview() {
+      var t = document.getElementById('refresh-status');
+      t.textContent = '刷新中...';
+      API.get('/api/user/usage-overview?range=' + _range).then(function (data) {
+        var s = data.summary || {};
+        document.getElementById('stat-requests').textContent = Fmt.number(s.requests || 0);
+        document.getElementById('stat-requests-sub').textContent = '成功率 ' + (s.success_rate || 0) + '%';
+        document.getElementById('stat-tokens').textContent = Fmt.number(s.total_tokens || 0);
+        document.getElementById('stat-latency').textContent = Fmt.latency(s.avg_latency_ms || 0);
+        document.getElementById('stat-ttft').textContent = '首字延迟 ' + Fmt.latency(s.avg_ttft_ms || 0);
+        var errs = (s.errors_4xx || 0) + (s.errors_5xx || 0) + (s.rate_limited || 0);
+        document.getElementById('stat-errors').textContent = Fmt.number(errs);
+        document.getElementById('stat-errors-sub').textContent = (s.errors_4xx || 0) + ' 4xx / ' + (s.errors_5xx || 0) + ' 5xx / ' + (s.rate_limited || 0) + ' 限流';
+        document.getElementById('stat-prompt').textContent = Fmt.number(s.prompt_tokens || 0);
+        document.getElementById('stat-completion').textContent = Fmt.number(s.completion_tokens || 0);
+        document.getElementById('stat-cached').textContent = Fmt.number(s.cached_tokens || 0);
+        document.getElementById('stat-stream').textContent = Fmt.number(s.stream_requests || 0) + ' / ' + Fmt.number(s.non_stream_requests || 0);
+        renderTrend(data.trend || []);
+        renderTopModels(data.top_models || []);
+        t.textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' · 每 30 秒自动刷新';
+      }).catch(function () {
+        t.textContent = '加载失败';
+      });
+    }
+
+    function renderTrend(trend) {
+      var container = document.getElementById('trend-chart');
+      if (!trend.length) {
+        container.innerHTML = '<div class="text-muted" style="padding:40px">暂无数据</div>';
+        return;
+      }
+      var maxReq = 1, maxTok = 1;
+      trend.forEach(function (p) { if (p.requests > maxReq) maxReq = p.requests; if (p.tokens > maxTok) maxTok = p.tokens; });
+      var html = '';
+      trend.forEach(function (p) {
+        var hReq = Math.max(3, (p.requests / maxReq) * 180);
+        var hTok = Math.max(2, (p.tokens / maxTok) * 180);
+        html += '<div class="st-chart-col" title="' + p.label + ' · 请求 ' + p.requests + ' · Token ' + Fmt.number(p.tokens) + '">' +
+          '<div class="st-chart-val">' + (p.requests > 9999 ? Fmt.number(p.requests) : p.requests) + '</div>' +
+          '<div class="st-chart-bar" style="height:' + hReq + 'px;opacity:1" title="请求数"></div>' +
+          '<div class="st-chart-bar success" style="height:' + hTok + 'px;opacity:.85" title="Token(等比)"></div>' +
+          '<div class="st-chart-label">' + p.label + '</div>' +
+          '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    function renderTopModels(models) {
+      var tbody = document.getElementById('models-tbody');
+      if (!models.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">暂无数据</td></tr>';
+        return;
+      }
+      tbody.innerHTML = models.map(function (m, i) {
+        return '<tr>' +
+          '<td>' + (i + 1) + '</td>' +
+          '<td class="mono" style="word-break:break-all">' + escapeHtml(m.model) + '</td>' +
+          '<td>' + Fmt.number(m.requests || 0) + '</td>' +
+          '<td>' + Fmt.number(m.tokens || 0) + '</td>' +
+          '<td>' + (m.success_rate || 0) + '%</td>' +
+          '<td>' + Fmt.latency(m.avg_latency_ms || 0) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function loadConcurrency() {
+      API.get('/api/user/concurrency-stats').then(function (data) {
+        var el = document.getElementById('stat-concurrency');
+        if (el) el.textContent = (data.current || 0) + ' / ' + (data.limit_label || '不限并发');
+      }).catch(function () {});
+    }
+
+    function loadLeaderboard() {
+      API.get('/api/user/leaderboard?limit=20&range=7d').then(function (data) {
+        const board = data.leaderboard || [];
+        document.getElementById('total-requests').textContent = Fmt.number(board.reduce(function (s, b) { return s + (b.total_requests || 0); }, 0));
+        document.getElementById('total-tokens').textContent = Fmt.number(board.reduce(function (s, b) { return s + (b.total_tokens || 0); }, 0));
+        document.getElementById('active-users').textContent = Fmt.number(board.length);
+        const tbody = document.getElementById('leaderboard-tbody');
+        if (!board.length) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">暂无数据</td></tr>';
+          return;
+        }
+        tbody.innerHTML = board.slice(0, 20).map(function (b, i) {
+          const successRate = b.total_requests > 0 ? ((b.success_count / b.total_requests) * 100).toFixed(1) + '%' : '0%';
+          return '<tr>' +
+            '<td>' + (i + 1) + '</td>' +
+            '<td>' + escapeHtml(b.username || '未知') + '</td>' +
+            '<td>' + Fmt.number(b.total_requests || 0) + '</td>' +
+            '<td>' + Fmt.number(b.total_tokens || 0) + '</td>' +
+            '<td>' + Fmt.latency(b.avg_latency_ms || 0) + '</td>' +
+            '<td>' + successRate + '</td>' +
+            '</tr>';
+        }).join('');
+      }).catch(function () {
+        document.getElementById('leaderboard-tbody').innerHTML = '<tr><td colspan="6" class="text-center text-muted">加载失败</td></tr>';
+      });
+    }
+  </script>
+</body>
+</html>

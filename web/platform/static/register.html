@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>注册 - AQUA 公益AI</title>
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+  <link rel="stylesheet" href="/static/css/icons.css?v=1.0">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card" style="max-width:440px">
+      <div class="auth-title">注册 AQUA</div>
+      <div class="auth-subtitle">注册即享 100+ AI 模型免费使用</div>
+
+      <form id="register-form" onsubmit="return doRegister(event)">
+        <div class="input-group">
+          <label>用户名</label>
+          <input type="text" class="input" id="username" placeholder="设置用户名" required minlength="2" autocomplete="username">
+        </div>
+        <div class="input-group">
+          <label>邮箱</label>
+          <input type="email" class="input" id="email" placeholder="输入邮箱地址" required autocomplete="email">
+          <div class="input-hint">仅支持 QQ邮箱、163邮箱、Gmail 等主流邮箱（暂不支持 Outlook/Hotmail）</div>
+        </div>
+        <div class="input-group">
+          <label>验证码</label>
+          <div class="row">
+            <input type="text" class="input" id="code" placeholder="6位验证码" required maxlength="6">
+            <button type="button" class="btn" id="send-code-btn" onclick="sendCode()">发送验证码</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>密码</label>
+          <input type="password" class="input" id="password" placeholder="设置密码（至少8位）" required minlength="8" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-btn">注册</button>
+      </form>
+
+      <div class="auth-links">
+        <a href="/login">已有账号？登录</a>
+        <a href="/" class="text-muted">返回首页</a>
+      </div>
+
+      <div style="margin-top:16px;text-align:center">
+      </div>
+    </div>
+  </div>
+
+  <!-- 广告位 -->
+  <div class="ads-section" style="margin-top:32px">
+    <div class="ads-title">— 赞助商 —</div>
+    <div class="ads-row">
+      <a class="ad-card" href="https://idc.61nb.cn/aff/PRISUTPY" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/61nb.png" alt="安逸云"><div class="ad-info"><div class="ad-name">安逸云</div><div class="ad-desc">高性价比云服务器 · 特价9.9起</div></div>
+      </a>
+      <a class="ad-card" href="https://www.tokenlinks.cn/sign-up?aff=o4JN" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/tokenlinks.svg" alt="TokenLinks"><div class="ad-info"><div class="ad-name">TokenLinks</div><div class="ad-desc">主流高性能模型，更快接入，更低成本。</div></div>
+      </a></div>
+  </div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script src="/static/js/fingerprint.js?v=1.0"></script>
+  <script>
+    // 初始化设备指纹采集
+    AQUAFingerprint.init();
+    
+    // 已登录则跳转
+    API.get('/api/user/profile').then(function () { window.location.href = '/console'; }).catch(function () {});
+
+    let sendTimer = null;
+    function sendCode() {
+      const email = document.getElementById('email').value.trim();
+      if (!email) { Toast.warn('请先输入邮箱'); return; }
+      const btn = document.getElementById('send-code-btn');
+      btn.disabled = true;
+      API.post('/api/auth/send-code', { email: email, purpose: 'register' }).then(function () {
+        Toast.success('验证码已发送至邮箱');
+        let count = 60;
+        btn.textContent = count + 's';
+        sendTimer = setInterval(function () {
+          count--;
+          if (count <= 0) {
+            clearInterval(sendTimer);
+            btn.disabled = false;
+            btn.textContent = '发送验证码';
+          } else {
+            btn.textContent = count + 's';
+          }
+        }, 1000);
+      }).catch(function (err) {
+        Toast.error(err.message || '发送失败');
+        btn.disabled = false;
+      });
+    }
+
+    function doRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById('register-btn');
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const code = document.getElementById('code').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !email || !code || !password) { Toast.warn('请填写所有字段'); return false; }
+      if (password.length < 8) { Toast.warn('密码至少8位'); return false; }
+
+      btn.disabled = true;
+      btn.textContent = '注册中...';
+      API.post('/api/auth/register', {
+        username: username, email: email, code: code, password: password
+      }).then(function () {
+        Toast.success('注册成功，正在跳转...');
+        setTimeout(function () { window.location.href = '/console'; }, 800);
+      }).catch(function (err) {
+        Toast.error(err.message || '注册失败');
+        btn.disabled = false;
+        btn.textContent = '注册';
+      });
+      return false;
+    }
+  </script>
+</body>
+</html>

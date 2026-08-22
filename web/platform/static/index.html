@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="msvalidate.01" content="1B0EEE739DC3DB2ACD026924B711EC01">
+  <meta name="keywords" content="AQUA,公益AI,免费AI,AI模型,DeepSeek,GPT,AI平台,免费ChatGPT">
+  <meta name="description" content="AQUA 公益AI平台 - 免费使用DeepSeek、Qwen、GLM等模型，高速推理，稳定可靠">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta property="og:title" content="AQUA 公益AI - 免费 AI 模型平台">
+  <meta property="og:description" content="AQUA 公益AI平台 - 免费使用DeepSeek、Qwen、GLM等模型，高速推理，稳定可靠">
+  <meta property="og:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta property="og:url" content="https://acu.ltzy.top/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AQUA 公益AI - 免费 AI 模型平台">
+  <meta name="twitter:description" content="AQUA 公益AI平台 - 免费使用DeepSeek、Qwen、GLM等模型，高速推理，稳定可靠">
+  <meta name="twitter:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>AQUA 公益AI - 免费 AI 模型平台</title>
+  <meta name="description" content="AQUA 公益AI平台 - 多模型免费使用，高速推理，稳定可靠">
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <!-- Hero 区 -->
+  <section class="hero">
+    <h1 class="hero-title">免费 AI 模型平台</h1>
+    <p class="hero-subtitle">AQUA 公益AI · <span id="hero-model-count">-</span> 模型 · <span id="hero-user-count">-</span> 用户 · 高速推理 · 完全免费</p>
+    <div class="hero-stats" id="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-value" id="stat-models">-</div><div class="hero-stat-label">可用模型</div></div>
+      <div class="hero-stat"><div class="hero-stat-value" id="stat-upstreams">-</div><div class="hero-stat-label">上游数量</div></div>
+      <div class="hero-stat"><div class="hero-stat-value" id="stat-users">-</div><div class="hero-stat-label">注册用户</div></div>
+      <div class="hero-stat"><div class="hero-stat-value" id="stat-today">-</div><div class="hero-stat-label">今日访问</div></div>
+      <div class="hero-stat"><div class="hero-stat-value" id="stat-total">-</div><div class="hero-stat-label">历史访问</div></div>
+      <div class="hero-stat"><div class="hero-stat-value" id="stat-uptime">-</div><div class="hero-stat-label">稳定运行</div></div>
+    </div>
+    <div style="margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="/register" class="btn btn-primary btn-lg">免费注册</a>
+      <a href="/models" class="btn btn-lg">查看模型</a>
+      <a href="/qq-group" class="btn btn-lg" style="background:linear-gradient(135deg,#12b7f5,#00a6e0);color:#fff;border-color:transparent">加入QQ群</a>
+    </div>
+  </section>
+
+  <!-- 反滥用通告 -->
+  <section style="width:100%;max-width:min(1680px,96vw);margin:0 auto;padding:0 20px">
+    <div class="card mb-16" style="border-left:4px solid #e74c3c;background:linear-gradient(90deg,rgba(231,76,60,.07),rgba(231,76,60,0) 70%)">
+      <div class="card-title" style="color:#e74c3c;font-size:14px;margin-bottom:8px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>致所有平台蛀虫：缺钱就去搬砖，别偷公益</div>
+      <p style="margin:6px 0;font-size:13px;color:var(--text-primary);line-height:1.8">这里是公益，不是你们的生意场。拿着别人免费赠予的资源去倒卖赚钱，你连最基本的<strong>羞耻心</strong>都没有。</p>
+      <p style="margin:6px 0;font-size:13px;color:var(--text-primary);line-height:1.8">你卖的每一分钱，都是从真正需要免费 AI 的学生、开发者、普通人嘴里<strong>抠出来的</strong>——你偷的不是流量，是他们的机会，也是你自己的道德底线。</p>
+      <p style="margin:6px 0;font-size:13px;color:var(--text-primary);line-height:1.8">缺钱就去搬砖，手脏了就洗洗。别跪在这片公益地上偷食。</p>
+    </div>
+  </section>
+
+  <!-- 模型能力速览 -->
+  <style>
+    .cap-section { padding: 48px 20px; width: 100%; max-width: min(1680px, 96vw); margin: 0 auto; }
+    .cap-summary-bar {
+      display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+      padding: 18px 28px; margin-bottom: 36px;
+      background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color); border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+    }
+    .cap-summary-item { text-align: center; min-width: 76px; }
+    .cap-summary-num {
+      font-size: 26px; font-weight: 800; letter-spacing: .01em;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+      line-height: 1.15;
+    }
+    .cap-summary-label { font-size: 12px; color: var(--text-secondary); margin-top: 3px; font-weight: 500; }
+    .cap-summary-divider { width: 1px; background: var(--border-color); align-self: stretch; }
+    .cap-section-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 8px; letter-spacing: -.01em; }
+    .cap-section-subtitle { font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 32px; }
+    .cap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px; }
+    .cap-card {
+      background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+      padding: 16px; transition: border-color .2s, transform .2s, box-shadow .2s; display: flex; flex-direction: column; gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+    .cap-card:hover { border-color: rgba(59,130,246,.4); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .cap-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .cap-card-name { font-size: 14px; font-weight: 600; line-height: 1.3; word-break: break-word; }
+    .cap-card-publisher { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .cap-card-badges { display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
+    .cap-badge-ctx, .cap-badge-out {
+      display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; white-space: nowrap;
+    }
+    .cap-badge-ctx { background: rgba(74,144,217,.1); color: var(--accent-primary); }
+    .cap-badge-out { background: rgba(52,199,89,.1); color: var(--accent-success); }
+    .cap-badge-deprecated {
+      display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; white-space: nowrap;
+      background: rgba(150,150,150,.15); color: #888; border: 1px dashed rgba(150,150,150,.4);
+    }
+    /* 已弃用模型卡片：整体置灰、置于网格最底部 */
+    .cap-card.deprecated {
+      background: var(--bg-secondary);
+      border-style: dashed;
+      border-color: rgba(150,150,150,.35);
+      filter: grayscale(.9);
+      opacity: .72;
+      order: 99;
+    }
+    .cap-card.deprecated:hover { border-color: rgba(150,150,150,.55); transform: none; }
+    .cap-dots { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+    .cap-dot-item { display: flex; align-items: center; gap: 2px; }
+    .cap-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .cap-dot.on { background: #22c55e; }
+    .cap-dot.off { background: #444; }
+    .cap-dot-label { font-size: 10px; color: var(--text-muted); }
+    .cap-card-link { font-size: 12px; color: var(--accent-primary); text-decoration: none; margin-top: auto; }
+    .cap-card-link:hover { text-decoration: underline; }
+    .cap-footer { text-align: center; margin-top: 28px; }
+    .cap-footer a { font-size: 14px; color: var(--accent-primary); text-decoration: none; }
+    .cap-footer a:hover { text-decoration: underline; }
+    /* ===== 官方自营专区（acu/ 前缀，专属上游） ===== */
+    .cap-acu-section { margin-bottom: 30px; padding: 22px 20px; border: 1px solid rgba(59,130,246,.3); border-radius: var(--radius-xl); background: linear-gradient(135deg, rgba(59,130,246,.07), rgba(0,212,255,.05)); box-shadow: var(--shadow-sm); }
+    .cap-acu-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+    .cap-acu-title { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px; color: var(--text-primary); letter-spacing: .01em; }
+    .cap-acu-title svg { color: var(--accent-primary); }
+    .cap-acu-badge { background: var(--gradient-primary); color: #fff; font-size: 10.5px; font-weight: 700; padding: 2px 10px; border-radius: 999px; letter-spacing: .05em; }
+    .cap-acu-sub { font-size: 12.5px; color: var(--text-secondary); margin: 4px 0 16px; }
+    .cap-acu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; }
+    .cap-acu-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 14px 14px 12px; transition: all .18s; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--shadow-sm); }
+    .cap-acu-card:hover { border-color: rgba(59,130,246,.55); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .cap-acu-name { font-size: 13.5px; font-weight: 700; line-height: 1.35; color: var(--text-primary); }
+    .cap-acu-id { font-size: 10.5px; color: var(--text-muted); font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
+    .cap-acu-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.55; }
+    .cap-acu-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .cap-acu-tag { font-size: 10px; padding: 1px 8px; border-radius: 999px; background: rgba(59,130,246,.1); color: var(--accent-primary); font-weight: 600; }
+    .cap-acu-tag.green { background: rgba(52,199,89,.1); color: var(--accent-success); }
+    .cap-acu-tag.purple { background: rgba(171,71,188,.1); color: #ab47bc; }
+    .cap-acu-link { font-size: 11.5px; color: var(--accent-primary); text-decoration: none; margin-top: auto; display: inline-flex; align-items: center; gap: 3px; }
+    .cap-acu-link:hover { text-decoration: underline; }
+    .cap-acu-limit { margin: 2px 0 14px; padding: 10px 14px; background: rgba(59,130,246,.06); border: 1px solid rgba(59,130,246,.22); border-left: 4px solid #3b82f6; border-radius: 8px; font-size: 12px; line-height: 1.8; color: var(--text-secondary); }
+    .cap-acu-limit b { color: var(--accent-primary); }
+    @media (max-width: 768px) {
+      .cap-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+      .cap-summary-bar { gap: 12px; padding: 12px 16px; }
+      .cap-summary-num { font-size: 18px; }
+    }
+  </style>
+  <section class="cap-section">
+    <!-- 汇总条（数据动态来自 /api/public/model-capabilities） -->
+    <div class="cap-summary-bar" id="cap-summary-bar">
+      <div class="cap-summary-item"><div class="cap-summary-num" id="cap-num-total">-</div><div class="cap-summary-label">模型</div></div>
+      <div class="cap-summary-divider"></div>
+      <div class="cap-summary-item"><div class="cap-summary-num" id="cap-num-chat">-</div><div class="cap-summary-label">对话模型</div></div>
+      <div class="cap-summary-divider"></div>
+      <div class="cap-summary-item"><div class="cap-summary-num" id="cap-num-vision">-</div><div class="cap-summary-label">视觉模型</div></div>
+      <div class="cap-summary-divider"></div>
+      <div class="cap-summary-item"><div class="cap-summary-num" id="cap-num-embed">-</div><div class="cap-summary-label">嵌入模型</div></div>
+    </div>
+
+    <!-- 广告位 -->
+    <div class="ads-section" style="margin-bottom:24px">
+      <div class="ads-title">— 赞助商 —</div>
+      <div class="ads-row">
+        <a class="ad-card" href="https://idc.61nb.cn/aff/PRISUTPY" target="_blank" rel="nofollow">
+          <img src="/static/images/sponsors/61nb.png" alt="安逸云">
+          <div class="ad-info"><div class="ad-name">安逸云</div><div class="ad-desc">高性价比云服务器 · 特价9.9起</div></div>
+        </a>
+        <a class="ad-card" href="https://www.tokenlinks.cn/sign-up?aff=o4JN" target="_blank" rel="nofollow">
+          <img src="/static/images/sponsors/tokenlinks.svg" alt="TokenLinks">
+          <div class="ad-info"><div class="ad-name">TokenLinks</div><div class="ad-desc">主流高性能模型，更快接入，更低成本。</div></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 友情链接 -->
+    <div class="ads-section" style="margin-bottom:24px">
+      <div class="ads-title">— 友情链接 —</div>
+      <div class="ads-row">
+        <a class="ad-card" href="https://cloudagnetnew.nsdmc.top/" target="_blank" rel="noopener" style="border-color:rgba(59,130,246,.2)">
+          <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#3b82f6);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="ad-info"><div class="ad-name">CloudAgnet</div><div class="ad-desc">统一 AI 模型 API 网关 · 开源社区项目</div></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 标题 -->
+    <h2 class="cap-section-title">模型能力速览</h2>
+    <p class="cap-section-subtitle">快速了解各模型支持的功能参数</p>
+
+    <!-- 官方自营专区（acu/ 前缀，专属上游，列表最上方） -->
+    <div class="cap-acu-section">
+      <div class="cap-acu-head">
+        <div class="cap-acu-title"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z"/></svg> 官方自营 · 专属通道 <span class="cap-acu-badge">专享</span></div>
+      </div>
+      <div class="cap-acu-sub">官方自营专属通道，独立于英伟达上游，免费、稳定、低延迟。用量灵活调整，全站有总控，合理使用即可。</div>
+      <div class="cap-acu-grid">
+        <div class="cap-acu-card">
+          <div class="cap-acu-name">DeepSeek-V4-Flash</div>
+          <div class="cap-acu-id">acu/deepseek-v4-flash</div>
+          <div class="cap-acu-desc">标准版：速度与质量兼顾，默认开启深度思考，适合日常对话、写作、问答与编程。</div>
+          <div class="cap-acu-tags"><span class="cap-acu-tag">思考</span><span class="cap-acu-tag green">流式</span><span class="cap-acu-tag green">工具</span></div>
+          <a class="cap-acu-link" href="/models">在模型列表查看 →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 模型卡片网格 -->
+    <div class="cap-grid">
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">DeepSeek V4 Flash 正式版</div><div class="cap-card-publisher">DeepSeek</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">1M</span><span class="cap-badge-out">384K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Muse Glimmer 30B</div><div class="cap-card-publisher">Meta</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">131K</span><span class="cap-badge-out">8K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Nemotron 3 Ultra 550B</div><div class="cap-card-publisher">NVIDIA</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">1M</span><span class="cap-badge-out">32K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">GLM 5.2</div><div class="cap-card-publisher">Z.AI</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Qwen 3.5 397B</div><div class="cap-card-publisher">Qwen</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">MiniMax M3</div><div class="cap-card-publisher">MiniMax</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">1M</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Step 3.7 Flash</div><div class="cap-card-publisher">StepFun</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Llama 3.3 70B Instruct</div><div class="cap-card-publisher">Meta</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Mistral Large 3 675B</div><div class="cap-card-publisher">Mistral</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Gemma 4 31B</div><div class="cap-card-publisher">Google</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Kimi K2.6</div><div class="cap-card-publisher">Moonshot</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Llama 4 Maverick 17B</div><div class="cap-card-publisher">Meta</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">256K</span><span class="cap-badge-out">8K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">GPT-OSS 120B</div><div class="cap-card-publisher">OpenAI</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Nemotron 3 Nano 30B</div><div class="cap-card-publisher">NVIDIA</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">1M</span><span class="cap-badge-out">32K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+      <div class="cap-card">
+        <div class="cap-card-top">
+          <div><div class="cap-card-name">Llama 3.2 90B Vision</div><div class="cap-card-publisher">Meta</div></div>
+          <div class="cap-card-badges"><span class="cap-badge-ctx">128K</span><span class="cap-badge-out">16K</span></div>
+        </div>
+        <div class="cap-dots">
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">流式</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">工具</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">视觉</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">JSON</span></div>
+          <div class="cap-dot-item"><span class="cap-dot off"></span><span class="cap-dot-label">推理</span></div>
+          <div class="cap-dot-item"><span class="cap-dot on"></span><span class="cap-dot-label">种子</span></div>
+        </div>
+        <a href="/models" class="cap-card-link">查看详情</a>
+      </div>
+    </div>
+
+    <!-- 底部链接 -->
+    <div class="cap-footer">
+      <a href="/console/capabilities">查看完整能力矩阵 →</a>
+    </div>
+  </section>
+
+  <!-- 特性卡片 -->
+  <section class="container">
+    <div class="grid grid-3">
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></div>
+        <div class="feature-title">高速推理</div>
+        <div class="feature-desc">多上游智能调度，毫秒级响应，流式输出体验</div>
+        <ul class="feature-points">
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>多上游智能调度，自动择优</li>
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>首字节毫秒级低延迟</li>
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>流式输出，实时渲染</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="12" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/><path d="M12 2v4M8 20v2M16 20v2"/></svg></div>
+        <div class="feature-title">多模型支持</div>
+        <div class="feature-desc">DeepSeek、Qwen、GLM 等主流模型，持续更新</div>
+        <ul class="feature-points">
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>主流模型持续更新</li>
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>DeepSeek / Qwen / GLM 全覆盖</li>
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>统一 OpenAI 兼容接口</li>
+        </ul>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z"/></svg></div>
+        <div class="feature-title">稳定可靠</div>
+        <div class="feature-desc">自动故障转移，密钥加密存储，7x24 可用</div>
+        <ul class="feature-points">
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>自动故障转移高可用</li>
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>密钥加密安全存储</li>
+          <li><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>7x24 全天候稳定服务</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 快速开始 -->
+  <section class="container">
+    <div class="card">
+      <div class="card-title">快速开始</div>
+      <div class="grid grid-3">
+        <div><div class="tag primary mb-8">步骤 1</div><div>注册账号并登录控制台</div></div>
+        <div><div class="tag primary mb-8">步骤 2</div><div>创建 API 密钥</div></div>
+        <div><div class="tag primary mb-8">步骤 3</div><div>使用 OpenAI 兼容接口调用</div></div>
+      </div>
+      <pre class="code-block mt-16"><span style="color:var(--text-muted)"># cURL 示例</span>
+curl https://api.ltzy.top/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"minimaxai/minimax-m3","messages":[{"role":"user","content":"你好"}]}'</pre>
+    </div>
+  </section>
+
+  <div id="footer"></div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    // 登录态感知导航：已登录显示 控制台/退出，未登录显示 登录/注册
+    AquaPlatform.mountPublicNavbar('home');
+    document.getElementById('footer').innerHTML = AquaPlatform.renderFooter();
+
+    // 获取统计
+    var startTime = 0; // 启动时间戳（秒）
+    API.get('/api/public/stats').then(function (data) {
+      document.getElementById('stat-models').textContent = Fmt.number(data.models);
+      document.getElementById('hero-model-count').textContent = Fmt.number(data.models);
+      document.getElementById('hero-user-count').textContent = Fmt.number(data.users);
+      document.getElementById('stat-upstreams').textContent = Fmt.number(data.upstreams);
+      document.getElementById('stat-users').textContent = Fmt.number(data.users);
+      document.getElementById('stat-today').textContent = Fmt.number(data.today_visits || 0);
+      document.getElementById('stat-total').textContent = Fmt.number(data.total_visits || 0);
+      startTime = data.start_time || 0;
+      updateUptime();
+    }).catch(function () {
+      document.getElementById('stat-models').textContent = '-';
+      document.getElementById('hero-model-count').textContent = '-';
+      document.getElementById('hero-user-count').textContent = '-';
+      document.getElementById('stat-upstreams').textContent = '-';
+      document.getElementById('stat-users').textContent = '-';
+      document.getElementById('stat-today').textContent = '-';
+      document.getElementById('stat-total').textContent = '-';
+      document.getElementById('stat-uptime').textContent = '-';
+    });
+
+    // 实时更新运行时间（每秒刷新）
+    function updateUptime() {
+      if (!startTime) return;
+      var now = Math.floor(Date.now() / 1000);
+      var elapsed = now - startTime;
+      var days = Math.floor(elapsed / 86400);
+      var hours = Math.floor((elapsed % 86400) / 3600);
+      var mins = Math.floor((elapsed % 3600) / 60);
+      var secs = elapsed % 60;
+      var el = document.getElementById('stat-uptime');
+      if (el) {
+        el.textContent = days + '天 ' + String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      }
+    }
+    setInterval(updateUptime, 1000);
+
+    // 模型能力速览汇总条：动态统计真实模型数（对话/视觉/嵌入）
+    API.get('/api/public/model-capabilities').then(function (cap) {
+      var ms = (cap && cap.models) || [];
+      var total = ms.length;
+      var vision = 0, chat = 0, embed = 0;
+      ms.forEach(function (m) {
+        var id = String(m.model_id || '').toLowerCase();
+        // 嵌入模型：按名称识别（embed / retriever / bge 等）
+        if (/embed|retriever|bge|embedding/.test(id)) { embed++; return; }
+        if (m.model_type === 'vision') vision++; else chat++;
+      });
+      function setNum(id, v) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = v;
+      }
+      setNum('cap-num-total', total);
+      setNum('cap-num-chat', chat);
+      setNum('cap-num-vision', vision);
+      setNum('cap-num-embed', embed);
+    }).catch(function () {
+      // 加载失败保留占位符，不阻塞页面
+    });
+  </script>
+</body>
+</html>

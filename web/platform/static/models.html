@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="msvalidate.01" content="1B0EEE739DC3DB2ACD026924B711EC01">
+  <meta name="keywords" content="AQUA,公益AI,免费AI,AI模型,DeepSeek,GPT,AI平台,模型列表,免费ChatGPT">
+  <meta name="description" content="浏览 AQUA 公益AI平台所有可用 AI 模型，包括 DeepSeek、Qwen、GLM 等">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+  <meta property="og:title" content="模型列表 - AQUA 公益AI">
+  <meta property="og:description" content="浏览 AQUA 公益AI平台所有可用 AI 模型，包括 DeepSeek、Qwen、GLM 等">
+  <meta property="og:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta property="og:url" content="https://acu.ltzy.top/models">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="模型列表 - AQUA 公益AI">
+  <meta name="twitter:description" content="浏览 AQUA 公益AI平台所有可用 AI 模型，包括 DeepSeek、Qwen、GLM 等">
+  <meta name="twitter:image" content="https://acu.ltzy.top/favicon.ico">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>模型列表 - AQUA 公益AI</title>
+  <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
+  <link rel="stylesheet" href="/static/css/icons.css?v=1.0">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container">
+    <div class="flex justify-between items-center mb-20" style="flex-wrap:wrap;gap:12px">
+      <h1 style="margin:0">可用模型</h1>
+      <div id="model-stats" class="text-sm text-muted"></div>
+    </div>
+
+    <!-- 反滥用警示 -->
+    <div class="card mb-16" style="border-left:4px solid #e74c3c;background:linear-gradient(90deg,rgba(231,76,60,.07),rgba(231,76,60,0) 70%)">
+      <div style="font-size:14px;font-weight:500;color:#e74c3c;margin-bottom:8px"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 给倒卖狗、中转狗</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--text-primary)">
+        这里的模型是给真正需要的人用的，<strong>不是给你倒卖的货架</strong>。
+      </div>
+      <div style="font-size:13px;line-height:1.8;color:var(--text-primary)">
+        把免费资源当提款机的，跟偷公益捐款箱的小偷没什么区别，甚至更恶心——你还打着"分享""中转"的旗号，装得人模狗样。公益二字，你不配。
+      </div>
+    </div>
+
+    <!-- 上下文深度探测提示 -->
+    <div class="card mb-16" style="background:var(--bg-secondary);border-left:3px solid var(--primary)">
+      <div style="font-size:14px;font-weight:500;margin-bottom:8px"><span class="icon-svg icon-chart"><svg viewBox="0 0 24 24"><rect x="3" y="10" width="4" height="10" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="17" y="1" width="4" height="19" rx="1"/></svg></span> 深度上下文探测结果（2026-08-07 更新）</div>
+      <div style="font-size:13px;line-height:1.6;color:var(--text-secondary)">
+        基于 NVIDIA 官方 <code>/v1/models</code> 及真实测试结果；上游已下线的模型均<strong style="color:var(--accent-danger)">已置灰标注“已弃用”、排序置底，并从网关 API 模型列表移除</strong>，其余可用模型全部上架。上下文数值仅代表报告中的证据，不等同于未验证的最大值：
+        <ul style="margin:8px 0 0 0;padding-left:20px">
+          <li><strong style="color:var(--accent-danger)">已弃用（上游 EOL 2026-08-07）</strong>：DeepSeek-V4-Pro、DeepSeek-V4-Flash、Mistral-Medium-3.5-128B，调用将返回 410 模型已下线。</li>
+          <li><strong style="color:var(--success)">至少通过</strong>：Gemma 4 31B、Nemotron 3 Nano/Super/Ultra 均已通过至少 1M 请求；页面显示“至少1M”，不声称最大值。</li>
+          <li><strong style="color:var(--primary)">上游实测/明确上限</strong>：MiniMax M3 上游实测256K（官方声明1M）、DiffusionGemma 250K、Llama 3.2 90B Vision 32K、Nemotron Mini 4B 4K。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 搜索过滤 -->
+    <div class="card mb-16" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <input type="text" class="input" id="search" placeholder="搜索模型名称..." style="flex:1;min-width:200px" oninput="filterModels()">
+      <select class="select" id="provider-filter" style="width:160px" onchange="filterModels()">
+        <option value="">所有厂商</option>
+      </select>
+      <select class="select" id="category-filter" style="width:140px" onchange="filterModels()">
+        <option value="">所有类型</option>
+        <option value="chat">对话模型</option>
+        <option value="vision">视觉/多模态</option>
+        <option value="code">代码模型</option>
+        <option value="reasoning">推理模型</option>
+        <option value="embedding">嵌入模型</option>
+        <option value="tool">工具/函数调用</option>
+      </select>
+      <select class="select" id="cap-filter" style="width:160px" onchange="filterModels()">
+        <option value="">所有能力</option>
+        <option value="stream">支持流式输出</option>
+        <option value="tools">支持工具调用</option>
+        <option value="vision">支持视觉/多模态</option>
+        <option value="jsonMode">支持 JSON 模式</option>
+        <option value="reasoning">支持推理</option>
+      </select>
+    </div>
+
+    <!-- 模型列表 -->
+    <div id="models-container">
+      <div class="empty-state"><div class="empty-state-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h12M6 22h12M6 2v6a6 6 0 0 0 12 0V2M6 22v-6a6 6 0 0 1 12 0v6"/></svg></div><div class="empty-state-text">加载模型列表中...</div></div>
+    </div>
+  </div>
+
+  <!-- 广告位 -->
+  <div class="ads-section">
+    <div class="ads-title">— 赞助商 —</div>
+    <div class="ads-row">
+      <a class="ad-card" href="https://idc.61nb.cn/aff/PRISUTPY" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/61nb.png" alt="安逸云"><div class="ad-info"><div class="ad-name">安逸云</div><div class="ad-desc">高性价比云服务器 · 特价9.9起</div></div>
+      </a>
+      <a class="ad-card" href="https://www.tokenlinks.cn/sign-up?aff=o4JN" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/tokenlinks.svg" alt="TokenLinks"><div class="ad-info"><div class="ad-name">TokenLinks</div><div class="ad-desc">主流高性能模型，更快接入，更低成本。</div></div>
+      </a></div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    // 登录态感知导航：已登录显示 控制台/退出
+    AquaPlatform.mountPublicNavbar('models');
+    document.getElementById('footer').innerHTML = AquaPlatform.renderFooter();
+
+    let allModels = [];
+    let providers = {};
+    const PRIORITY_PROVIDERS = ['acu', 'nvidia', 'deepseek-ai', 'minimaxai', 'z-ai', 'moonshotai', 'stepfun-ai', '01-ai'];
+
+    // 热门模型（优先展示）
+    // 仅来自 NVIDIA 官方 /v1/models 的模型；热门列表只允许基础请求可用且未弃用的模型。
+    const HOT_MODELS = [
+      'acu/deepseek-v4-flash',
+      'deepseek-ai/deepseek-v4-flash-0731',
+      'meta/muse-glimmer-30b',
+      'meta/llama-3.1-70b-instruct',
+      'meta/llama-3.2-90b-vision-instruct',
+      'nvidia/nemotron-3-ultra-550b-a55b',
+      'nvidia/nemotron-3-super-120b-a12b',
+      'minimaxai/minimax-m3',
+      'openai/gpt-oss-120b',
+      'google/gemma-4-31b-it',
+      'mistralai/mistral-nemotron',
+    ];
+
+    const UNAVAILABLE_MODELS = new Set([
+      '01-ai/yi-large', 'adept/fuyu-8b', 'ai21labs/jamba-1.5-large-instruct', 'aisingapore/sea-lion-7b-instruct', 'baai/bge-m3', 'bigcode/starcoder2-15b', 'databricks/dbrx-instruct', 'deepseek-ai/deepseek-coder-6.7b-instruct', 'deepseek-ai/deepseek-v4-flash', 'google/codegemma-1.1-7b', 'google/codegemma-7b', 'google/deplot', 'google/gemma-2b', 'google/gemma-3-12b-it', 'google/gemma-3-4b-it', 'google/recurrentgemma-2b', 'ibm/granite-3.0-3b-a800m-instruct', 'ibm/granite-3.0-8b-instruct', 'ibm/granite-34b-code-instruct', 'ibm/granite-8b-code-instruct', 'meta/codellama-70b', 'meta/llama-3.2-1b-instruct', 'meta/llama-3.2-3b-instruct', 'meta/llama-guard-4-12b', 'meta/llama2-70b', 'microsoft/kosmos-2', 'microsoft/phi-3-vision-128k-instruct', 'microsoft/phi-3.5-moe-instruct', 'mistralai/codestral-22b-instruct-v0.1', 'mistralai/mistral-7b-instruct-v0.3', 'mistralai/mistral-large', 'mistralai/mistral-large-2-instruct', 'mistralai/mixtral-8x22b-v0.1', 'moonshotai/kimi-k2.6', 'nv-mistralai/mistral-nemo-12b-instruct', 'nvidia/ai-synthetic-video-detector', 'nvidia/cosmos-reason2-8b', 'nvidia/embed-qa-4', 'nvidia/llama-3.1-nemoguard-8b-topic-control', 'nvidia/llama-3.1-nemotron-51b-instruct', 'nvidia/llama-3.1-nemotron-70b-instruct', 'nvidia/llama-3.1-nemotron-nano-8b-v1', 'nvidia/llama-3.1-nemotron-ultra-253b-v1', 'nvidia/llama-3.2-nemoretriever-1b-vlm-embed-v1', 'nvidia/llama-3.2-nv-embedqa-1b-v1', 'nvidia/llama-nemotron-embed-1b-v2', 'nvidia/llama-nemotron-embed-vl-1b-v2', 'nvidia/llama3-chatqa-1.5-70b', 'nvidia/mistral-nemo-minitron-8b-8k-instruct', 'nvidia/nemoretriever-parse', 'nvidia/nemotron-4-340b-instruct', 'nvidia/nemotron-4-340b-reward', 'nvidia/nemotron-nano-3-30b-a3b', 'nvidia/nemotron-parse', 'nvidia/neva-22b', 'nvidia/nv-embedcode-7b-v1', 'nvidia/nv-embedqa-e5-v5', 'nvidia/nv-embedqa-mistral-7b-v2', 'nvidia/nvclip', 'nvidia/riva-translate-4b-instruct', 'nvidia/vila', 'poolside/laguna-xs-2.1', 'snowflake/arctic-embed-l', 'writer/palmyra-creative-122b', 'writer/palmyra-fin-70b-32k', 'writer/palmyra-med-70b', 'writer/palmyra-med-70b-32k', 'zyphra/zamba2-7b-instruct'
+    ]);
+
+    // 已弃用模型（上游 EOL，2026-08-07 09:00Z 正式下线）
+    // 已从网关 API /v1/models 列表移除；前台保留展示，打"已弃用"标签并置灰、排序置底。
+    const DEPRECATED_MODELS = new Set([
+      'deepseek-ai/deepseek-v4-pro',
+      'deepseek-ai/deepseek-v4-flash',
+      'mistralai/mistral-medium-3.5-128b',
+      'acuzc/deepseek-v4-flash',
+      'acuzc/doubao-seed-2.0-mini',
+      'acuzc/doubao-seed-2.0-lite',
+      'acuzc/gemini-3.1-flash-lite',
+      'acuzc/qwen3.7-flash',
+      'acuzc/qwen3.5-397b-a17b',
+      'acuzc/gpt-image-2',
+      'acuzc/gpt-image-2-1k',
+      'acuzc/gpt-image-2-2k',
+      'acuzc/gpt-image-2-4k',
+      'acuzc/qwen-image-2.0',
+      'acuzc/qwen-image-2.0-pro',
+      'acuzc/qwen-image-3.0-pro',
+      'acuzc/qwen-image-max',
+      'acuzc/sora-2',
+    ]);
+    const CONTEXT_EVIDENCE = {
+      'acu/deepseek-v4-flash': ['1M', '官方自营/满血'], 'deepseek-ai/deepseek-v4-flash-0731': ['1M', '官方发布页/满血'], 'meta/muse-glimmer-30b': ['131K', '官方发布页/满血'], 'deepseek-ai/deepseek-v4-pro': ['262144/256K', '独立审计实测/明确上限'], 'google/diffusiongemma-26b-a4b-it': ['250K', '上游实测/明确上限'], 'google/gemma-4-31b-it': ['至少1M', '至少通过'], 'meta/llama-3.1-70b-instruct': ['131K', '上游实测'], 'meta/llama-3.1-8b-instruct': ['131K', '上游实测'], 'meta/llama-3.2-11b-vision-instruct': ['131K', '上游实测'], 'meta/llama-3.2-90b-vision-instruct': ['32K', '上游实测/明确上限'], 'meta/llama-3.3-70b-instruct': ['131K', '上游实测'], 'minimaxai/minimax-m3': ['256K', '上游实测/明确上限'], 'mistralai/mistral-medium-3.5-128b': ['256K', '上游实测'], 'mistralai/mistral-nemotron': ['至少131K', '至少通过'], 'nvidia/ising-calibration-1.5-31b': ['131K', '上游实测'], 'nvidia/llama-3.1-nemotron-nano-vl-8b-v1': ['16K', '上游实测/明确上限'], 'nvidia/llama-3.3-nemotron-super-49b-v1': ['131K', '上游实测'], 'nvidia/llama-3.3-nemotron-super-49b-v1.5': ['131K', '上游实测'], 'nvidia/nemotron-3-nano-30b-a3b': ['至少1M', '至少通过'], 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning': ['至少512K', '至少通过'], 'nvidia/nemotron-3-super-120b-a12b': ['至少1M', '至少通过'], 'nvidia/nemotron-3-ultra-550b-a55b': ['至少1M', '至少通过'], 'nvidia/nemotron-mini-4b-instruct': ['4K', '上游实测/明确上限'], 'nvidia/nemotron-nano-12b-v2-vl': ['131K', '上游实测'], 'nvidia/nvidia-nemotron-nano-9b-v2': ['至少131K', '至少通过'], 'openai/gpt-oss-120b': ['至少131K', '至少通过'], 'openai/gpt-oss-20b': ['至少131K', '至少通过'], 'stepfun-ai/step-3.7-flash': ['256K', '上游实测/明确上限'], 'z-ai/glm-5.2': ['202752/约198K', '独立审计实测/明确上限']
+    };
+
+    // 模型能力映射（基于探测结果，覆盖部分代表性模型）
+    const MODEL_CAPS = {
+      'acu/deepseek-v4-flash': { ctx: '1M', maxOut: '32K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'acu', type: 'chat' },
+      'deepseek-ai/deepseek-v4-flash-0731': { ctx: '1M', maxOut: '384K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'deepseek-ai', type: 'chat' },
+      'meta/muse-glimmer-30b': { ctx: '131K', maxOut: '8K', stream: true, tools: true, vision: true, temp: '0-2.0', topP: '0-1.0', freqPen: false, presPen: false, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: true, family: 'meta', type: 'vision' },
+      'deepseek-ai/deepseek-v4-flash': { ctx: '暂态过载，边界未完成', maxOut: '16K', stream: undefined, tools: true, vision: false, temp: undefined, topP: undefined, freqPen: undefined, presPen: undefined, seed: undefined, stop: undefined, logprobs: undefined, jsonMode: true, reasoning: undefined, family: 'deepseek-ai', type: 'chat' },
+      'deepseek-ai/deepseek-v4-pro': { ctx: '256K', maxOut: '32K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'deepseek-ai', type: 'chat' },
+      'google/diffusiongemma-26b-a4b-it': { ctx: '16K', maxOut: '4K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: false, jsonMode: false, reasoning: true, family: 'google', type: 'chat' },
+      'google/gemma-4-31b-it': { ctx: '256K', maxOut: '16K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'google', type: 'chat' },
+      'meta/llama-3.1-70b-instruct': { ctx: '128K', maxOut: '16K', stream: false, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: false, logprobs: true, jsonMode: true, reasoning: true, family: 'meta', type: 'chat' },
+      'meta/llama-3.1-8b-instruct': { ctx: '128K', maxOut: '8K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'meta', type: 'chat' },
+      'meta/llama-3.2-11b-vision-instruct': { ctx: '128K', maxOut: '8K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'meta', type: 'vision' },
+      'meta/llama-3.2-1b-instruct': { ctx: '128K', maxOut: '4K', stream: true, tools: false, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: false, reasoning: false, family: 'meta', type: 'chat' },
+      'meta/llama-3.2-3b-instruct': { ctx: '128K', maxOut: '4K', stream: false, tools: false, vision: false, temp: '0-2.0', topP: 'N/A', freqPen: false, presPen: false, seed: false, stop: false, logprobs: true, jsonMode: false, reasoning: false, family: 'meta', type: 'chat' },
+      'meta/llama-3.2-90b-vision-instruct': { ctx: '32K', maxOut: '16K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'meta', type: 'vision' },
+      'minimaxai/minimax-m3': { ctx: '256K', maxOut: '16K', stream: true, tools: true, vision: false, temp: 'N/A', topP: 'N/A', freqPen: true, presPen: true, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: false, family: 'minimaxai', type: 'chat' },
+      'mistralai/mistral-medium-3.5-128b': { ctx: '256K', maxOut: '16K', stream: true, tools: false, vision: false, temp: 'N/A', topP: '0-1.0', freqPen: false, presPen: true, seed: true, stop: false, logprobs: false, jsonMode: true, reasoning: false, family: 'mistralai', type: 'chat' },
+      'mistralai/mistral-nemotron': { ctx: '173K', maxOut: '16K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: false, jsonMode: true, reasoning: true, family: 'mistralai', type: 'chat' },
+      'nvidia/ising-calibration-1.5-31b': { ctx: '128K', maxOut: '16K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'chat' },
+      'nvidia/llama-3.1-nemoguard-8b-content-safety': { ctx: '128K', maxOut: '4K', stream: true, tools: false, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: false, reasoning: false, family: 'nvidia', type: 'safety' },
+      'nvidia/llama-3.1-nemotron-nano-vl-8b-v1': { ctx: '16K', maxOut: '8K', stream: true, tools: false, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: false, reasoning: true, family: 'nvidia', type: 'vision' },
+      'nvidia/llama-3.1-nemotron-safety-guard-8b-v3': { ctx: '128K', maxOut: '4K', stream: true, tools: false, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: false, reasoning: false, family: 'nvidia', type: 'safety' },
+      'nvidia/llama-3.3-nemotron-super-49b-v1': { ctx: '128K', maxOut: '16K', stream: true, tools: true, vision: false, temp: 'N/A', topP: '0-1.0', freqPen: true, presPen: false, seed: true, stop: false, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'chat' },
+      'nvidia/llama-3.3-nemotron-super-49b-v1.5': { ctx: '128K', maxOut: '16K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'chat' },
+      'nvidia/nemotron-3-embed-1b': { ctx: '至少1M', maxOut: '16K', stream: false, tools: false, vision: false, temp: 'N/A', topP: 'N/A', freqPen: false, presPen: false, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: false, family: 'nvidia', type: 'embedding' },
+      'nvidia/nemotron-3-nano-30b-a3b': { ctx: '512K', maxOut: '32K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'chat' },
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning': { ctx: '500K', maxOut: '20K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'reasoning' },
+      'nvidia/nemotron-3-super-120b-a12b': { ctx: '至少1M', maxOut: '32K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'chat' },
+      'nvidia/nemotron-3-ultra-550b-a55b': { ctx: '512K', maxOut: '32K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'chat' },
+      'nvidia/nemotron-3.5-content-safety': { ctx: '128K', maxOut: '4K', stream: true, tools: false, vision: false, temp: '0-2.0', topP: 'N/A', freqPen: true, presPen: true, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: false, family: 'nvidia', type: 'safety' },
+      'nvidia/nemotron-mini-4b-instruct': { ctx: '4K', maxOut: '4K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: false, family: 'nvidia', type: 'chat' },
+      'nvidia/nemotron-nano-12b-v2-vl': { ctx: '64K', maxOut: '8K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'vision' },
+      'nvidia/nv-embed-v1': { ctx: '4K', maxOut: '4K', stream: false, tools: false, vision: false, temp: 'N/A', topP: 'N/A', freqPen: false, presPen: false, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: false, family: 'nvidia', type: 'embedding' },
+      'nvidia/nvidia-nemotron-nano-9b-v2': { ctx: '128K', maxOut: '8K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'nvidia', type: 'chat' },
+      'nvidia/riva-translate-4b-instruct-v1.1': { ctx: '4K', maxOut: '4K', stream: true, tools: false, vision: false, temp: '0-2.0', topP: 'N/A', freqPen: false, presPen: false, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: false, family: 'nvidia', type: 'translation' },
+      'nvidia/riva-translate-4b-instruct-v2': { ctx: '4K', maxOut: '4K', stream: true, tools: false, vision: false, temp: '0-2.0', topP: 'N/A', freqPen: false, presPen: false, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: false, family: 'nvidia', type: 'translation' },
+      'openai/gpt-oss-20b': { ctx: '128K', maxOut: '16K', stream: true, tools: true, vision: false, temp: '0-2.0', topP: '0-1.0', freqPen: true, presPen: true, seed: true, stop: true, logprobs: true, jsonMode: true, reasoning: true, family: 'openai', type: 'chat' },
+      'thinkingmachines/inkling': { ctx: '64K', maxOut: '4K', stream: true, tools: false, vision: false, temp: 'N/A', topP: '0-1.0', freqPen: false, presPen: true, seed: false, stop: true, logprobs: false, jsonMode: true, reasoning: false, family: 'thinkingmachines', type: 'chat' },
+    };
+
+    // 默认能力（未知模型使用）
+    const DEFAULT_CAPS = { ctx: '?', maxOut: '?', stream: true, tools: true, vision: false, temp: '?', topP: '?', freqPen: false, presPen: false, seed: false, stop: false, logprobs: false, jsonMode: false, reasoning: false, family: '?', type: 'chat' };
+
+    function getModelCaps(modelId) {
+      return MODEL_CAPS[modelId] || DEFAULT_CAPS;
+    }
+
+    // 能力关键词匹配
+    const CATEGORY_RULES = [
+      { key: 'vision',    patterns: ['vision', 'vl', '多模态', 'gemma-3-', 'llama-3.2.*vision', 'vila', 'fuyu', 'kosmos', 'vqav2', 'pixtral'] },
+      { key: 'code',      patterns: ['code', 'coder', 'codestral', 'starcoder', 'codegemma', 'granite.*code', 'embedcode'] },
+      { key: 'reasoning', patterns: ['reasoning', 'nemotron-3.*nano.*omni', 'deepseek-r1', 'ising-calibration', 'maverick'] },
+      { key: 'embedding', patterns: ['embed', 'bge', 'arctic-embed', 'retriever', 'nv-embed', 'bge-m3'] },
+      { key: 'tool',      patterns: ['function', 'tool', 'jamba', 'nemotron-mini'] },
+    ];
+
+    function detectCategories(mid) {
+      const lower = mid.toLowerCase();
+      const cats = [];
+      CATEGORY_RULES.forEach(function (rule) {
+        for (let i = 0; i < rule.patterns.length; i++) {
+          try {
+            if (new RegExp(rule.patterns[i]).test(lower)) {
+              cats.push(rule.key);
+              break;
+            }
+          } catch (e) {}
+        }
+      });
+      // 默认对话模型
+      if (cats.length === 0) cats.push('chat');
+      return cats;
+    }
+
+
+    // 厂商中文名映射（全部厂商）
+    const PROVIDER_CN_NAMES = {
+      '01': '零一万物',
+      '01-ai': '零一万物',
+      '01ai': '零一万物',
+      'abacus': 'Abacus AI',
+      'abacusai': 'Abacus AI',
+      'acu': 'AQUA自营',
+      'adept': 'Adept AI',
+      'ai21': 'AI21 Labs',
+      'ai21labs': 'AI21 Labs',
+      'aisingapore': 'AI Singapore',
+      'anthropic': 'Anthropic',
+      'baai': '智源研究院',
+      'bigcode': 'BigCode 开源社区',
+      'byte': '字节跳动 豆包',
+      'bytedance': '字节跳动 豆包',
+      'databricks': 'Databricks',
+      'dbrx': 'Databricks DBRX',
+      'deepseek-ai': '深度求索',
+      'ds': '深度求索',
+      'goog': '谷歌 Google',
+      'google': '谷歌 Google',
+      'ibm': 'IBM',
+      'meta': 'Meta 元宇宙',
+      'microsoft': '微软 Microsoft',
+      'minimax': 'MiniMax 稀宇',
+      'minimaxai': 'MiniMax 稀宇',
+      'mis': 'Mistral AI',
+      'mistralai': 'Mistral AI',
+      'moon': '月之暗面 Kimi',
+      'moonshotai': '月之暗面 Kimi',
+      'ms': '微软 Microsoft',
+      'nv': '英伟达 NVIDIA',
+      'nv-mistralai': 'NVIDIA × Mistral',
+      'nvidia': '英伟达 NVIDIA',
+      'nvm': 'NVIDIA × Mistral',
+      'oai': 'OpenAI',
+      'openai': 'OpenAI',
+      'pool': 'Poolside AI',
+      'poolside': 'Poolside AI',
+      'qwen': '通义千问',
+      'sarvam': 'Sarvam AI',
+      'sarvamai': 'Sarvam AI',
+      'sf': '阶跃星辰',
+      'sg': 'AI Singapore',
+      'snow': 'Snowflake',
+      'snowflake': 'Snowflake',
+      'step': '阶跃星辰',
+      'stepfun-ai': '阶跃星辰',
+      'think': 'Thinking Machines',
+      'thinkingmachines': 'Thinking Machines',
+      'upstage': 'Upstage AI',
+      'writer': 'Writer AI',
+      'z-ai': '智谱 AI',
+      'zai': '智谱 AI',
+      'zyphra': 'Zyphra AI',
+    };
+    function getProviderName(p) {
+      return PROVIDER_CN_NAMES[p] || p;
+    }
+
+    function getCategoryLabels(cats) {
+      const labels = { chat: '对话', vision: '视觉', code: '代码', reasoning: '推理', embedding: '嵌入', tool: '工具调用' };
+      return cats.map(function (c) { return labels[c] || c; });
+    }
+
+    // 模型中文名映射（与后端 modelCNNames 对应）
+    const MODEL_CN_NAMES = {
+      'deepseek-ai/deepseek-v4-flash-0731': 'DeepSeek V4 Flash 正式版',
+      'meta/muse-glimmer-30b': 'Muse Glimmer 30B',
+      'nvidia/ising-calibration-1.5-31b': 'Ising Calibration 1.5 31B',
+      'mistralai/mistral-nemotron': 'Mistral Nemotron',
+      'nvidia/llama-3.1-nemoguard-8b-content-safety': 'Llama 3.1 NemoGuard 8B Content Safety',
+      'nvidia/llama-3.1-nemotron-nano-vl-8b-v1': 'Llama 3.1 Nemotron Nano VL 8B',
+      'google/diffusiongemma-26b-a4b-it': 'DiffusionGemma 26B',
+      'nvidia/nemotron-3-super-120b-a12b': 'Nemotron 3 Super 120B',
+      'deepseek-ai/deepseek-v4-flash': 'DeepSeek V4 Flash',
+      'nvidia/nemotron-3-nano-30b-a3b': 'Nemotron 3 Nano 30B',
+      'google/gemma-4-31b-it': 'Gemma 4 31B',
+      'nvidia/nemotron-3-ultra-550b-a55b': 'Nemotron 3 Ultra 550B',
+      'nvidia/llama-3.3-nemotron-super-49b-v1': 'Llama 3.3 Nemotron Super 49B',
+      'meta/llama-3.1-8b-instruct': 'Llama 3.1 8B',
+      'meta/llama-3.2-11b-vision-instruct': 'Llama 3.2 11B Vision',
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning': 'Nemotron 3 Nano Omni 30B Reasoning',
+      'nvidia/llama-3.3-nemotron-super-49b-v1.5': 'Llama 3.3 Nemotron Super 49B v1.5',
+      'meta/llama-3.2-1b-instruct': 'Llama 3.2 1B',
+      'nvidia/nvidia-nemotron-nano-9b-v2': 'Nemotron Nano 9B v2',
+      'nvidia/nemotron-3.5-content-safety': 'Nemotron 3.5 Content Safety',
+      'nvidia/riva-translate-4b-instruct-v1.1': 'Riva Translate 4B v1.1',
+      'openai/gpt-oss-20b': 'GPT OSS 20B',
+      'deepseek-ai/deepseek-v4-pro': 'DeepSeek V4 Pro',
+      'openai/gpt-oss-120b': 'GPT OSS 120B',
+      'poolside/laguna-xs-2.1': 'Laguna XS 2.1',
+      'meta/llama-3.2-90b-vision-instruct': 'Llama 3.2 90B Vision',
+      'thinkingmachines/inkling': 'Inkling',
+      'minimaxai/minimax-m3': 'MiniMax M3',
+      'nvidia/nemotron-nano-12b-v2-vl': 'Nemotron Nano 12B v2 VL',
+      'nvidia/nemotron-mini-4b-instruct': 'Nemotron Mini 4B',
+      'meta/llama-3.2-3b-instruct': 'Llama 3.2 3B',
+      'stepfun-ai/step-3.7-flash': 'Step 3.7 Flash',
+      'meta/llama-3.1-70b-instruct': 'Llama 3.1 70B',
+    };
+
+    function getModelInfo(m) {
+      const id = m.id || m.model || '';
+      const name = m.name || id.split('/').pop() || id;
+      const cnName = MODEL_CN_NAMES[id] || '';
+      const provider = m.publisher || m.owned_by || id.split('/')[0] || '其他';
+      const cats = detectCategories(id);
+      const isHot = HOT_MODELS.indexOf(id) !== -1;
+      const isSpecial = m.special === true;
+      const caps = getModelCaps(id);
+      const evidence = CONTEXT_EVIDENCE[id];
+      const deprecated = DEPRECATED_MODELS.has(id);
+      const available = m.available !== undefined ? m.available : (!UNAVAILABLE_MODELS.has(id) && !deprecated);
+      return { id: id, name: name, cnName: cnName, provider: provider, cats: cats, isHot: isHot, special: isSpecial, caps: caps, deprecated: deprecated, available: available, availability: m.availability || '', evidence: evidence };
+    }
+
+    // ===== 官方自营（acu/）模型详细介绍 =====
+    const ACU_MODEL_DESCS = {
+      'acu/deepseek-v4-flash': 'DeepSeek V4 Flash 标准版：兼顾速度与质量，适合日常对话、写作、问答与编程等绝大多数场景。默认开启深度思考，回答更严谨。',
+    };
+    function getAcuDesc(id) { return ACU_MODEL_DESCS[id] || ''; }
+
+    // ===== 官方自营（acu/）通道限速说明 =====
+    // 灵活调整说明
+    const ACU_LIMIT_NOTICE =
+      '<div style="margin:10px 0 14px;padding:10px 14px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.22);border-left:4px solid #3b82f6;border-radius:8px;font-size:12.5px;line-height:1.75;color:var(--text-secondary)">' +
+      '<div style="font-weight:600;color:#3b82f6;margin-bottom:4px">通道使用说明</div>' +
+      '<div>· 全站有总控，每个人和全站的用量会根据上游承载<strong>灵活调整</strong>，不固定</div>' +
+      '<div>· 超速请求<strong>不会直接报错</strong>：自动排队等待放行，最长等待约 30 秒</div>' +
+      '<div>· 高峰期为保障通道稳定，限速可能<strong>临时收紧</strong>，请按需合理使用，勿批量刷请求</div>' +
+      '</div>';
+
+    // 加载模型列表
+    function loadModels() {
+      // 同时加载模型列表和能力数据
+      Promise.all([
+        API.get('/api/chat/models'),
+        API.get('/api/public/model-capabilities')
+      ]).then(function (results) {
+        const data = results[0];
+        const capData = results[1];
+        const models = (data && data.data) || (Array.isArray(data) ? data : []);
+        
+        // 构建别名映射
+        const aliasMap = {};
+        if (capData && capData.models) {
+          capData.models.forEach(function (cm) {
+            aliasMap[cm.model_id] = cm.aliases || [];
+          });
+        }
+        
+        allModels = models;
+        // 将别名、能力标签、真实上下文/最大输出/能力数组附加到模型对象
+        allModels.forEach(function (m) {
+          m._aliases = aliasMap[m.id] || [];
+          const cap = (capData && capData.models || []).find(function (cm) { return cm.model_id === m.id; });
+          m._tags = cap ? (cap.tags || []) : [];
+          m._ctx = cap ? (cap.context_length || 0) : 0;
+          m._maxOut = cap ? (cap.max_output_tokens || 0) : 0;
+          m._caps = cap ? (cap.capabilities || []) : null;
+        });
+        
+        providers = {};
+        let total = 0;
+        models.forEach(function (m) {
+          const info = getModelInfo(m);
+          if (!providers[info.provider]) providers[info.provider] = [];
+          providers[info.provider].push(m);
+          total++;
+        });
+        const sel = document.getElementById('provider-filter');
+        Object.keys(providers).sort().forEach(function (p) {
+          const opt = document.createElement('option');
+          // 专属上游（官方自营/众筹）不暴露厂商名，统一显示"专属模型"
+          const label = (p === 'acu' || p === 'kedang') ? '专属模型' : getProviderName(p);
+          opt.value = p; opt.textContent = label + ' (' + providers[p].length + ')';
+          sel.appendChild(opt);
+        });
+        document.getElementById('model-stats').textContent = '共 ' + total + ' 个模型 · ' + Object.keys(providers).length + ' 家厂商';
+        renderModels();
+      }).catch(function (err) {
+        document.getElementById('models-container').innerHTML =
+          '<div class="empty-state"><div class="empty-state-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg></div><div class="empty-state-text">加载模型列表失败，请稍后重试</div></div>';
+      });
+    }
+
+    function renderModels() {
+      const search = document.getElementById('search').value.toLowerCase().trim();
+      const provider = document.getElementById('provider-filter').value;
+      const category = document.getElementById('category-filter').value;
+      const capFilter = document.getElementById('cap-filter').value;
+      let html = '';
+      let total = 0;
+
+      // 官方自营专区（acu/ 前缀，专属上游，列表最上方）
+      const acuList = allModels.filter(function (m) { return m.id && m.id.indexOf('acu/') === 0; });
+      if (acuList.length > 0 && !search && !provider && !category && !capFilter) {
+        html += '<div class="card mb-16" style="border:1px solid rgba(59,130,246,.4);background:linear-gradient(135deg,rgba(59,130,246,.07),rgba(0,212,255,.04))">';
+        html += '<div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+        html += '<span class="tag" style="background:linear-gradient(135deg,#3b82f6,#00d4ff);color:#fff;border-radius:4px;padding:2px 10px;font-size:12px">官方自营</span>';
+        html += ' 官方自营 · 专属通道 <span class="text-muted text-sm">(专属上游 · ' + acuList.length + ' 个模型)</span>';
+        html += '</div>';
+        html += ACU_LIMIT_NOTICE;
+        html += '<div class="grid grid-3">';
+        acuList.forEach(function (m) { html += renderModelCard(m, true); });
+        html += '</div></div>';
+      }
+
+      // 热门推荐（英伟达上游精选模型，优先展示）
+      if (!search && !provider && !category && !capFilter) {
+        const hotList = allModels.filter(function (m) { return HOT_MODELS.indexOf(m.id) !== -1; });
+        if (hotList.length > 0) {
+          html += '<div class="card mb-16"><div class="card-title"><span class="icon-svg icon-fire"><svg viewBox="0 0 24 24"><path d="M12 2c-2 5-5 8-5 13a5 5 0 0010 0c0-5-3-8-5-13z"/><path d="M12 20v2" stroke-width="1"/></svg></span> 热门推荐 <span class="text-muted text-sm">(' + hotList.length + ')</span></div>';
+          html += '<div class="grid grid-3">';
+          hotList.forEach(function (m) { html += renderModelCard(m, true); });
+          html += '</div></div>';
+        }
+      }
+
+      // 按厂商分组：多模型厂商独占一行，单模型厂商统一用网格展示
+      // 无过滤时 acu/kedang（自营/众筹专区）已在顶部专区展示，分组中跳过避免重复；
+      // 有搜索/过滤时专区不渲染，这些模型在分组中以"专属模型"通用标题展示，不暴露厂商名。
+      const noFilter = !search && !provider && !category && !capFilter;
+      const keys = Object.keys(providers).sort(function (a, b) {
+        // 专属模型分组排最后（社区渠道）；nvidia 等常规上游通过 compareProvider 排最前
+        const isSpecA = a === 'kedang' || a === 'acu' ? 1 : 0;
+        const isSpecB = b === 'kedang' || b === 'acu' ? 1 : 0;
+        if (isSpecA !== isSpecB) return isSpecA - isSpecB;
+        return compareProvider(a, b);
+      });
+      const multiProviders = [];
+      const singleProviders = [];
+      
+      keys.forEach(function (p) {
+        // 无过滤时 acu 已在顶部"官方自营专区"展示，分组中跳过避免重复
+        if (noFilter && p === 'acu') return;
+        if (provider && p !== provider) return;
+        const filtered = providers[p].filter(function (m) {
+          const info = getModelInfo(m);
+          // 厂商分组只展示可用模型；不可用/已下线模型集中到底部灰色区
+          if (info.deprecated || !info.available) return false;
+          if (category && info.cats.indexOf(category) === -1) return false;
+          if (capFilter && !info.caps[capFilter]) return false;
+          if (!search) return true;
+          return info.id.toLowerCase().includes(search) || info.name.toLowerCase().includes(search);
+        });
+        if (filtered.length === 0) return;
+        total += filtered.length;
+        filtered.sort(function (a, b) {
+          const ia = getModelInfo(a);
+          const ib = getModelInfo(b);
+          // 弃用模型始终排在最底下，可用模型往上排
+          if (ia.deprecated && !ib.deprecated) return 1;
+          if (!ia.deprecated && ib.deprecated) return -1;
+          if (ia.isHot && !ib.isHot) return -1;
+          if (!ia.isHot && ib.isHot) return 1;
+          if (ia.available !== ib.available) return ia.available ? -1 : 1;
+          return ia.name.localeCompare(ib.name);
+        });
+        if (filtered.length > 1) {
+          multiProviders.push({ p: p, models: filtered });
+        } else {
+          singleProviders.push({ p: p, models: filtered });
+        }
+      });
+
+      // 多模型厂商
+      multiProviders.forEach(function (gp) {
+        // 专属上游分组不展示厂商名，用通用标题
+        const providerTitle = (gp.p === 'acu' || gp.p === 'kedang') ? '专属模型' : getProviderName(gp.p);
+        html += '<div class="card mb-16"><div class="card-title">' + escapeHtml(providerTitle) + ' <span class="text-muted text-sm">(' + gp.models.length + ')</span></div>';
+        html += '<div class="grid grid-3">';
+        gp.models.forEach(function (m) { html += renderModelCard(m, false); });
+        html += '</div></div>';
+      });
+
+      // 单模型厂商（小卡片网格）
+      if (singleProviders.length > 0) {
+        html += '<div class="card mb-16"><div class="card-title">更多厂商 <span class="text-muted text-sm">(' + singleProviders.length + '家)</span></div>';
+        html += '<div class="grid grid-3">';
+        singleProviders.forEach(function (gp) {
+          const m = gp.models[0];
+          const providerTitle = (gp.p === 'acu' || gp.p === 'kedang') ? '专属模型' : getProviderName(gp.p);
+          html += '<div class="model-card provider-card" onclick="copyId(\'' + escapeHtml(m.id) + '\')">';
+          html += '<div class="provider-card-header">';
+          html += '<span class="provider-card-name">' + escapeHtml(providerTitle) + '</span>';
+          html += '</div>';
+          html += '<div class="provider-card-model">' + escapeHtml(m.name || m.id.split('/').pop()) + '</div>';
+          html += '<div class="text-xs text-muted mono" style="word-break:break-all">' + escapeHtml(m.id) + '</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      // <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 2026-08-11 官方自营上游/众筹专属模型已关停直连，仅专线通道可用，专区代码注释
+      // 专属模型专区（自营上游 / 众筹模型）：社区赞助渠道，排在最底部
+      // if (!search && !provider && !category && !capFilter) {
+      //   const acuList = allModels.filter(function (m) { return m.id && m.id.indexOf('acu/') === 0 && m.special === true; });
+      //   const otherSpecial = allModels.filter(function (m) { return m.special === true && !(m.id && m.id.indexOf('acu/') === 0); });
+      //   // 官方自营上游专区
+      //   if (acuList.length > 0) {
+      //     html += '<div class="card mb-16" style="border:1px solid rgba(52,168,83,.35);background:linear-gradient(135deg,rgba(52,168,83,.06),rgba(52,168,83,0) 70%)">';
+      //     html += '<div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+      //     html += '<span class="tag" style="background:#34a853;color:#fff;border-radius:4px;padding:2px 8px;font-size:12px">官方自营</span>';
+      //     html += ' 官方自营上游专区 <span class="text-muted text-sm">(自营订阅账号池 · ' + acuList.length + ' 个模型)</span>';
+      //     html += '</div>';
+      //     // 总用量条
+      //     html += renderAcuUsageBar();
+      //     html += '<div class="grid grid-3">';
+      //     acuList.forEach(function (m) { html += renderModelCard(m, true); });
+      //     html += '</div></div>';
+      //   }
+      //   // 其他专属模型（众筹）
+      //   if (otherSpecial.length > 0) {
+      //     html += '<div class="card mb-16"><div class="card-title"><span class="tag hot" style="margin-right:6px">众筹模型</span> 专属模型专区</div>';
+      //     html += '<div class="grid grid-3">';
+      //     otherSpecial.forEach(function (m) { html += renderModelCard(m, true); });
+      //     html += '</div></div>';
+      //   }
+      // }
+
+      // 不可用 / 已下线模型：集中置底，全部灰色，仅展示模型 ID（暂不可调用）
+      const unavailableList = allModels.filter(function (m) {
+        const info = getModelInfo(m);
+        return !info.deprecated && !info.available;
+      });
+      const offlineList = Array.from(DEPRECATED_MODELS);
+      if (unavailableList.length > 0 || offlineList.length > 0) {
+        html += '<div class="card mb-16" style="border-color:rgba(150,150,150,.35);background:var(--bg-secondary)">';
+        html += '<div class="card-title" style="color:var(--text-muted)"><span class="tag deprecated" style="margin-right:6px">不可用</span> 不可用 / 已下线模型列表 <span class="text-muted text-sm">(暂不可调用 · 灰色)</span></div>';
+        html += '<p class="text-xs text-muted mb-12" style="line-height:1.6">以下模型已从可用列表移除：上游故障临时下架、或已随上游下线（EOL）。调用将返回错误，请勿继续使用。</p>';
+        html += '<div class="grid grid-4">';
+        unavailableList.forEach(function (m) {
+          const info = getModelInfo(m);
+          html += '<div class="model-card deprecated" style="cursor:default" title="' + escapeHtml(info.availability || '暂不可用') + '">';
+          html += '<div class="text-xs text-muted mb-4">' + escapeHtml(info.availability || '暂不可用') + '</div>';
+          html += '<div class="text-xs mono" style="word-break:break-all;color:#888">' + escapeHtml(info.id) + '</div>';
+          html += '</div>';
+        });
+        offlineList.forEach(function (id) {
+          const name = MODEL_CN_NAMES[id] || id.split('/').pop() || id;
+          html += '<div class="model-card deprecated" style="cursor:default" title="上游已下线（EOL）">';
+          html += '<div class="text-xs text-muted mb-4">上游已下线 · 调用返回 410</div>';
+          html += '<div class="text-xs" style="font-weight:600;color:#888">' + escapeHtml(name) + '</div>';
+          html += '<div class="text-xs mono" style="word-break:break-all;color:#999">' + escapeHtml(id) + '</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      if (!html) {
+        html = '<div class="empty-state"><div class="empty-state-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="empty-state-text">未找到匹配的模型</div></div>';
+      }
+      document.getElementById('models-container').innerHTML = html;
+      // <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 2026-08-11 acu 用量条随官方自营上游下线一并注释
+      // DOM 挂载后填充用量条（若本次渲染包含 acu 专区）
+      // if (!search && !provider && !category && !capFilter && allModels.some(function (m) { return m.id && m.id.indexOf('acu/') === 0 && m.special === true; })) {
+      //   loadAcuUsage();
+      // }
+    }
+
+    function compareProvider(a, b) {
+      const ai = PRIORITY_PROVIDERS.indexOf(a);
+      const bi = PRIORITY_PROVIDERS.indexOf(b);
+      return (ai === -1 ? PRIORITY_PROVIDERS.length : ai) - (bi === -1 ? PRIORITY_PROVIDERS.length : bi) || a.localeCompare(b);
+    }
+
+    // token 数 → 友好显示（131072 → 128K，1000000 → 1M）
+    function tokenSize(n) {
+      n = Number(n) || 0;
+      if (n <= 0) return '';
+      if (n >= 1000000) return (n / 1000000) % 1 === 0 ? (n / 1000000) + 'M' : (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1000) return Math.round(n / 1000) + 'K';
+      return String(n);
+    }
+
+    function renderModelCard(m, showHot) {
+      const info = getModelInfo(m);
+      const caps = info.caps;
+      const labels = getCategoryLabels(info.cats);
+      const welfareTags = (m._tags || []).filter(function (tag) { return tag === '公益' || tag === '众筹模型' || tag === '官方自营'; });
+      let html = '<div class="model-card' + (info.deprecated ? ' deprecated' : '') + '" onclick="copyId(\'' + escapeHtml(info.id) + '\')" title="点击复制模型ID">';
+      // 标题行
+      html += '<div class="flex justify-between items-start mb-6">';
+      html += '<strong class="model-name">' + escapeHtml(info.name) + '</strong>';
+      html += '<span class="flex" style="gap:4px">';
+      if (info.isHot) html += '<span class="tag hot">HOT</span>';
+      if (info.special) html += '<span class="tag hot">专属</span>';
+      if (info.id.indexOf('acu/') === 0) html += '<span class="tag welfare" style="background:linear-gradient(135deg,#3b82f6,#00d4ff);color:#fff">官方自营</span>';
+      if (info.deprecated) html += '<span class="tag deprecated">已弃用</span>';
+      html += '</span>';
+      html += '</div>';
+      // 中文名
+      if (info.cnName) {
+        html += '<div class="model-desc">' + escapeHtml(info.cnName) + '</div>';
+      }
+      // 官方自营（acu/）模型详细介绍
+      const acuDesc = getAcuDesc(info.id);
+      if (acuDesc) {
+        html += '<div class="model-desc" style="color:var(--text-secondary);font-size:12px;line-height:1.6">' + escapeHtml(acuDesc) + '</div>';
+      }
+      // 众筹模型说明
+      if ((m._tags || []).indexOf('众筹模型') !== -1) {
+        html += '<div class="crowdfund-notice" style="background:rgba(255,193,7,.12);border-left:3px solid #ffc107;padding:6px 10px;margin:6px 0 8px;font-size:12px;color:#b8860b;border-radius:4px"><span class="icon-svg icon-heart"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span> 众筹模型 · 由社区赞助的专属模型，大家赞助多少就有多少额度，用完即止，请按需使用</div>';
+      }
+      // 可用性状态
+      const availabilityLabel = info.deprecated ? '已弃用 · 上游已下线' : (info.availability || (info.id === 'moonshotai/kimi-k2.6' ? 'NVIDIA 请求 404，不可用' : (info.available ? '基础可用' : '基础不可用')));
+      html += '<div class="mb-8">' + (info.available ? '<span class="cap-badge on">' + availabilityLabel + '</span>' : '<span class="cap-badge off">' + availabilityLabel + '</span>') + '</div>';
+      if (info.evidence) html += '<div class="text-xs text-muted mb-8">上下文证据：' + escapeHtml(info.evidence[1]) + '</div>';
+      // 规格：上下文 + 最大输出（优先 API 返回的真实满血值，其次能力映射表）
+      // 图像/视频模型（gpt-image、qwen-image、sora 等）无 token 输出概念，显示"图像/视频"
+      var isImgModel = /(gpt-image|qwen-image|sora|video)/i.test(info.id);
+      var ctxText = (info.evidence && info.evidence[0]) || (m._ctx ? tokenSize(m._ctx) : (info.available ? caps.ctx : '未测'));
+      var outText = isImgModel ? '图像/视频' : (m._maxOut ? tokenSize(m._maxOut) : caps.maxOut);
+      html += '<div class="model-specs">';
+      html += '<span>上下文 <span class="spec-val">' + escapeHtml(ctxText) + '</span></span>';
+      if (outText && outText !== '-' && outText !== '?') {
+        html += '<span>最大输出 <span class="spec-val">' + escapeHtml(outText) + '</span></span>';
+      }
+      html += '</div>';
+      // 能力徽章（流式/工具/视觉优先使用后端真实能力数据，其余用映射表）
+      var capStream = m._caps ? m._caps.indexOf('streaming') !== -1 : caps.stream;
+      var capTools = m._caps ? m._caps.indexOf('tools') !== -1 : caps.tools;
+      var capVision = m._caps ? m._caps.indexOf('vision') !== -1 : caps.vision;
+      html += '<div class="mb-8">';
+      html += renderCapBadge('流式', capStream);
+      html += renderCapBadge('工具调用', capTools);
+      html += renderCapBadge('视觉', capVision);
+      html += renderCapBadge('JSON模式', caps.jsonMode);
+      html += renderCapBadge('推理', caps.reasoning);
+      html += renderCapBadge('种子', caps.seed);
+      html += renderCapBadge('Logprobs', caps.logprobs);
+      html += '</div>';
+      // 类型标签
+      html += '<div class="flex gap-6" style="flex-wrap:wrap">';
+      labels.forEach(function (c, i) {
+        const cls = i === 0 ? 'primary' : '';
+        html += '<span class="tag ' + cls + '">' + escapeHtml(c) + '</span>';
+      });
+      welfareTags.forEach(function (tag) {
+        html += '<span class="tag welfare">' + escapeHtml(tag) + '</span>';
+      });
+      html += '</div>';
+      // 模型ID
+      html += '<div class="text-xs text-muted mono mt-8 model-id" style="word-break:break-all">' + escapeHtml(info.id) + '</div>';
+      // 别名展示
+      const midAliases = m._aliases || [];
+      if (midAliases.length > 0) {
+        html += '<div class="model-aliases" style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">';
+        const showAliases = midAliases.slice(0, 4);
+        showAliases.forEach(function(a) {
+          html += '<code style="font-size:9px;padding:1px 4px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:2px;color:var(--text-muted);cursor:pointer" title="点击复制" onclick="event.stopPropagation();copyId(\'' + escapeHtml(a) + '\')">' + escapeHtml(a) + '</code>';
+        });
+        if (midAliases.length > 4) {
+          html += '<span style="font-size:9px;color:var(--text-muted);line-height:16px">+' + (midAliases.length - 4) + '</span>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    // <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> 2026-08-11 官方自营上游下线：用量条相关函数全部注释
+    // // 官方自营上游总用量条（调用公开接口，仅聚合数据）
+    // let acuUsageLoaded = false;
+    // let acuUsageCache = null;
+    // function renderAcuUsageBar() {
+    //   // 返回静态骨架；renderModels 完成 DOM 挂载后由 loadAcuUsage() 填充
+    //   return '<div class="acu-usage-bar" style="padding:10px 12px;background:rgba(52,168,83,.06);border:1px solid rgba(52,168,83,.2);border-radius:8px;margin-bottom:12px">' +
+    //     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;color:var(--text-secondary)">账号池总用量</span><span class="text-xs text-muted" id="acu-usage-meta">加载中...</span></div>' +
+    //     '<div style="height:10px;background:var(--bg-input);border-radius:5px;overflow:hidden"><div id="acu-usage-fill" style="height:100%;width:0;background:linear-gradient(90deg,#34a853,#52c41a);border-radius:5px;transition:width .6s ease"></div></div></div>';
+    // }
+    // function loadAcuUsage() {
+    //   if (acuUsageLoaded) { paintAcuUsage(); return; }
+    //   acuUsageLoaded = true;
+    //   API.get('/api/public/acu-usage').then(function (d) {
+    //     acuUsageCache = d;
+    //     paintAcuUsage();
+    //   }).catch(function () {
+    //     const meta = document.getElementById('acu-usage-meta');
+    //     if (meta) meta.textContent = '用量信息暂不可用';
+    //   });
+    // }
+    // function paintAcuUsage() {
+    //   const meta = document.getElementById('acu-usage-meta');
+    //   const fill = document.getElementById('acu-usage-fill');
+    //   if (!meta || !fill || !acuUsageCache) return;
+    //   const u = (acuUsageCache && acuUsageCache.usage) || {};
+    //   const total = acuUsageCache ? acuUsageCache.total_accounts || 0 : 0;
+    //   const usable = acuUsageCache ? acuUsageCache.usable_accounts || 0 : 0;
+    //   if (u.remaining_percent !== null && u.remaining_percent !== undefined) {
+    //     const used = Math.max(0, Math.min(100, 100 - u.remaining_percent));
+    //     fill.style.width = used + '%';
+    //     fill.style.background = used > 85 ? 'linear-gradient(90deg,#fa8c16,#f5222d)' : (used > 60 ? 'linear-gradient(90deg,#faad14,#fa8c16)' : 'linear-gradient(90deg,#34a853,#52c41a)');
+    //     meta.textContent = '剩余 ' + u.remaining_percent + '% · ' + usable + '/' + total + ' 个账号可用';
+    //   } else {
+    //     fill.style.width = '10%';
+    //     fill.style.background = 'linear-gradient(90deg,#d9d9d9,#bfbfbf)';
+    //     meta.textContent = '额度信息获取中（' + total + ' 个账号）';
+    //   }
+    // }
+
+    function renderCapBadge(label, supported) {
+      if (supported === true) {
+        return '<span class="cap-badge on">' + label + '</span>';
+      } else if (supported === false) {
+        return '<span class="cap-badge off">' + label + '</span>';
+      }
+      return '<span class="cap-badge warn">' + label + '</span>';
+    }
+
+    function filterModels() { renderModels(); }
+
+    function copyId(id) {
+      copyToClipboard(id).then(function (ok) {
+        if (ok) Toast.success('已复制: ' + id);
+        else { Toast.error('复制失败'); }
+      });
+    }
+
+    // 启动加载
+    loadModels();
+  </script>
+</body>
+</html>

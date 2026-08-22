@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>模型能力矩阵 - AQUA 公益AI</title>
+  <style>
+    /* ============ CSS 变量（内联，不依赖 platform.css） ============ */
+    :root {
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #eef1f6;
+      --bg-input: #f8f9fc;
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a6a;
+      --text-muted: #8888a8;
+      --accent-primary: #4a90d9;
+      --accent-success: #34c759;
+      --accent-warning: #f0a500;
+      --accent-danger: #e74c3c;
+      --border-color: #e0e4ea;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1a1f2e;
+      --bg-card: #1e2433;
+      --bg-hover: #2a3142;
+      --bg-input: #151a24;
+      --text-primary: #e1e6ed;
+      --text-secondary: #8b95a5;
+      --text-muted: #5a6478;
+      --accent-primary: #5b9ee0;
+      --border-color: #2a3344;
+    }
+
+    /* ============ 基础重置 ============ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 14px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { color: var(--accent-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ============ 导航栏 ============ */
+    .navbar {
+      height: 56px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .navbar-inner {
+      max-width: 1200px; margin: 0 auto; height: 100%;
+      display: flex; align-items: center; padding: 0 20px; gap: 16px;
+    }
+    .navbar-brand { flex-shrink: 0; }
+    .brand-logo { display: flex; align-items: center; gap: 6px; text-decoration: none; }
+    .brand-logo:hover { text-decoration: none; }
+    .brand-name { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .brand-tag { font-size: 11px; color: var(--accent-primary); background: rgba(0,212,255,0.1); padding: 2px 6px; border-radius: var(--radius-sm); }
+    .navbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .icon-btn {
+      width: 36px; height: 36px; border: 1px solid var(--border-color); background: var(--bg-card);
+      border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center;
+      color: var(--text-primary); cursor: pointer; transition: all .15s;
+    }
+    .icon-btn:hover { background: var(--bg-hover); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 16px; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+      background: var(--bg-card); color: var(--text-primary); font-size: 14px;
+      transition: all .15s; cursor: pointer; white-space: nowrap; text-decoration: none;
+    }
+    .btn:hover { background: var(--bg-hover); border-color: var(--accent-primary); text-decoration: none; }
+    .btn-primary { background: var(--accent-primary); color: #000; border-color: var(--accent-primary); }
+    .btn-primary:hover { opacity: .9; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-xs { padding: 2px 8px; font-size: 11px; }
+
+    /* ============ 容器 ============ */
+    .container { width: 100%; max-width: min(1680px, 96vw); margin: 0 auto; padding: 24px 20px; }
+
+    /* ============ Hero 区域 ============ */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      background: linear-gradient(180deg, rgba(0,212,255,0.04) 0%, transparent 100%);
+    }
+    .hero-title {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-success));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      text-align: center;
+      cursor: pointer;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      transition: all .15s;
+      min-width: 100px;
+    }
+    .hero-stat:hover { border-color: var(--accent-primary); }
+    .hero-stat.filtered { border-color: var(--accent-primary); background: rgba(0,212,255,0.06); }
+    .hero-stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ============ 过滤栏 ============ */
+    .filter-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-row + .filter-row { margin-top: 10px; }
+    .filter-input {
+      flex: 1; min-width: 180px;
+      padding: 6px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+    }
+    .filter-input:focus { border-color: var(--accent-primary); }
+    .filter-select {
+      min-width: 130px;
+      padding: 6px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+    }
+    .filter-select:focus { border-color: var(--accent-primary); }
+    .filter-checkbox-lbl {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      user-select: none;
+      transition: all .15s;
+    }
+    .filter-checkbox-lbl:hover { border-color: var(--accent-primary); }
+    .filter-checkbox-lbl input { display: none; }
+    .filter-checkbox-lbl.checked { background: var(--accent-primary); color: #000; border-color: var(--accent-primary); }
+    .filter-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ============ 模型卡片网格 ============ */
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 900px) {
+      .cap-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .cap-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    }
+
+    /* ============ 模型卡片 ============ */
+    .cap-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      transition: border-color .15s;
+      position: relative;
+    }
+    .cap-card:hover { border-color: var(--accent-primary); }
+    .cap-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .cap-card-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      word-break: break-word;
+      transition: color .15s;
+    }
+    .cap-card-name-link:hover .cap-card-name { color: var(--accent-primary); }
+    .cap-card-id {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: "SF Mono", Consolas, monospace;
+      word-break: break-all;
+      margin-bottom: 8px;
+    }
+    .cap-card-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .cap-publisher-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(0,212,255,0.08);
+      color: var(--accent-primary);
+      border: 1px solid rgba(0,212,255,0.2);
+    }
+    .cap-type-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .cap-type-badge.chat { background: rgba(74,144,217,0.1); color: var(--accent-primary); }
+    .cap-type-badge.vision { background: rgba(171,71,188,0.1); color: #ab47bc; }
+    .cap-type-badge.embedding { background: rgba(52,199,89,0.1); color: var(--accent-success); }
+    .cap-type-badge.safety { background: rgba(231,76,60,0.1); color: var(--accent-danger); }
+    .cap-type-badge.translation { background: rgba(74,144,217,0.08); color: #4a90d9; }
+    .cap-type-badge.code { background: rgba(66,165,245,0.1); color: #42a5f5; }
+    .cap-type-badge.reasoning { background: rgba(240,165,0,0.1); color: var(--accent-warning); }
+    .cap-deprecated-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(231,76,60,0.08);
+      color: var(--accent-danger);
+      border: 1px solid rgba(231,76,60,0.15);
+    }
+
+    .cap-context-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    .cap-context-item {
+      color: var(--text-secondary);
+    }
+    .cap-context-item strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* 能力徽章行 */
+    .cap-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .cap-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .cap-badge.on {
+      background: rgba(0,230,118,0.12);
+      color: var(--accent-success);
+      border: 1px solid rgba(0,230,118,0.25);
+    }
+    .cap-badge.off {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    /* 查看详情链接 */
+    .cap-detail-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--accent-primary);
+      text-decoration: none;
+      margin-top: 4px;
+      transition: opacity .15s;
+    }
+    .cap-detail-link:hover { opacity: .8; text-decoration: none; }
+
+    /* 空状态 */
+    .cap-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+
+    /* ============ 页脚 ============ */
+    .footer {
+      border-top: 1px solid var(--border-color);
+      padding: 24px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 40px;
+    }
+    .footer a { color: var(--text-secondary); margin: 0 8px; }
+
+    /* ============ Toast 系统 ============ */
+    .toast-container {
+      position: fixed; top: 70px; right: 20px; z-index: 2000;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-left: 3px solid var(--accent-primary);
+      border-radius: var(--radius-md); padding: 12px 16px;
+      min-width: 240px; max-width: 360px;
+      font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      animation: slideIn .2s ease;
+    }
+    .toast.success { border-left-color: var(--accent-success); }
+    .toast.error { border-left-color: var(--accent-danger); }
+    .toast.warn { border-left-color: var(--accent-warning); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ============ 响应式 ============ */
+    @media (max-width: 768px) {
+      .hero { padding: 40px 16px 24px; }
+      .hero-title { font-size: 26px; }
+      .hero-stats { gap: 8px; }
+      .hero-stat { padding: 10px 14px; min-width: 80px; }
+      .hero-stat-value { font-size: 22px; }
+
+      .cap-summary { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .cap-filter-bar { padding: 10px; }
+      .cap-filter-row { gap: 6px; }
+      .cap-filter-row .input { min-width: 0; width: 100%; flex: none; }
+      .cap-filter-row .select { min-width: 0; flex: 1; }
+      .cap-checkbox-lbl { font-size: 11px; padding: 3px 6px; }
+      .cap-grid { grid-template-columns: 1fr; gap: 8px; }
+      .cap-card { padding: 12px; }
+      .cap-card-name { font-size: 13px; }
+      .cap-context-row { gap: 8px; font-size: 11px; flex-wrap: wrap; }
+
+      .navbar .btn-sm { font-size: 11px; padding: 4px 8px; }
+      .brand-name { font-size: 16px; }
+    }
+
+    @media (max-width: 400px) {
+      .cap-summary { grid-template-columns: repeat(2, 1fr); }
+      .hero-stats { flex-wrap: wrap; }
+      .hero-stat { flex: 1 1 40%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <a href="/" class="brand-logo">
+          <span class="brand-name">AQUA</span><span class="brand-tag">公益AI</span>
+        </a>
+      </div>
+      <div class="navbar-actions">
+        <a href="/models" class="btn btn-sm">模型列表</a>
+        <a href="/console" class="btn btn-sm">控制台</a>
+        <a href="/login" class="btn btn-sm btn-primary">登录</a>
+        <button class="icon-btn" data-theme-toggle title="切换主题" onclick="Theme.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero 区域 -->
+  <section class="hero">
+    <h1 class="hero-title">模型能力矩阵</h1>
+    <p class="hero-subtitle">100+ 模型的完整参数支持、上下文窗口与使用限制</p>
+    <div class="hero-stats" id="hero-stats">
+      <div class="hero-stat" data-filter-type="">
+        <div class="hero-stat-value" id="stat-total">-</div>
+        <div class="hero-stat-label">全部</div>
+      </div>
+      <div class="hero-stat" data-filter-type="chat">
+        <div class="hero-stat-value" id="stat-chat">-</div>
+        <div class="hero-stat-label">对话</div>
+      </div>
+      <div class="hero-stat" data-filter-type="vision">
+        <div class="hero-stat-value" id="stat-vision">-</div>
+        <div class="hero-stat-label">视觉</div>
+      </div>
+      <div class="hero-stat" data-filter-type="embedding">
+        <div class="hero-stat-value" id="stat-embedding">-</div>
+        <div class="hero-stat-label">嵌入</div>
+      </div>
+      <div class="hero-stat" data-filter-type="safety">
+        <div class="hero-stat-value" id="stat-safety">-</div>
+        <div class="hero-stat-label">安全</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主内容区 -->
+  <div class="container">
+    <!-- 过滤栏 -->
+    <div class="filter-bar">
+      <div class="filter-row">
+        <input type="text" class="filter-input" id="search-input" placeholder="搜索模型名称..." oninput="applyFilters()">
+        <select class="filter-select" id="publisher-filter" onchange="applyFilters()">
+          <option value="">所有厂商</option>
+        </select>
+        <select class="filter-select" id="type-filter" onchange="applyFilters()">
+          <option value="">所有类型</option>
+          <option value="chat">对话</option>
+          <option value="vision">视觉</option>
+          <option value="embedding">嵌入</option>
+          <option value="safety">安全</option>
+          <option value="translation">翻译</option>
+          <option value="code">代码</option>
+          <option value="reasoning">推理</option>
+        </select>
+        <span class="filter-count" id="filter-count"></span>
+      </div>
+      <div class="filter-row">
+        <label class="filter-checkbox-lbl" data-cap="streaming"><input type="checkbox" onchange="applyFilters()">流式</label>
+        <label class="filter-checkbox-lbl" data-cap="tools"><input type="checkbox" onchange="applyFilters()">工具调用</label>
+        <label class="filter-checkbox-lbl" data-cap="vision"><input type="checkbox" onchange="applyFilters()">视觉</label>
+        <label class="filter-checkbox-lbl" data-cap="json_mode"><input type="checkbox" onchange="applyFilters()">JSON模式</label>
+        <label class="filter-checkbox-lbl" data-cap="reasoning"><input type="checkbox" onchange="applyFilters()">推理</label>
+        <label class="filter-checkbox-lbl" data-cap="seed"><input type="checkbox" onchange="applyFilters()">种子</label>
+        <label class="filter-checkbox-lbl" data-cap="logprobs"><input type="checkbox" onchange="applyFilters()">Logprobs</label>
+        <button class="btn btn-sm" onclick="resetFilters()" style="margin-left:auto">重置</button>
+      </div>
+    </div>
+
+    <!-- 模型卡片网格 -->
+    <div class="cap-grid" id="cards-container">
+      <div class="cap-empty">加载模型能力数据中...</div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div>AQUA 公益AI平台 · 免费AI模型服务</div>
+    <div style="margin-top:8px">
+      <a href="/">首页</a>
+      <a href="/models">模型列表</a>
+      <a href="/docs">API文档</a>
+      <a href="/sponsor">赞助</a>
+    </div>
+  </footer>
+
+  <script src="/static/js/platform.js?v=24.0"></script>
+  <script>
+    var _allModels = [];
+    var _filtered = [];
+
+    // 类型名称映射
+    var TYPE_LABELS = {
+      chat: '对话', vision: '视觉', embedding: '嵌入', safety: '安全',
+      translation: '翻译', code: '代码', reasoning: '推理'
+    };
+
+    // 能力徽章定义
+    var CAP_BADGES = [
+      { key: 'streaming', label: '流式', capKey: 'streaming' },
+      { key: 'tools', label: '工具调用', capKey: 'tools' },
+      { key: 'vision', label: '视觉', capKey: 'vision' },
+      { key: 'json_mode', label: 'JSON模式', capKey: 'json_mode' },
+      { key: 'reasoning', label: '推理', capKey: 'reasoning' },
+      { key: 'seed', label: '种子', capKey: 'seed' },
+      { key: 'stop', label: '停止词', fallback: function(m) { return m.params && m.params.stop && m.params.stop.supported; } },
+      { key: 'logprobs', label: 'Logprobs', capKey: 'logprobs' },
+      { key: 'n', label: 'N', fallback: function(m) { return m.params && m.params.n && m.params.n.supported; } },
+      { key: 'freq_penalty', label: '频率惩罚', fallback: function(m) { return m.params && m.params.frequency_penalty && m.params.frequency_penalty.supported; } }
+    ];
+
+    // ============ 数据加载 ============
+    function loadCapabilities() {
+      API.get('/api/public/model-capabilities').then(function(d) {
+        _allModels = d.models || [];
+        _filtered = _allModels.slice();
+
+        // 填充厂商下拉
+        var pubs = {};
+        _allModels.forEach(function(m) {
+          var p = m.publisher || '未知';
+          if (!pubs[p]) pubs[p] = 0;
+          pubs[p]++;
+        });
+        var sel = document.getElementById('publisher-filter');
+        Object.keys(pubs).sort().forEach(function(p) {
+          var opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p + ' (' + pubs[p] + ')';
+          sel.appendChild(opt);
+        });
+
+        render();
+      }).catch(function(err) {
+        document.getElementById('cards-container').innerHTML =
+          '<div class="cap-empty">加载失败，请稍后重试</div>';
+        Toast.error('加载模型数据失败');
+      });
+    }
+
+    function render() {
+      renderHeroStats();
+      renderCards();
+      updateFilterCount();
+    }
+
+    function renderHeroStats() {
+      var counts = { total: _allModels.length, chat: 0, vision: 0, embedding: 0, safety: 0 };
+      _allModels.forEach(function(m) {
+        var t = m.model_type || 'chat';
+        if (counts[t] !== undefined) counts[t]++;
+      });
+      document.getElementById('stat-total').textContent = counts.total;
+      document.getElementById('stat-chat').textContent = counts.chat;
+      document.getElementById('stat-vision').textContent = counts.vision;
+      document.getElementById('stat-embedding').textContent = counts.embedding;
+      document.getElementById('stat-safety').textContent = counts.safety;
+    }
+
+    function renderCards() {
+      var container = document.getElementById('cards-container');
+      if (_filtered.length === 0) {
+        container.innerHTML = '<div class="cap-empty">未找到匹配的模型</div>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < _filtered.length; i++) {
+        html += renderCard(_filtered[i]);
+      }
+      container.innerHTML = html;
+    }
+
+    function renderCard(m) {
+      var type = m.model_type || 'chat';
+      var typeLabel = TYPE_LABELS[type] || type;
+      var ctxLen = fmtContext(m.context_length);
+      var maxOut = fmtContext(m.max_output_tokens);
+      // 图像/视频模型（gpt-image、qwen-image、sora 等）输出为图像/视频，无 token 上限概念
+      if (/(gpt-image|qwen-image|sora|video)/i.test(m.model_id)) {
+        maxOut = '图像/视频';
+      }
+      var caps = m.capabilities || [];
+      var modelId = m.model_id;
+      var detailUrl = '/console/capability-detail?model=' + encodeURIComponent(modelId);
+
+      var html = '<div class="cap-card">';
+
+      // 头部：名称（可点击链接）+ 类型标识
+      html += '<div class="cap-card-header">';
+      html += '<a href="' + detailUrl + '" class="cap-card-name-link" style="text-decoration:none;color:inherit">';
+      html += '<span class="cap-card-name">' + escapeHtml(m.display_name || m.model_id) + '</span>';
+      html += '</a>';
+      html += '<span class="cap-type-badge ' + type + '">' + escapeHtml(typeLabel) + '</span>';
+      html += '</div>';
+
+      // 模型ID
+      html += '<div class="cap-card-id">' + escapeHtml(m.model_id) + '</div>';
+
+      // 子ID别名（可点击复制）
+      var aliases = m.aliases || [];
+      if (aliases.length > 0) {
+        html += '<div class="cap-card-aliases" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">';
+        html += '<span style="font-size:10px;color:var(--text-muted);line-height:18px">别名: </span>';
+        for (var a = 0; a < Math.min(aliases.length, 5); a++) {
+          html += '<code style="font-size:10px;padding:1px 5px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:3px;cursor:pointer" title="点击复制" onclick="navigator.clipboard.writeText(\'' + escapeHtml(aliases[a]) + '\');this.style.borderColor=\'var(--accent-success)\';setTimeout(function(){this.style.borderColor=\'var(--border-color)\'}.bind(this),1000)">' + escapeHtml(aliases[a]) + '</code>';
+        }
+        if (aliases.length > 5) {
+          html += '<span style="font-size:10px;color:var(--text-muted);line-height:18px">+' + (aliases.length - 5) + '</span>';
+        }
+        html += '</div>';
+      }
+
+      // 元信息
+      html += '<div class="cap-card-meta">';
+      html += '<span class="cap-publisher-tag">' + escapeHtml(m.publisher || '未知') + '</span>';
+      (m.tags || []).forEach(function (tag) {
+        if (tag === '公益' || tag === '众筹模型') html += '<span class="cap-publisher-tag welfare-tag">' + escapeHtml(tag) + '</span>';
+      });
+      if (m.cn_name) {
+        html += '<span class="text-xs text-muted" style="font-size:11px;color:var(--text-muted)">' + escapeHtml(m.cn_name) + '</span>';
+      }
+      if (m.is_deprecated) {
+        html += '<span class="cap-deprecated-tag">已弃用</span>';
+      }
+      html += '</div>';
+
+      // 上下文窗口信息
+      html += '<div class="cap-context-row">';
+      html += '<span class="cap-context-item">上下文: <strong>' + escapeHtml(ctxLen) + '</strong></span>';
+      html += '<span class="cap-context-item">最大输出: <strong>' + escapeHtml(maxOut) + '</strong></span>';
+      if (m.max_input_tokens) {
+        html += '<span class="cap-context-item">最大输入: <strong>' + escapeHtml(fmtContext(m.max_input_tokens)) + '</strong></span>';
+      }
+      html += '</div>';
+
+      // 能力徽章行
+      html += '<div class="cap-badges">';
+      for (var b = 0; b < CAP_BADGES.length; b++) {
+        var badge = CAP_BADGES[b];
+        var supported = false;
+        if (badge.fallback) {
+          supported = badge.fallback(m);
+        } else if (badge.capKey) {
+          supported = caps.indexOf(badge.capKey) !== -1;
+        }
+        html += '<span class="cap-badge ' + (supported ? 'on' : 'off') + '">' + escapeHtml(badge.label) + '</span>';
+      }
+      html += '</div>';
+
+      // 查看详情链接
+      html += '<a href="' + detailUrl + '" class="cap-detail-link">查看详情 →</a>';
+
+      html += '</div>'; // 卡片结束
+
+      return html;
+    }
+
+    function fmtContext(val) {
+      if (val === undefined || val === null || val === 0) return '-';
+      var n = Number(val);
+      if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(n);
+    }
+
+    // ============ 过滤 ============
+    function applyFilters() {
+      var search = document.getElementById('search-input').value.toLowerCase().trim();
+      var publisher = document.getElementById('publisher-filter').value;
+      var type = document.getElementById('type-filter').value;
+
+      var activeCaps = [];
+      document.querySelectorAll('.filter-checkbox-lbl').forEach(function(lbl) {
+        var cb = lbl.querySelector('input');
+        if (cb && cb.checked) {
+          var cap = lbl.getAttribute('data-cap');
+          if (cap) activeCaps.push(cap);
+        }
+      });
+
+      document.querySelectorAll('.filter-checkbox-lbl').forEach(function(lbl) {
+        var cb = lbl.querySelector('input');
+        lbl.classList.toggle('checked', cb && cb.checked);
+      });
+
+      _filtered = _allModels.filter(function(m) {
+        if (search) {
+          var name = (m.display_name || '').toLowerCase();
+          var id = (m.model_id || '').toLowerCase();
+          var cn = (m.cn_name || '').toLowerCase();
+          if (name.indexOf(search) === -1 && id.indexOf(search) === -1 && cn.indexOf(search) === -1) return false;
+        }
+        if (publisher && m.publisher !== publisher) return false;
+        if (type && m.model_type !== type) return false;
+        if (activeCaps.length > 0) {
+          var caps = m.capabilities || [];
+          for (var c = 0; c < activeCaps.length; c++) {
+            if (caps.indexOf(activeCaps[c]) === -1) return false;
+          }
+        }
+        return true;
+      });
+
+      render();
+    }
+
+    function resetFilters() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('publisher-filter').value = '';
+      document.getElementById('type-filter').value = '';
+      document.querySelectorAll('.filter-checkbox-lbl input').forEach(function(cb) { cb.checked = false; });
+      document.querySelectorAll('.filter-checkbox-lbl').forEach(function(lbl) { lbl.classList.remove('checked'); });
+      document.querySelectorAll('.hero-stat').forEach(function(el) { el.classList.remove('filtered'); });
+      _filtered = _allModels.slice();
+      render();
+    }
+
+    function updateFilterCount() {
+      document.getElementById('filter-count').textContent = '显示 ' + _filtered.length + ' / ' + _allModels.length + ' 个模型';
+    }
+
+    // ============ Hero 统计卡片点击过滤 ============
+    document.getElementById('hero-stats').addEventListener('click', function(e) {
+      var item = e.target.closest('.hero-stat');
+      if (!item) return;
+      var type = item.getAttribute('data-filter-type');
+      document.getElementById('type-filter').value = type;
+      document.querySelectorAll('.hero-stat').forEach(function(el) { el.classList.remove('filtered'); });
+      item.classList.add('filtered');
+      applyFilters();
+    });
+
+    // ============ 初始化 ============
+    Theme.init();
+    loadCapabilities();
+  </script>
+
+  <!-- 广告位 -->
+  <div class="ads-section">
+    <div class="ads-title">— 赞助商 —</div>
+    <div class="ads-row">
+      <a class="ad-card" href="https://idc.61nb.cn/aff/PRISUTPY" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/61nb.png" alt="安逸云"><div class="ad-info"><div class="ad-name">安逸云</div><div class="ad-desc">高性价比云服务器 · 特价9.9起</div></div>
+      </a>
+      <a class="ad-card" href="https://www.tokenlinks.cn/sign-up?aff=o4JN" target="_blank" rel="nofollow">
+        <img src="/static/images/sponsors/tokenlinks.svg" alt="TokenLinks"><div class="ad-info"><div class="ad-name">TokenLinks</div><div class="ad-desc">主流高性能模型，更快接入，更低成本。</div></div>
+      </a></div>
+  </div>
+
+</body>
+</html>
