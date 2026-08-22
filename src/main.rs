@@ -333,15 +333,23 @@ fn set_so_reuse_port(sock: &socket2::Socket) -> std::io::Result<()> {
 
 /// CORS 中间件（复用网关导出的配置）
 fn cors_layer(cfg: &Config) -> CorsLayer {
-    let origins: Vec<axum::http::HeaderValue> = cfg
-        .cors_origins
-        .iter()
-        .filter_map(|o| o.parse().ok())
-        .collect();
-    CorsLayer::new()
-        .allow_origin(origins)
-        .allow_methods(Any)
-        .allow_headers(Any)
+    let has_wildcard = cfg.cors_origins.iter().any(|o| o == "*");
+    if has_wildcard {
+        CorsLayer::new()
+            .allow_origin(Any)
+            .allow_methods(Any)
+            .allow_headers(Any)
+    } else {
+        let origins: Vec<axum::http::HeaderValue> = cfg
+            .cors_origins
+            .iter()
+            .filter_map(|o| o.parse().ok())
+            .collect();
+        CorsLayer::new()
+            .allow_origin(origins)
+            .allow_methods(Any)
+            .allow_headers(Any)
+    }
 }
 
 /// HTML 页面禁止浏览器缓存（避免旧版/404 页面被长期缓存导致"页面不显示"）
