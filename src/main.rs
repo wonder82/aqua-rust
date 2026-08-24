@@ -191,11 +191,11 @@ async fn run() {
 
     // ===== 平台 Router :8000 =====
     let platform_router = build_platform_router(state.clone());
-    let platform_addr = format!("127.0.0.1:{}", cfg.server.platform_port);
+    let platform_addr = format!("0.0.0.0:{}", cfg.server.platform_port);
 
     // ===== 网关 Router :8001 =====
     let gateway_router = build_gateway_router(state.clone());
-    let gateway_addr = format!("127.0.0.1:{}", cfg.server.gateway_port);
+    let gateway_addr = format!("0.0.0.0:{}", cfg.server.gateway_port);
 
     // ===== 启动双服务（SO_REUSEPORT：热更滚动零中断，新实例先接管、旧实例再退出）=====
     let (shutdown_tx, _) = tokio::sync::broadcast::channel::<()>(8);
