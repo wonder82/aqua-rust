@@ -414,12 +414,10 @@
     const links = [
       { href: '/', label: '首页', key: 'home' },
       { href: '/models', label: '模型', key: 'models' },
-      { href: '/qq-group', label: 'QQ群', key: 'qq-group' },
-      { href: '/sponsor', label: '赞助', key: 'sponsor', warn: true },
       { href: '/docs', label: 'API文档', key: 'docs' },
     ];
     let html = '<nav class="navbar"><div class="navbar-inner">';
-    html += '<div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">AQUA</span><span class="brand-tag">公益AI</span></a></div>';
+    html += '<div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">AQUA</span><span class="brand-tag">AI</span></a></div>';
     html += '<div class="navbar-links">';
     links.forEach(function (l) {
       const cls = active === l.key ? ' style="color:var(--text-primary)"' : '';
@@ -443,24 +441,18 @@
 
   function renderFooter() {
     return '<footer class="footer">' +
-      '<div class="footer-brand"><span>AQUA</span> 公益AI · 免费 AI 模型平台</div>' +
+      '<div class="footer-brand"><span>AQUA</span> AI · 免费 AI 模型平台</div>' +
       '<div class="footer-links">' +
         '<a href="/">首页</a>' +
         '<a href="/models">模型列表</a>' +
-        '<a href="/qq-group">QQ交流群</a>' +
-        '<a href="/sponsor">赞助支持</a>' +
         '<a href="/docs">API文档</a>' +
         '<a href="/console">控制台</a>' +
-      '</div>' +
-      '<div class="footer-qq" style="margin-top:10px;font-size:13px;color:var(--text-muted)">' +
-        '<a href="https://qm.qq.com/q/XJU6d5cScK" target="_blank" rel="noopener" style="color:var(--accent-primary);text-decoration:none">' +
-          '官方QQ交流群：1103667832</a>（1000人群）' +
       '</div>' +
       '<div class="footer-friends" style="margin-top:8px;font-size:12px;color:var(--text-muted)">' +
         '<span style="opacity:.7">友情链接：</span>' +
         '<a href="https://cloudagnetnew.nsdmc.top/" target="_blank" rel="noopener" style="color:var(--text-secondary);text-decoration:none">CloudAgnet</a>' +
       '</div>' +
-      '<div class="footer-copy">© 2026 AQUA 公益AI · 让 AI 回归公益 · 本站为社区公益项目，非商业运营</div>' +
+      '<div class="footer-copy">© 2026 AQUA AI · 让 AI 回归公益 · 本站为社区公益项目，非商业运营</div>' +
     '</footer>';
   }
 
@@ -534,15 +526,8 @@
       html += '<a href="' + it.href + '" class="' + cls + '">' + labelHtml + '</a>';
     });
     html += '</nav>';
-    html += '<div style="padding:8px 12px;border-top:1px solid var(--border-color);margin-top:auto">';
-    html += '<a href="https://idc.61nb.cn/aff/PRISUTPY" target="_blank" rel="nofollow" style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;text-decoration:none;color:var(--text-secondary);font-size:11px;margin-bottom:4px;background:var(--bg-card);border:1px solid var(--border-color);transition:border-color .2s" onmouseover="this.style.borderColor=\'var(--accent-primary)\'" onmouseout="this.style.borderColor=\'var(--border-color)\'">';
-    html += '<img src="/static/images/sponsors/61nb.png" style="width:20px;height:20px;border-radius:4px" alt="安逸云"><span style="font-weight:600;font-size:11px">安逸云</span><span style="color:var(--text-muted);font-size:10px">云服务器</span>';
-    html += '</a>';
-    html += '<a href="https://www.tokenlinks.cn/sign-up?aff=o4JN" target="_blank" rel="nofollow" style="display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:6px;text-decoration:none;color:var(--text-secondary);font-size:11px;margin-bottom:4px;background:var(--bg-card);border:1px solid var(--border-color);transition:border-color .2s" onmouseover="this.style.borderColor=\'var(--accent-primary)\'" onmouseout="this.style.borderColor=\'var(--border-color)\'">';
-    html += '<img src="/static/images/sponsors/tokenlinks.svg" style="width:20px;height:20px;border-radius:4px" alt="TokenLinks"><span style="font-weight:600;font-size:11px">TokenLinks</span><span style="color:var(--text-muted);font-size:10px">主流高性能模型，更快接入，更低成本。</span>';
-    html += '</a></div>';
     html += '<div class="sidebar-footer">';
-    html += '<a href="/sponsor" class="nav-item" style="color:var(--accent-warning)">赞助支持</a>';
+
     html += '<button class="nav-item" onclick="logout()">退出登录</button>';
     html += '</div>';
     // 注入到页面侧边栏容器
