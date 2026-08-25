@@ -1,6 +1,5 @@
-//! 网关管理后台（/gw/admin/*）
-//! 与 Go 版 internal/gateway/handler/admin*.go 对齐
-//! 认证：POST /gw/admin/login（bcrypt 同一密码）→ HMAC token + CSRF
+//! 缃戝叧绠＄悊鍚庡彴锛?gw/admin/*锛?//! 涓?Go 鐗?internal/gateway/handler/admin*.go 瀵归綈
+//! 璁よ瘉锛歅OST /gw/admin/login锛坆crypt 鍚屼竴瀵嗙爜锛夆啋 HMAC token + CSRF
 
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -26,30 +25,29 @@ const VERSION: &str = "11.0.0-go";
 const ALGORITHMS: &str = "7-core-lite";
 const ADMIN_TTL: i64 = 8 * 3600;
 
-// ===================== 统一响应 =====================
+// ===================== 缁熶竴鍝嶅簲 =====================
 
-/// 统一 JSON 成功响应
+/// 缁熶竴 JSON 鎴愬姛鍝嶅簲
 pub fn ok_json(v: Value) -> Response {
     (StatusCode::OK, Json(v)).into_response()
 }
 
-/// OpenAI 风格错误响应：{"error":{"message","type","code","param":null}}
+/// OpenAI 椋庢牸閿欒鍝嶅簲锛歿"error":{"message","type","code","param":null}}
 pub fn err_json(status: StatusCode, err_type: &str, msg: &str) -> Response {
     (status, Json(json!({
         "error": {"message": msg, "type": err_type, "code": status.as_u16(), "param": null}
     }))).into_response()
 }
 
-// ===================== 内存状态 =====================
+// ===================== 鍐呭瓨鐘舵€?=====================
 
-/// 维护模式（DB admin_settings 持久化）
+/// 缁存姢妯″紡锛圖B admin_settings 鎸佷箙鍖栵級
 static MAINTENANCE_MODE: AtomicBool = AtomicBool::new(false);
-/// CSRF token 缓存：admin_token -> csrf_token
+/// CSRF token 缂撳瓨锛歛dmin_token -> csrf_token
 static CSRF_TOKENS: LazyLock<Mutex<HashMap<String, String>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
-/// 登录限速（5 次/分钟/IP）
-static LOGIN_RATE: LazyLock<Mutex<HashMap<String, Vec<i64>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+/// 鐧诲綍闄愰€燂紙5 娆?鍒嗛挓/IP锛?static LOGIN_RATE: LazyLock<Mutex<HashMap<String, Vec<i64>>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
-/// 启动时从 DB 恢复维护模式
+/// 鍚姩鏃朵粠 DB 鎭㈠缁存姢妯″紡
 pub async fn init_from_db(state: &SharedState) {
     let val: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key = 'maintenance_mode'")
         .fetch_optional(&state.pool)
@@ -65,8 +63,7 @@ pub fn set_maintenance(enabled: bool) {
     MAINTENANCE_MODE.store(enabled, Ordering::Relaxed);
 }
 
-/// 全局调度状态（Rust 版内存状态等价物，部分字段取自 DB）
-pub async fn global_status_json(state: &SharedState) -> Value {
+/// 鍏ㄥ眬璋冨害鐘舵€侊紙Rust 鐗堝唴瀛樼姸鎬佺瓑浠风墿锛岄儴鍒嗗瓧娈靛彇鑷?DB锛?pub async fn global_status_json(state: &SharedState) -> Value {
     let healthy: i64 = sqlx::query_scalar("SELECT count(*) FROM upstream_keys WHERE status = 'active'")
         .fetch_one(&state.pool)
         .await
@@ -87,14 +84,14 @@ pub async fn global_status_json(state: &SharedState) -> Value {
     })
 }
 
-/// ip_monitor 内存统计
+/// ip_monitor 鍐呭瓨缁熻
 pub async fn ip_stats_json(state: &SharedState) -> Value {
     let total: i64 = sqlx::query_scalar("SELECT count(*) FROM ip_monitor").fetch_one(&state.pool).await.unwrap_or(0);
     let blocked: i64 = sqlx::query_scalar("SELECT count(*) FROM ip_monitor WHERE blocked = true").fetch_one(&state.pool).await.unwrap_or(0);
     json!({"total_ips": total, "blocked_count": blocked})
 }
 
-/// anomaly guard 内存统计（降级：基于 client_api_keys revoked 数）
+/// anomaly guard 鍐呭瓨缁熻锛堥檷绾э細鍩轰簬 client_api_keys revoked 鏁帮級
 pub async fn anomaly_stats_json(state: &SharedState) -> Value {
     let banned: i64 = sqlx::query_scalar("SELECT count(*) FROM client_api_keys WHERE status = 'revoked'").fetch_one(&state.pool).await.unwrap_or(0);
     let tracked: i64 = sqlx::query_scalar("SELECT count(*) FROM clients").fetch_one(&state.pool).await.unwrap_or(0);
@@ -113,9 +110,9 @@ fn now_ts() -> i64 {
     SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0)
 }
 
-// ===================== 认证 =====================
+// ===================== 璁よ瘉 =====================
 
-/// 提取 Bearer token / x-api-key
+/// 鎻愬彇 Bearer token / x-api-key
 fn extract_api_key(headers: &HeaderMap) -> String {
     if let Some(auth) = headers.get("Authorization").and_then(|v| v.to_str().ok()) {
         if let Some(t) = auth.strip_prefix("Bearer ") {
@@ -128,8 +125,7 @@ fn extract_api_key(headers: &HeaderMap) -> String {
     String::new()
 }
 
-/// 客户端 IP（X-Real-IP → XFF 最右非内网 → CF → RemoteAddr）
-fn client_ip(headers: &HeaderMap, fallback: &str) -> String {
+/// 瀹㈡埛绔?IP锛圶-Real-IP 鈫?XFF 鏈€鍙抽潪鍐呯綉 鈫?CF 鈫?RemoteAddr锛?fn client_ip(headers: &HeaderMap, fallback: &str) -> String {
     if let Some(v) = headers.get("X-Real-IP").and_then(|v| v.to_str().ok()) {
         if !v.trim().is_empty() {
             return v.trim().to_string();
@@ -168,7 +164,7 @@ fn is_private_ip(ip: &str) -> bool {
     }
 }
 
-/// 管理员认证（读操作）：IP 白名单 + HMAC token
+/// 绠＄悊鍛樿璇侊紙璇绘搷浣滐級锛欼P 鐧藉悕鍗?+ HMAC token
 pub async fn require_admin(state: &SharedState, headers: &HeaderMap) -> Result<(), Response> {
     let ip = client_ip(headers, "");
     if !is_ip_allowed(&ip, &state.cfg.admin.allowed_ips) {
@@ -184,7 +180,7 @@ pub async fn require_admin(state: &SharedState, headers: &HeaderMap) -> Result<(
     Ok(())
 }
 
-/// 管理员认证（写操作 POST/PUT/DELETE）：IP 白名单 + token + CSRF
+/// 绠＄悊鍛樿璇侊紙鍐欐搷浣?POST/PUT/DELETE锛夛細IP 鐧藉悕鍗?+ token + CSRF
 pub async fn require_admin_csrf(state: &SharedState, headers: &HeaderMap) -> Result<(), Response> {
     require_admin(state, headers).await?;
     let token = extract_api_key(headers);
@@ -202,13 +198,12 @@ pub async fn login(State(state): State<SharedState>, headers: HeaderMap, body: B
     if !is_ip_allowed(&ip, &state.cfg.admin.allowed_ips) {
         return err_json(StatusCode::FORBIDDEN, "forbidden", "Access denied");
     }
-    // 限速
-    let now = now_ts();
+    // 闄愰€?    let now = now_ts();
     let mut limiter = LOGIN_RATE.lock().unwrap();
     let entries = limiter.entry(ip.clone()).or_default();
     entries.retain(|&t| t >= now - 60);
     if entries.len() >= 5 {
-        return err_json(StatusCode::TOO_MANY_REQUESTS, "rate_limit_exceeded", "登录尝试过于频繁，请稍后重试");
+        return err_json(StatusCode::TOO_MANY_REQUESTS, "rate_limit_exceeded", "鐧诲綍灏濊瘯杩囦簬棰戠箒锛岃绋嶅悗閲嶈瘯");
     }
     let req: Value = match serde_json::from_slice(&body) {
         Ok(v) => v,
@@ -222,7 +217,7 @@ pub async fn login(State(state): State<SharedState>, headers: HeaderMap, body: B
         entries.push(now);
         return err_json(StatusCode::UNAUTHORIZED, "invalid_request_error", "Invalid password");
     }
-    entries.clear(); // 登录成功清空计数
+    entries.clear(); // 鐧诲綍鎴愬姛娓呯┖璁℃暟
     let token = match crate::security::generate_admin_token(&state.cfg.admin.session_secret, "admin") {
         Ok(t) => t,
         Err(_) => return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "Failed to generate token"),
@@ -272,9 +267,9 @@ pub async fn dashboard(State(state): State<SharedState>, headers: HeaderMap) -> 
     }))
 }
 
-/// ===================== 上游密钥 =====================
+/// ===================== 涓婃父瀵嗛挜 =====================
 
-/// GET /gw/admin/upstreams - 列表
+/// GET /gw/admin/upstreams - 鍒楄〃
 pub async fn upstreams_list(State(state): State<SharedState>, headers: HeaderMap) -> Response {
     if let Err(r) = require_admin(&state, &headers).await {
         return r;
@@ -282,7 +277,7 @@ pub async fn upstreams_list(State(state): State<SharedState>, headers: HeaderMap
     list_upstreams(&state).await
 }
 
-/// POST /gw/admin/upstreams - 创建
+/// POST /gw/admin/upstreams - 鍒涘缓
 pub async fn upstreams_create(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
     if let Err(r) = require_admin_csrf(&state, &headers).await {
         return r;
@@ -291,21 +286,20 @@ pub async fn upstreams_create(State(state): State<SharedState>, headers: HeaderM
 }
 
 async fn list_upstreams(state: &SharedState) -> Response {
-    let rows = sqlx::query_as::<_, (String, String, String, String, i32, i32, i32, String, i64, i64)>(
-        "SELECT id, name, provider, key_prefix, weight, rpm_limit, switch_threshold, status, \
-                extract(epoch from created_at)::bigint, extract(epoch from updated_at)::bigint \
+    let rows = sqlx::query_as::<_, (String, String, String, String, String, i32, i32, i32, String, String, i64, i64)>(
+        "SELECT id, name, provider, key_prefix, base_url, weight, rpm_limit, switch_threshold, status, \
+                model_scope, extract(epoch from created_at)::bigint, extract(epoch from updated_at)::bigint \
          FROM upstream_keys ORDER BY id ASC LIMIT 500",
     )
     .fetch_all(&state.pool)
     .await
     .unwrap_or_default();
-    // 调度器实时桶状态（健康度/冷却/计数）
-    let buckets: std::collections::HashMap<String, crate::gateway::scheduler::BucketState> =
+    // 璋冨害鍣ㄥ疄鏃舵《鐘舵€侊紙鍋ュ悍搴?鍐峰嵈/璁℃暟锛?    let buckets: std::collections::HashMap<String, crate::gateway::scheduler::BucketState> =
         state.scheduler.bucket_stats().into_iter().collect();
     let now = std::time::Instant::now();
     let data: Vec<Value> = rows
         .into_iter()
-        .map(|(id, name, provider, prefix, weight, rpm, threshold, status, created, updated)| {
+        .map(|(id, name, provider, prefix, base_url, weight, rpm, threshold, status, model_scope, created, updated)| {
             let b = buckets.get(&id);
             let (total_req, total_success, total_429, total_5xx) = b.map(|x| (x.total_requests, x.total_success, x.total_429, x.total_5xx)).unwrap_or((0, 0, 0, 0));
             let health = b.map(|x| x.health_score).unwrap_or(100.0);
@@ -316,6 +310,7 @@ async fn list_upstreams(state: &SharedState) -> Response {
             }).unwrap_or((0, false));
             json!({
                 "id": id, "name": name, "provider": provider, "key_prefix": prefix,
+                "base_url": base_url, "model_scope": model_scope,
                 "weight": weight, "rpm_limit": rpm, "switch_threshold": threshold,
                 "status": status,
                 "created_at": ts_rfc3339(created), "updated_at": ts_rfc3339(updated),
@@ -342,19 +337,19 @@ async fn create_upstream(state: &SharedState, body: &Bytes) -> Response {
     }
     let provider = req.get("provider").and_then(|p| p.as_str()).filter(|p| !p.is_empty()).unwrap_or("nvidia").to_string();
     let model_scope = req.get("model_scope").and_then(|m| m.as_str()).unwrap_or("").to_string();
+    let base_url = req.get("base_url").and_then(|u| u.as_str()).unwrap_or("").to_string();
     let weight = req.get("weight").and_then(|w| w.as_i64()).unwrap_or(1).max(1) as i32;
     let rpm_limit = req.get("rpm_limit").and_then(|w| w.as_i64()).unwrap_or(40).max(1) as i32;
     let switch_threshold = req.get("switch_threshold").and_then(|w| w.as_i64()).unwrap_or(38).max(1) as i32;
-    // AES-GCM 加密（upstream_master_key）
-    let ciphertext = match aesgcm_encrypt(api_key.as_bytes(), &state.upstream_master_key) {
+    // AES-GCM 鍔犲瘑锛坲pstream_master_key锛?    let ciphertext = match aesgcm_encrypt(api_key.as_bytes(), &state.upstream_master_key) {
         Ok(c) => c,
         Err(_) => return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "Failed to encrypt key"),
     };
     let id = generate_id();
     let prefix = if api_key.len() > 12 { api_key[..12].to_string() } else { api_key.clone() };
     let insert = sqlx::query(
-        "INSERT INTO upstream_keys(id, name, provider, model_scope, api_key_ciphertext, key_prefix, weight, rpm_limit, switch_threshold, status) \
-         VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active')",
+        "INSERT INTO upstream_keys(id, name, provider, model_scope, api_key_ciphertext, key_prefix, weight, rpm_limit, switch_threshold, base_url, status) \
+         VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active')",
     )
     .bind(&id)
     .bind(&name)
@@ -365,10 +360,11 @@ async fn create_upstream(state: &SharedState, body: &Bytes) -> Response {
     .bind(weight)
     .bind(rpm_limit)
     .bind(switch_threshold)
+    .bind(&base_url)
     .execute(&state.pool)
     .await;
     if insert.is_err() {
-        return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "操作失败");
+        return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "鎿嶄綔澶辫触");
     }
     (StatusCode::CREATED, Json(json!({"id": id, "key_prefix": prefix, "status": "active"}))).into_response()
 }
@@ -378,8 +374,8 @@ pub async fn get_upstream(State(state): State<SharedState>, headers: HeaderMap, 
     if let Err(r) = require_admin(&state, &headers).await {
         return r;
     }
-    let row = sqlx::query_as::<_, (String, String, String, i32, i32, i32, String, i64, i64)>(
-        "SELECT name, provider, key_prefix, weight, rpm_limit, switch_threshold, status, \
+    let row = sqlx::query_as::<_, (String, String, String, String, i32, i32, i32, String, i64, i64)>(
+        "SELECT name, provider, key_prefix, base_url, weight, rpm_limit, switch_threshold, status, \
                 extract(epoch from created_at)::bigint, extract(epoch from updated_at)::bigint \
          FROM upstream_keys WHERE id = $1",
     )
@@ -388,11 +384,12 @@ pub async fn get_upstream(State(state): State<SharedState>, headers: HeaderMap, 
     .await
     .ok()
     .flatten();
-    let Some((name, provider, prefix, weight, rpm, threshold, status, created, updated)) = row else {
+    let Some((name, provider, prefix, base_url, weight, rpm, threshold, status, created, updated)) = row else {
         return err_json(StatusCode::NOT_FOUND, "not_found", "Upstream key not found");
     };
     ok_json(json!({
         "id": id, "name": name, "provider": provider, "key_prefix": prefix,
+        "base_url": base_url,
         "weight": weight, "rpm_limit": rpm, "switch_threshold": threshold,
         "status": status, "created_at": ts_rfc3339(created), "updated_at": ts_rfc3339(updated),
     }))
@@ -411,6 +408,7 @@ pub async fn update_upstream(State(state): State<SharedState>, headers: HeaderMa
     let mut binds: Vec<Value> = Vec::new();
     for (field, col) in [
         ("name", "name"),
+        ("base_url", "base_url"),
         ("weight", "weight"),
         ("rpm_limit", "rpm_limit"),
         ("switch_threshold", "switch_threshold"),
@@ -471,7 +469,7 @@ pub async fn reveal_upstream(State(state): State<SharedState>, headers: HeaderMa
     };
     let plain = match decrypt_upstream_key(&ciphertext, &state.upstream_master_key) {
         Ok(p) => p,
-        Err(_) => return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "操作失败"),
+        Err(_) => return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "鎿嶄綔澶辫触"),
     };
     let mut resp = ok_json(json!({
         "id": id, "name": name, "provider": provider, "prefix": prefix,
@@ -481,7 +479,7 @@ pub async fn reveal_upstream(State(state): State<SharedState>, headers: HeaderMa
     resp
 }
 
-/// 解密上游密钥：优先 AES-GCM，回退 Fernet
+/// 瑙ｅ瘑涓婃父瀵嗛挜锛氫紭鍏?AES-GCM锛屽洖閫€ Fernet
 fn decrypt_upstream_key(ciphertext: &str, master_key: &[u8]) -> Result<String, String> {
     if let Ok(p) = decrypt_universal(ciphertext, master_key, DecryptKind::Upstream) {
         return Ok(String::from_utf8_lossy(&p).to_string());
@@ -506,9 +504,9 @@ pub async fn unfreeze_upstream(State(state): State<SharedState>, headers: Header
     }
 }
 
-/// ===================== 客户端 =====================
+/// ===================== 瀹㈡埛绔?=====================
 
-/// GET /gw/admin/clients - 用户列表
+/// GET /gw/admin/clients - 鐢ㄦ埛鍒楄〃
 pub async fn clients(State(state): State<SharedState>, headers: HeaderMap, Query(q): Query<PageQuery>) -> Response {
     if let Err(r) = require_admin(&state, &headers).await {
         return r;
@@ -592,7 +590,7 @@ pub async fn get_client(State(state): State<SharedState>, headers: HeaderMap, Pa
     }))
 }
 
-/// PUT /gw/admin/clients/{id} - 更新用户
+/// PUT /gw/admin/clients/{id} - 鏇存柊鐢ㄦ埛
 pub async fn update_client(State(state): State<SharedState>, headers: HeaderMap, Path(id): Path<String>, body: Bytes) -> Response {
     if let Err(r) = require_admin_csrf(&state, &headers).await {
         return r;
@@ -702,7 +700,7 @@ pub async fn create_client_key(State(state): State<SharedState>, headers: Header
     .await;
     (StatusCode::CREATED, Json(json!({
         "id": key_id, "client_id": id, "key_prefix": prefix, "api_key": api_key,
-        "status": "active", "message": "请妥善保存此密钥，仅在创建时显示一次",
+        "status": "active", "message": "璇峰Ε鍠勪繚瀛樻瀵嗛挜锛屼粎鍦ㄥ垱寤烘椂鏄剧ず涓€娆?,
     }))).into_response()
 }
 
@@ -742,7 +740,7 @@ pub async fn reveal_client_key(State(state): State<SharedState>, headers: Header
     };
     let plain = match decrypt_universal(&ciphertext, &state.upstream_master_key, DecryptKind::Client) {
         Ok(p) => String::from_utf8_lossy(&p).to_string(),
-        Err(_) => return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "操作失败"),
+        Err(_) => return err_json(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "鎿嶄綔澶辫触"),
     };
     let mut resp = ok_json(json!({
         "id": kid, "client_id": id, "key_prefix": prefix, "status": status,
@@ -752,7 +750,7 @@ pub async fn reveal_client_key(State(state): State<SharedState>, headers: Header
     resp
 }
 
-/// ===================== 工具 =====================
+/// ===================== 宸ュ叿 =====================
 
 pub fn ts_rfc3339(epoch: i64) -> String {
     let dt = chrono::DateTime::<chrono::Utc>::from_timestamp(epoch, 0).unwrap_or_else(|| chrono::DateTime::from_timestamp(0, 0).unwrap());
