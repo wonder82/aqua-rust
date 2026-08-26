@@ -1,5 +1,5 @@
-//! 璁よ瘉璺敱锛歴end-code / register / login / logout / reset-password / verify
-//! 涓?Go 鐗?internal/platform/handler/auth.go 瀵归綈
+//! 认证路由：send-code / register / login / logout / reset-password / verify
+//! 与 Go 版 internal/platform/handler/auth.go 对齐
 
 use axum::body::Bytes;
 use axum::extract::State;
@@ -13,7 +13,7 @@ use crate::platform::guard as guard;
 use crate::platform::service::EmailService;
 use crate::security::{generate_code, generate_id, hash_password, verify_password};
 
-/// 璇锋眰浣撹В鏋愯緟鍔╋紙杩斿洖 Value 鎴栭敊璇搷搴旓級
+/// 请求体解析辅助（返回 Value 或错误响应）
 fn parse_body(body: &Bytes) -> Result<Value, Response> {
     serde_json::from_slice(body).map_err(|_| write_err(StatusCode::BAD_REQUEST, "invalid_request", "Invalid JSON"))
 }
@@ -26,9 +26,10 @@ fn email_svc(state: &SharedState) -> EmailService {
 
 /// POST /api/auth/send-code
 pub async fn send_code(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
-    // IP 缁村害闄愰锛? 娆?鍒嗛挓锛岄槻閭欢杞扮偢 / 鏋氫妇锛?    let ip = client_ip(&headers, "");
+    // IP 维度限频（3 次/分钟，防邮件轰炸 / 枚举）
+    let ip = client_ip(&headers, "");
     if !SEND_CODE_RATE.allow(&ip, 3, 60) {
-        return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "鍙戦€佽繃浜庨绻侊紝璇风◢鍚庡啀璇?);
+        return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "发送过于频繁，请稍后再试");
     }
     let req = match parse_body(&body) {
         Ok(v) => v,
@@ -42,11 +43,12 @@ pub async fn send_code(State(state): State<SharedState>, headers: HeaderMap, bod
     if email.is_empty() {
         return write_err(StatusCode::BAD_REQUEST, "invalid_request", "Email required");
     }
-    // 閭鍩熷悕鐧藉悕鍗?    let (allowed, reason) = guard::is_allowed_domain(&email);
+    // 邮箱域名白名单
+    let (allowed, reason) = guard::is_allowed_domain(&email);
     if !allowed {
         return write_err(StatusCode::BAD_REQUEST, "email_not_allowed", &reason);
     }
-    // 60s 闄愰
+    // 60s 限频
     let last_sent: Option<i64> = sqlx::query_scalar(
         "SELECT extract(epoch from created_at)::bigint FROM email_verification \
          WHERE email=$1 ORDER BY created_at DESC LIMIT 1",
@@ -59,11 +61,11 @@ pub async fn send_code(State(state): State<SharedState>, headers: HeaderMap, bod
     let now = chrono::Utc::now().timestamp();
     if let Some(ts) = last_sent {
         if now - ts < 60 {
-            return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "楠岃瘉鐮佸彂閫佽繃浜庨绻侊紝璇?0绉掑悗鍐嶈瘯");
+            return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "验证码发送过于频繁，请60秒后再试");
         }
     }
     let purpose = req.get("purpose").and_then(|p| p.as_str()).filter(|p| !p.is_empty()).unwrap_or("register").to_string();
-    // 娉ㄥ唽鏃舵鏌ラ偖绠辨槸鍚﹀凡娉ㄥ唽锛堟椿璺冪敤鎴凤級
+    // 注册时检查邮箱是否已注册（活跃用户）
     if purpose == "register" {
         let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE email=$1 AND status='active')")
             .bind(&email)
@@ -74,7 +76,8 @@ pub async fn send_code(State(state): State<SharedState>, headers: HeaderMap, bod
             return write_err(StatusCode::CONFLICT, "email_exists", "Email already registered");
         }
     }
-    // 鏇存崲閭锛氶渶鐧诲綍锛屼笖鏂伴偖绠辨湭琚崰鐢?    if purpose == "change_email" {
+    // 更换邮箱：需登录，且新邮箱未被占用
+    if purpose == "change_email" {
         let _sess = match require_session(&state, &headers).await {
             Ok(s) => s,
             Err(r) => return r,
@@ -85,10 +88,11 @@ pub async fn send_code(State(state): State<SharedState>, headers: HeaderMap, bod
             .await
             .unwrap_or(false);
         if exists {
-            return write_err(StatusCode::CONFLICT, "email_taken", "璇ラ偖绠卞凡琚娇鐢?);
+            return write_err(StatusCode::CONFLICT, "email_taken", "该邮箱已被使用");
         }
     }
-    // 鐢熸垚 6 浣嶉獙璇佺爜骞跺叆搴?    let code = generate_code();
+    // 生成 6 位验证码并入库
+    let code = generate_code();
     let id = generate_id();
     if let Err(e) = sqlx::query(
         "INSERT INTO email_verification(id, email, code, purpose, expires_at, used) \
@@ -104,7 +108,8 @@ pub async fn send_code(State(state): State<SharedState>, headers: HeaderMap, bod
         tracing::warn!("store verify code failed: {e}");
         return write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "Failed to store code");
     }
-    // 鍙戦€侀偖浠?    if let Err(e) = email_svc(&state).send_verification_code(&email, &code, &purpose).await {
+    // 发送邮件
+    if let Err(e) = email_svc(&state).send_verification_code(&email, &code, &purpose).await {
         tracing::error!("send verification email failed: {e}");
         return write_err(StatusCode::INTERNAL_SERVER_ERROR, "email_error", "Failed to send email");
     }
@@ -113,20 +118,22 @@ pub async fn send_code(State(state): State<SharedState>, headers: HeaderMap, bod
 
 /// POST /api/auth/register
 pub async fn register(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
-    // 鑷敞鍐屽凡鍏抽棴锛氫粎绠＄悊鍛樺彲鍦ㄥ悗鍙板垱寤虹敤鎴?    write_err(StatusCode::FORBIDDEN, "registration_disabled", "娉ㄥ唽宸插叧闂紝璇疯仈绯荤鐞嗗憳寮€閫氳处鍙?)
+    // 自注册已关闭：仅管理员可在后台创建用户
+    write_err(StatusCode::FORBIDDEN, "registration_disabled", "注册已关闭，请联系管理员开通账号")
 }
 
 /// POST /api/auth/login
 pub async fn login(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
     let ip = client_ip(&headers, "");
     if !LOGIN_RATE.allow(&ip, 5, 60) {
-        return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "鐧诲綍灏濊瘯杩囦簬棰戠箒锛岃绋嶅悗鍐嶈瘯");
+        return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "登录尝试过于频繁，请稍后再试");
     }
-    // 杩炵画澶辫触閿佸畾妫€鏌ワ紙闃叉毚鍔涚牬瑙?/ 鎾炲簱锛?    if let Some(remain) = login_locked(&ip) {
+    // 连续失败锁定检查（防暴力破解 / 撞库）
+    if let Some(remain) = login_locked(&ip) {
         return write_err(
             StatusCode::TOO_MANY_REQUESTS,
             "rate_limited",
-            &format!("鐧诲綍澶辫触娆℃暟杩囧锛岃处鎴峰凡涓存椂閿佸畾锛岃 {remain} 绉掑悗鍐嶈瘯"),
+            &format!("登录失败次数过多，账户已临时锁定，请 {remain} 秒后再试"),
         );
     }
     let req = match parse_body(&body) {
@@ -137,15 +144,17 @@ pub async fn login(State(state): State<SharedState>, headers: HeaderMap, body: B
     let username = req.get("username").and_then(|u| u.as_str()).map(|s| s.trim().to_string()).unwrap_or_default();
     let password = req.get("password").and_then(|p| p.as_str()).unwrap_or("").to_string();
     if email.is_empty() && username.is_empty() {
-        return write_err(StatusCode::BAD_REQUEST, "invalid_request", "璇疯緭鍏ョ敤鎴峰悕鎴栭偖绠?);
+        return write_err(StatusCode::BAD_REQUEST, "invalid_request", "请输入用户名或邮箱");
     }
     if password.is_empty() {
-        return write_err(StatusCode::BAD_REQUEST, "invalid_request", "璇疯緭鍏ュ瘑鐮?);
+        return write_err(StatusCode::BAD_REQUEST, "invalid_request", "请输入密码");
     }
     let login_identifier = if !email.is_empty() { email.clone() } else { username.clone() };
     let is_email = login_identifier.contains('@');
-    // 鏌ヨ鐢ㄦ埛锛氶偖绠辩簿纭尮閰嶏紝鐢ㄦ埛鍚嶅ぇ灏忓啓涓嶆晱鎰燂紙鍚?@ 鏃跺厛閭鍚庣敤鎴峰悕鍥為€€锛?    let row: Option<(i64, String, String, String, String, String)> = if is_email {
-        // 鍏煎涓嶅悓瀹㈡埛绔細浼樺厛鐢?email 瀛楁锛岀己澶辨椂鍥為€€鍒?login_identifier锛堝墠绔彲鑳芥妸閭鏀惧湪 username 瀛楁锛?        let email_key = if !email.is_empty() { email.clone() } else { login_identifier.to_lowercase() };
+    // 查询用户：邮箱精确匹配，用户名大小写不敏感（含 @ 时先邮箱后用户名回退）
+    let row: Option<(i64, String, String, String, String, String)> = if is_email {
+        // 兼容不同客户端：优先用 email 字段，缺失时回退到 login_identifier（前端可能把邮箱放在 username 字段）
+        let email_key = if !email.is_empty() { email.clone() } else { login_identifier.to_lowercase() };
         let by_email: Option<(i64, String, String, String, String, String)> = sqlx::query_as(
             "SELECT id, username, email, password_hash, status, display_name FROM users WHERE email=$1",
         )
@@ -174,19 +183,20 @@ pub async fn login(State(state): State<SharedState>, headers: HeaderMap, body: B
             .flatten()
     };
     let Some((user_id, username, email, password_hash, status, display_name)) = row else {
-        // 鐢ㄦ埛涓嶅瓨鍦ㄥ悓鏍风疮璁″け璐ワ紝閬垮厤閫氳繃鍝嶅簲宸紓鏋氫妇璐﹀彿
+        // 用户不存在同样累计失败，避免通过响应差异枚举账号
         record_login_failure(&ip);
-        return write_err(StatusCode::UNAUTHORIZED, "auth_failed", "鐢ㄦ埛鍚嶆垨瀵嗙爜閿欒");
+        return write_err(StatusCode::UNAUTHORIZED, "auth_failed", "用户名或密码错误");
     };
     if status != "active" {
-        return write_err(StatusCode::FORBIDDEN, "banned", "璐︽埛宸茶灏佺");
+        return write_err(StatusCode::FORBIDDEN, "banned", "账户已被封禁");
     }
     if !verify_password(&password, &password_hash).unwrap_or(false) {
         record_login_failure(&ip);
-        return write_err(StatusCode::UNAUTHORIZED, "auth_failed", "鐢ㄦ埛鍚嶆垨瀵嗙爜閿欒");
+        return write_err(StatusCode::UNAUTHORIZED, "auth_failed", "用户名或密码错误");
     }
-    // 鐧诲綍鎴愬姛锛氭竻闄ゅけ璐ヨ鏁?    reset_login_failures(&ip);
-    // 鍒涘缓浼氳瘽
+    // 登录成功：清除失败计数
+    reset_login_failures(&ip);
+    // 创建会话
     let ua = headers.get(axum::http::header::USER_AGENT).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
     let (sid, _csrf) = match state.session.create(user_id, &ip, &ua).await {
         Ok(v) => v,
@@ -230,7 +240,7 @@ pub async fn reset_password(State(state): State<SharedState>, body: Bytes) -> Re
     if !allowed {
         return write_err(StatusCode::BAD_REQUEST, "email_not_allowed", &reason);
     }
-    // 鏍￠獙楠岃瘉鐮侊紙reset_password 鐢ㄩ€旓級
+    // 校验验证码（reset_password 用途）
     let verify_id: Option<String> = sqlx::query_scalar(
         "SELECT id FROM email_verification \
          WHERE email=$1 AND code=$2 AND purpose='reset_password' AND used=false AND expires_at > now() \
@@ -249,7 +259,7 @@ pub async fn reset_password(State(state): State<SharedState>, body: Bytes) -> Re
         .bind(&verify_id)
         .execute(&state.pool)
         .await;
-    // 纭鐢ㄦ埛瀛樺湪
+    // 确认用户存在
     let user_id: Option<i64> = sqlx::query_scalar("SELECT id FROM users WHERE email=$1")
         .bind(&email)
         .fetch_optional(&state.pool)
@@ -259,7 +269,7 @@ pub async fn reset_password(State(state): State<SharedState>, body: Bytes) -> Re
     let Some(user_id) = user_id else {
         return write_err(StatusCode::NOT_FOUND, "not_found", "Email not registered");
     };
-    // 鍝堝笇鏂板瘑鐮佸苟鏇存柊
+    // 哈希新密码并更新
     let hash = match hash_password(&password) {
         Ok(h) => h,
         Err(e) => {
@@ -272,7 +282,8 @@ pub async fn reset_password(State(state): State<SharedState>, body: Bytes) -> Re
         .bind(user_id)
         .execute(&state.pool)
         .await;
-    // 娓呴櫎璇ョ敤鎴峰叏閮ㄤ細璇?    let _ = state.session.clear_user_sessions(user_id).await;
+    // 清除该用户全部会话
+    let _ = state.session.clear_user_sessions(user_id).await;
     write_ok(StatusCode::OK, json!({"reset": true}))
 }
 
