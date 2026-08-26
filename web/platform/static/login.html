@@ -3,35 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>鐧诲綍 - JHRY鍏泭</title>
+  <title>登录 - JHRY公益</title>
   <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
   <link rel="stylesheet" href="/static/css/icons.css?v=1.0">
 </head>
 <body>
   <div class="auth-page">
     <div class="auth-card">
-      <div class="auth-title">鐧诲綍 JHRY鍏泭</div>
-      <div class="auth-subtitle">鐧诲綍鍚庡嵆鍙娇鐢ㄦ墍鏈?AI 妯″瀷</div>
+      <div class="auth-title">登录 JHRY公益</div>
+      <div class="auth-subtitle">登录后即可使用所有 AI 模型</div>
 
       <form id="login-form" onsubmit="return doLogin(event)">
         <div class="input-group">
-          <label>鐢ㄦ埛鍚?/ 閭</label>
-          <input type="text" class="input" id="username" name="username" placeholder="杈撳叆鐢ㄦ埛鍚嶆垨閭" required autocomplete="username">
+          <label>用户名 / 邮箱</label>
+          <input type="text" class="input" id="username" name="username" placeholder="输入用户名或邮箱" required autocomplete="username">
         </div>
         <div class="input-group">
-          <label>瀵嗙爜</label>
-          <input type="password" class="input" id="password" name="password" placeholder="杈撳叆瀵嗙爜" required autocomplete="current-password">
+          <label>密码</label>
+          <input type="password" class="input" id="password" name="password" placeholder="输入密码" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">鐧诲綍</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">登录</button>
       </form>
 
       <div class="auth-links">
-        <a href="/register">璐﹀彿娉ㄥ唽</a>
-        <a href="/reset-password">蹇樿瀵嗙爜锛?/a>
+        <a href="/register">账号注册</a>
+        <a href="/reset-password">忘记密码？</a>
       </div>
 
       <div style="margin-top:24px;text-align:center">
-        <a href="/" class="text-sm text-muted">鈫?杩斿洖棣栭〉</a>
+        <a href="/" class="text-sm text-muted">← 返回首页</a>
       </div>
     </div>
   </div>
@@ -41,9 +41,10 @@
   <script src="/static/js/platform.js?v=24.0"></script>
   <script src="/static/js/fingerprint.js?v=1.0"></script>
   <script>
-    // 鍒濆鍖栬澶囨寚绾归噰闆?    AQUAFingerprint.init();
+    // 初始化设备指纹采集
+    AQUAFingerprint.init();
 
-    // 鏍￠獙 redirect 鍙傛暟锛岄槻姝㈠紑鏀鹃噸瀹氬悜锛氬繀椤讳互鍗曚釜 / 寮€澶翠笖闈?//
+    // 校验 redirect 参数，防止开放重定向：必须以单个 / 开头且非 //
     function getSafeRedirect() {
       var redirect = new URLSearchParams(location.search).get('redirect') || '/console';
       if (!redirect.startsWith('/') || redirect.startsWith('//')) {
@@ -52,43 +53,45 @@
       return redirect;
     }
 
-    // 宸茬櫥褰曞垯璺宠浆鎺у埗鍙帮紙浼樺厛浣跨敤 redirect 鍙傛暟锛?    API.get('/api/user/profile').then(function () {
+    // 已登录则跳转控制台（优先使用 redirect 参数）
+    API.get('/api/user/profile').then(function () {
       window.location.href = getSafeRedirect();
-    }).catch(function () { /* 鏈櫥褰曪紝鍋滅暀鍦ㄧ櫥褰曢〉 */ });
+    }).catch(function () { /* 未登录，停留在登录页 */ });
 
     function doLogin(e) {
       e.preventDefault();
       const btn = document.getElementById('login-btn');
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      if (!username || !password) { Toast.warn('璇峰～鍐欑敤鎴峰悕鍜屽瘑鐮?); return false; }
+      if (!username || !password) { Toast.warn('请填写用户名和密码'); return false; }
 
       btn.disabled = true;
-      btn.textContent = '鐧诲綍涓?..';
-      // 閭涓庣敤鎴峰悕鍖哄垎鎻愪氦锛氬惈 @ 璧?email 瀛楁锛屽惁鍒欒蛋 username 瀛楁
+      btn.textContent = '登录中...';
+      // 邮箱与用户名区分提交：含 @ 走 email 字段，否则走 username 字段
       var payload = username.indexOf('@') !== -1
         ? { email: username, password: password }
         : { username: username, password: password };
       API.post('/api/auth/login', payload).then(function (data) {
-        Toast.success('鐧诲綍鎴愬姛');
+        Toast.success('登录成功');
         var redirect = getSafeRedirect();
-        // 鍏堥獙璇?Cookie 鏄惁鐢熸晥锛屽啀璺宠浆
+        // 先验证 Cookie 是否生效，再跳转
         setTimeout(async function () {
           try {
             var resp = await fetch('/api/user/profile', { credentials: 'same-origin' });
             if (resp.ok) {
               window.location.href = redirect;
             } else {
-              // Cookie 鍙兘灏氭湭鐢熸晥锛屽欢杩熷悗閲嶈瘯涓€娆?              setTimeout(function () { window.location.href = redirect; }, 500);
+              // Cookie 可能尚未生效，延迟后重试一次
+              setTimeout(function () { window.location.href = redirect; }, 500);
             }
           } catch (e) {
             window.location.href = redirect;
           }
         }, 300);
       }).catch(function (err) {
-        Toast.error(err.message || '鐧诲綍澶辫触');
+        Toast.error(err.message || '登录失败');
         btn.disabled = false;
-        btn.textContent = '鐧诲綍';
+        btn.textContent = '登录';
       });
       return false;
     }
