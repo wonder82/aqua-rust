@@ -1,6 +1,5 @@
 
-//! AQUA Platform Rust — 单二进制双服务入口（平台 :8000 + 网关 :8001）
-//! 与 Go 版 cmd/server/main.go 对齐：共享配置/连接池/调度器，优雅关闭 30s
+//! AQUA Platform Rust 鈥?鍗曚簩杩涘埗鍙屾湇鍔″叆鍙ｏ紙骞冲彴 :8000 + 缃戝叧 :8001锛?//! 涓?Go 鐗?cmd/server/main.go 瀵归綈锛氬叡浜厤缃?杩炴帴姹?璋冨害鍣紝浼橀泤鍏抽棴 30s
 
 mod appstate;
 mod config;
@@ -24,13 +23,12 @@ use tracing::{info, warn};
 use appstate::AppState;
 use config::Config;
 
-/// 极致内存优化（K3）：全局分配器使用 mimalloc（碎片低、峰值 RSS 小）
+/// 鏋佽嚧鍐呭瓨浼樺寲锛圞3锛夛細鍏ㄥ眬鍒嗛厤鍣ㄤ娇鐢?mimalloc锛堢鐗囦綆銆佸嘲鍊?RSS 灏忥級
 #[global_allocator]
 static GLOBAL_ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 fn main() {
-    // tokio 运行时：4 worker（8 核机器收敛线程栈占用；并发仍充足）
-    let rt = match tokio::runtime::Builder::new_multi_thread()
+    // tokio 杩愯鏃讹細4 worker锛? 鏍告満鍣ㄦ敹鏁涚嚎绋嬫爤鍗犵敤锛涘苟鍙戜粛鍏呰冻锛?    let rt = match tokio::runtime::Builder::new_multi_thread()
         .worker_threads(4)
         .enable_all()
         .build()
@@ -45,7 +43,7 @@ fn main() {
 }
 
 async fn run() {
-    // ===== 加载配置 =====
+    // ===== 鍔犺浇閰嶇疆 =====
     let cfg = match Config::load() {
         Ok(c) => c,
         Err(e) => {
@@ -54,7 +52,7 @@ async fn run() {
         }
     };
 
-    // ===== 结构化日志（JSON）=====
+    // ===== 缁撴瀯鍖栨棩蹇楋紙JSON锛?====
     let subscriber = tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::try_from_default_env()
             .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")))
@@ -68,7 +66,7 @@ async fn run() {
         "starting AQUA Server (single binary, dual service)"
     );
 
-    // ===== 初始化数据库 =====
+    // ===== 鍒濆鍖栨暟鎹簱 =====
     let pool = match db::new_pool(&cfg).await {
         Ok(p) => p,
         Err(e) => {
@@ -90,24 +88,22 @@ async fn run() {
             std::process::exit(1);
         }
     };
-    // 网关主密钥：DB upstream_master_key 优先，回退 PLATFORM_ENCRYPT_KEY（与 Go 版一致）
+    // 缃戝叧涓诲瘑閽ワ細DB upstream_master_key 浼樺厛锛屽洖閫€ PLATFORM_ENCRYPT_KEY锛堜笌 Go 鐗堜竴鑷达級
     let upstream_master_key = load_upstream_master_key(&pool).await.unwrap_or_else(|_| platform_encrypt_key.clone());
     let state = Arc::new(AppState::new(cfg.clone(), pool, upstream_master_key, platform_encrypt_key));
-    // 加载可信客户端白名单 + 刷新 IP 封禁缓存
+    // 鍔犺浇鍙俊瀹㈡埛绔櫧鍚嶅崟 + 鍒锋柊 IP 灏佺缂撳瓨
     state.load_trusted_clients().await;
     state.ip_monitor.refresh_blocked_cache().await;
-    // 恢复网关维护模式状态
-    gateway::handler::admin::init_from_db(&state).await;
+    // 鎭㈠缃戝叧缁存姢妯″紡鐘舵€?    gateway::handler::admin::init_from_db(&state).await;
     info!("security engines initialized (ip_monitor / anomaly_guard / trusted_clients)");
-    // 后台任务：IP 封禁缓存周期刷新
+    // 鍚庡彴浠诲姟锛欼P 灏佺缂撳瓨鍛ㄦ湡鍒锋柊
     {
         let ipm = state.ip_monitor.clone();
         tokio::spawn(async move {
             gateway::detect::run_ip_monitor_bg(ipm).await;
         });
     }
-    // 后台任务：密钥调度器周期清理 + 密钥池热更新（DB 变更 ≤30s 生效，不中断服务）
-    {
+    // 鍚庡彴浠诲姟锛氬瘑閽ヨ皟搴﹀櫒鍛ㄦ湡娓呯悊 + 瀵嗛挜姹犵儹鏇存柊锛圖B 鍙樻洿 鈮?0s 鐢熸晥锛屼笉涓柇鏈嶅姟锛?    {
         let sched = state.scheduler.clone();
         tokio::spawn(async move {
             loop {
@@ -116,13 +112,12 @@ async fn run() {
             }
         });
     }
-    // 后台任务：模型健康巡检（自动下架故障模型，5 分钟粒度）+ force_stream 配置刷新
+    // 鍚庡彴浠诲姟锛氭ā鍨嬪仴搴峰贰妫€锛堣嚜鍔ㄤ笅鏋舵晠闅滄ā鍨嬶紝5 鍒嗛挓绮掑害锛? force_stream 閰嶇疆鍒锋柊
     {
         let mh = state.model_health.clone();
         let fs = state.force_stream.clone();
         let pool = state.pool.clone();
-        // 启动时立即初始化动态开关（避免热更后 60s 空窗期配置未生效）
-        {
+        // 鍚姩鏃剁珛鍗冲垵濮嬪寲鍔ㄦ€佸紑鍏筹紙閬垮厤鐑洿鍚?60s 绌虹獥鏈熼厤缃湭鐢熸晥锛?        {
             let v: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='force_stream_default'")
                 .fetch_optional(&pool).await.ok().flatten();
             fs.store(v.as_deref() == Some("true"), std::sync::atomic::Ordering::Relaxed);
@@ -139,35 +134,32 @@ async fn run() {
         tokio::spawn(async move {
             loop {
                 tokio::time::sleep(Duration::from_secs(60)).await;
-                // 刷新强制流式开关（admin_settings.force_stream_default）
-                let v: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='force_stream_default'")
+                // 鍒锋柊寮哄埗娴佸紡寮€鍏筹紙admin_settings.force_stream_default锛?                let v: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='force_stream_default'")
                     .fetch_optional(&pool)
                     .await
                     .ok()
                     .flatten();
                 fs.store(v.as_deref() == Some("true"), std::sync::atomic::Ordering::Relaxed);
-                // 刷新特殊专属模型暂停开关（admin_settings.special_model_suspended，true=临时下架）
-                let v2: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='special_model_suspended'")
+                // 鍒锋柊鐗规畩涓撳睘妯″瀷鏆傚仠寮€鍏筹紙admin_settings.special_model_suspended锛宼rue=涓存椂涓嬫灦锛?                let v2: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='special_model_suspended'")
                     .fetch_optional(&pool)
                     .await
                     .ok()
                     .flatten();
                 crate::model::catalog::set_special_suspended(v2.as_deref() == Some("true"));
-                // 刷新特殊专属模型调用开放开关（admin_settings.special_model_call_allowed，true=开放调用）
+                // 鍒锋柊鐗规畩涓撳睘妯″瀷璋冪敤寮€鏀惧紑鍏筹紙admin_settings.special_model_call_allowed锛宼rue=寮€鏀捐皟鐢級
                 let v3: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='special_model_call_allowed'")
                     .fetch_optional(&pool)
                     .await
                     .ok()
                     .flatten();
                 crate::model::catalog::set_special_call_allowed(v3.as_deref() == Some("true"));
-                // 刷新单模型暂停列表（admin_settings.special_suspended_models，JSON 数组）
-                let v4: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='special_suspended_models'")
+                // 鍒锋柊鍗曟ā鍨嬫殏鍋滃垪琛紙admin_settings.special_suspended_models锛孞SON 鏁扮粍锛?                let v4: Option<String> = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key='special_suspended_models'")
                     .fetch_optional(&pool)
                     .await
                     .ok()
                     .flatten();
                 crate::model::catalog::set_suspended_models(v4.as_deref());
-                // 每 5 次循环（约 5 分钟）执行一次健康巡检
+                // 姣?5 娆″惊鐜紙绾?5 鍒嗛挓锛夋墽琛屼竴娆″仴搴峰贰妫€
                 for _ in 0..5 {
                     tokio::time::sleep(Duration::from_secs(60)).await;
                 }
@@ -175,12 +167,12 @@ async fn run() {
             }
         });
     }
-    // 后台任务：上游模型列表同步（以 NIM /v1/models 为权威基准，启动立即 + 每小时）
+    // 鍚庡彴浠诲姟锛氫笂娓告ā鍨嬪垪琛ㄥ悓姝ワ紙浠?NIM /v1/models 涓烘潈濞佸熀鍑嗭紝鍚姩绔嬪嵆 + 姣忓皬鏃讹級
     {
         let pool = state.pool.clone();
         let master_key = state.upstream_master_key.clone();
         tokio::spawn(async move {
-            // 启动立即同步一次（阻塞后续任务启动约 15s，换取模型列表即刻准确）
+            // 鍚姩绔嬪嵆鍚屾涓€娆★紙闃诲鍚庣画浠诲姟鍚姩绾?15s锛屾崲鍙栨ā鍨嬪垪琛ㄥ嵆鍒诲噯纭級
             crate::model::upstream::sync_upstream_models(&pool, &master_key).await;
             loop {
                 tokio::time::sleep(Duration::from_secs(3600)).await;
@@ -189,15 +181,15 @@ async fn run() {
         });
     }
 
-    // ===== 平台 Router :8000 =====
+    // ===== 骞冲彴 Router :8000 =====
     let platform_router = build_platform_router(state.clone());
     let platform_addr = format!("0.0.0.0:{}", cfg.server.platform_port);
 
-    // ===== 网关 Router :8001 =====
+    // ===== 缃戝叧 Router :8001 =====
     let gateway_router = build_gateway_router(state.clone());
     let gateway_addr = format!("0.0.0.0:{}", cfg.server.gateway_port);
 
-    // ===== 启动双服务（SO_REUSEPORT：热更滚动零中断，新实例先接管、旧实例再退出）=====
+    // ===== 鍚姩鍙屾湇鍔★紙SO_REUSEPORT锛氱儹鏇存粴鍔ㄩ浂涓柇锛屾柊瀹炰緥鍏堟帴绠°€佹棫瀹炰緥鍐嶉€€鍑猴級=====
     let (shutdown_tx, _) = tokio::sync::broadcast::channel::<()>(8);
     let mut handles = Vec::new();
 
@@ -208,8 +200,7 @@ async fn run() {
         info!(addr = %p_addr, "platform service listening");
         axum::serve(listener, platform_router)
             .with_graceful_shutdown(async move {
-                // 收到关闭信号：停止 accept 新连接，等待在途请求完成
-                let _ = rx_platform.recv().await;
+                // 鏀跺埌鍏抽棴淇″彿锛氬仠姝?accept 鏂拌繛鎺ワ紝绛夊緟鍦ㄩ€旇姹傚畬鎴?                let _ = rx_platform.recv().await;
             })
             .await
             .unwrap();
@@ -228,7 +219,7 @@ async fn run() {
             .unwrap();
     }));
 
-    // ===== 信号处理（优雅关闭：drain 在途请求，最多 30s）=====
+    // ===== 淇″彿澶勭悊锛堜紭闆呭叧闂細drain 鍦ㄩ€旇姹傦紝鏈€澶?30s锛?====
     let mut sigterm =
         tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()).unwrap();
     tokio::select! {
@@ -242,31 +233,24 @@ async fn run() {
             let _ = h.await;
         }
     }).await;
-    // 在途长连接（keep-alive / SSE 流式）可能一直不结束，超时后强制退出，
-    // 避免 systemd 等待到 TimeoutStopSec 再 SIGKILL（导致恢复被拖慢/标记 timeout 失败）
-    if timeout_result.is_err() {
+    // 鍦ㄩ€旈暱杩炴帴锛坘eep-alive / SSE 娴佸紡锛夊彲鑳戒竴鐩翠笉缁撴潫锛岃秴鏃跺悗寮哄埗閫€鍑猴紝
+    // 閬垮厤 systemd 绛夊緟鍒?TimeoutStopSec 鍐?SIGKILL锛堝鑷存仮澶嶈鎷栨參/鏍囪 timeout 澶辫触锛?    if timeout_result.is_err() {
         warn!("graceful drain timed out (long-lived connections), force exiting");
         std::process::exit(0);
     }
     info!("AQUA Server stopped");
 }
 
-/// 请求日志自动清理：分批删除过期数据，避免长事务锁表
-/// - request_logs（网关日志）：2xx 成功保留 30 天，其余状态（4xx/5xx 等）保留 90 天
-/// - pf_request_logs（平台日志）：status='success' 保留 30 天，其余保留 90 天
-async fn cleanup_old_logs(pool: &sqlx::PgPool) {
-    // 1. request_logs 非错误数据（2xx）
-    batch_delete_logs(pool, "request_logs", "status_code BETWEEN 200 AND 299", "30 days").await;
-    // 2. request_logs 错误数据（非 2xx）
-    batch_delete_logs(pool, "request_logs", "(status_code < 200 OR status_code > 299)", "90 days").await;
-    // 3. pf_request_logs 成功数据
+/// 璇锋眰鏃ュ織鑷姩娓呯悊锛氬垎鎵瑰垹闄よ繃鏈熸暟鎹紝閬垮厤闀夸簨鍔￠攣琛?/// - request_logs锛堢綉鍏虫棩蹇楋級锛?xx 鎴愬姛淇濈暀 30 澶╋紝鍏朵綑鐘舵€侊紙4xx/5xx 绛夛級淇濈暀 90 澶?/// - pf_request_logs锛堝钩鍙版棩蹇楋級锛歴tatus='success' 淇濈暀 30 澶╋紝鍏朵綑淇濈暀 90 澶?async fn cleanup_old_logs(pool: &sqlx::PgPool) {
+    // 1. request_logs 闈為敊璇暟鎹紙2xx锛?    batch_delete_logs(pool, "request_logs", "status_code BETWEEN 200 AND 299", "30 days").await;
+    // 2. request_logs 閿欒鏁版嵁锛堥潪 2xx锛?    batch_delete_logs(pool, "request_logs", "(status_code < 200 OR status_code > 299)", "90 days").await;
+    // 3. pf_request_logs 鎴愬姛鏁版嵁
     batch_delete_logs(pool, "pf_request_logs", "status = 'success'", "30 days").await;
-    // 4. pf_request_logs 错误数据
+    // 4. pf_request_logs 閿欒鏁版嵁
     batch_delete_logs(pool, "pf_request_logs", "status != 'success'", "90 days").await;
 }
 
-/// 分批删除（每批 5000 行，间隔 50ms，避免长锁；返回删除总数）
-async fn batch_delete_logs(pool: &sqlx::PgPool, table: &str, cond: &str, keep: &str) -> u64 {
+/// 鍒嗘壒鍒犻櫎锛堟瘡鎵?5000 琛岋紝闂撮殧 50ms锛岄伩鍏嶉暱閿侊紱杩斿洖鍒犻櫎鎬绘暟锛?async fn batch_delete_logs(pool: &sqlx::PgPool, table: &str, cond: &str, keep: &str) -> u64 {
     let mut total: u64 = 0;
     loop {
         let q = format!(
@@ -294,16 +278,14 @@ async fn batch_delete_logs(pool: &sqlx::PgPool, table: &str, cond: &str, keep: &
     total
 }
 
-/// SO_REUSEPORT 监听：热更期间新旧实例可共享同一端口（Linux）
-async fn bind_reuse(addr: &str) -> std::io::Result<tokio::net::TcpListener> {
+/// SO_REUSEPORT 鐩戝惉锛氱儹鏇存湡闂存柊鏃у疄渚嬪彲鍏变韩鍚屼竴绔彛锛圠inux锛?async fn bind_reuse(addr: &str) -> std::io::Result<tokio::net::TcpListener> {
     use socket2::{Domain, Protocol, Socket, Type};
     let addr: std::net::SocketAddr = addr
         .parse()
         .map_err(|e: std::net::AddrParseError| std::io::Error::new(std::io::ErrorKind::InvalidInput, e))?;
     let socket = Socket::new(Domain::for_address(addr), Type::STREAM, Some(Protocol::TCP))?;
     socket.set_reuse_address(true)?;
-    // SO_REUSEPORT：允许新实例与旧实例在滚动更新期间共享端口
-    set_so_reuse_port(&socket)?;
+    // SO_REUSEPORT锛氬厑璁告柊瀹炰緥涓庢棫瀹炰緥鍦ㄦ粴鍔ㄦ洿鏂版湡闂村叡浜鍙?    set_so_reuse_port(&socket)?;
     socket.bind(&addr.into())?;
     socket.listen(1024)?;
     socket.set_nonblocking(true)?;
@@ -311,8 +293,7 @@ async fn bind_reuse(addr: &str) -> std::io::Result<tokio::net::TcpListener> {
     tokio::net::TcpListener::from_std(std_listener)
 }
 
-/// 通过 libc 设置 SO_REUSEPORT（socket2 0.5 部分版本不导出该方法）
-fn set_so_reuse_port(sock: &socket2::Socket) -> std::io::Result<()> {
+/// 閫氳繃 libc 璁剧疆 SO_REUSEPORT锛坰ocket2 0.5 閮ㄥ垎鐗堟湰涓嶅鍑鸿鏂规硶锛?fn set_so_reuse_port(sock: &socket2::Socket) -> std::io::Result<()> {
     use std::os::fd::AsRawFd;
     let one: libc::c_int = 1;
     let rc = unsafe {
@@ -331,7 +312,7 @@ fn set_so_reuse_port(sock: &socket2::Socket) -> std::io::Result<()> {
     }
 }
 
-/// CORS 中间件（复用网关导出的配置）
+/// CORS 涓棿浠讹紙澶嶇敤缃戝叧瀵煎嚭鐨勯厤缃級
 fn cors_layer(cfg: &Config) -> CorsLayer {
     let has_wildcard = cfg.cors_origins.iter().any(|o| o == "*");
     if has_wildcard {
@@ -352,8 +333,7 @@ fn cors_layer(cfg: &Config) -> CorsLayer {
     }
 }
 
-/// HTML 页面禁止浏览器缓存（避免旧版/404 页面被长期缓存导致"页面不显示"）
-async fn no_cache_html(request: axum::http::Request<axum::body::Body>, next: axum::middleware::Next) -> Response {
+/// HTML 椤甸潰绂佹娴忚鍣ㄧ紦瀛橈紙閬垮厤鏃х増/404 椤甸潰琚暱鏈熺紦瀛樺鑷?椤甸潰涓嶆樉绀?锛?async fn no_cache_html(request: axum::http::Request<axum::body::Body>, next: axum::middleware::Next) -> Response {
     let mut response = next.run(request).await;
     let is_html = response
         .headers()
@@ -370,8 +350,7 @@ async fn no_cache_html(request: axum::http::Request<axum::body::Body>, next: axu
     response
 }
 
-/// 安全响应头中间件（防点击劫持 / MIME 嗅探 / 信息泄露，2026-08 安全加固）
-async fn security_headers(request: axum::http::Request<axum::body::Body>, next: axum::middleware::Next) -> Response {
+/// 瀹夊叏鍝嶅簲澶翠腑闂翠欢锛堥槻鐐瑰嚮鍔寔 / MIME 鍡呮帰 / 淇℃伅娉勯湶锛?026-08 瀹夊叏鍔犲浐锛?async fn security_headers(request: axum::http::Request<axum::body::Body>, next: axum::middleware::Next) -> Response {
     let mut response = next.run(request).await;
     let headers = response.headers_mut();
     headers.insert("X-Frame-Options", axum::http::HeaderValue::from_static("DENY"));
@@ -382,21 +361,20 @@ async fn security_headers(request: axum::http::Request<axum::body::Body>, next: 
     response
 }
 
-/// 平台 Router（页面 + 静态 + API）
-fn build_platform_router(state: Arc<AppState>) -> Router {
+/// 骞冲彴 Router锛堥〉闈?+ 闈欐€?+ API锛?fn build_platform_router(state: Arc<AppState>) -> Router {
     use axum::routing::{delete, get, get_service, patch, post, put};
     use tower_http::services::ServeFile;
     use crate::platform::handler as ph;
     let cors = cors_layer(&state.cfg);
     let html = |f: &str| get_service(ServeFile::new(format!("web/platform/static/{f}")));
     Router::new()
-        // ===== 基础 =====
+        // ===== 鍩虹 =====
         .route("/healthz", get(ph::public::healthz))
         .route("/robots.txt", get(ph::public::robots_txt))
         .route("/sitemap.xml", get(ph::public::sitemap))
         .route("/favicon.ico", get(ph::public::favicon))
         .route("/", get(ph::public::index))
-        // ===== 静态页面 =====
+        // ===== 闈欐€侀〉闈?=====
         .route("/login", html("login.html"))
         .route("/register", html("register.html"))
         .route("/reset-password", html("reset-password.html"))
@@ -406,8 +384,7 @@ fn build_platform_router(state: Arc<AppState>) -> Router {
         .route("/qq-group", html("qq-group.html"))
         .route("/sponsor", html("sponsor.html"))
         .route("/capabilities", html("capabilities.html"))
-        // ⚠️ 2026-08-11 QQ 群联系通道已废弃，页面与路由一并移除
-        // .route("/qq-groups", html("qq-groups.html"))
+        // 鈿狅笍 2026-08-11 QQ 缇よ仈绯婚€氶亾宸插簾寮冿紝椤甸潰涓庤矾鐢变竴骞剁Щ闄?        // .route("/qq-groups", html("qq-groups.html"))
         .route("/console", html("console.html"))
         .route("/console/keys", html("keys.html"))
 
@@ -421,22 +398,21 @@ fn build_platform_router(state: Arc<AppState>) -> Router {
         .route("/console/docs", html("console-docs.html"))
         .route("/console/settings", html("settings.html"))
         .route("/admin", html("admin.html"))
-        // ===== 模型列表代理 =====
+        // ===== 妯″瀷鍒楄〃浠ｇ悊 =====
         .route("/v1/models", get(ph::public::api_models))
         .route("/v1/models/", get(ph::public::api_models))
         .route("/api/v1/models", get(ph::public::api_models))
         .route("/api/v1/models/", get(ph::public::api_models))
-        // ===== 认证 =====
+        // ===== 璁よ瘉 =====
         .route("/api/auth/send-code", post(ph::auth::send_code))
         .route("/api/auth/register", post(ph::auth::register))
         .route("/api/auth/login", post(ph::auth::login))
         .route("/api/auth/logout", post(ph::auth::logout))
         .route("/api/auth/reset-password", post(ph::auth::reset_password))
         .route("/api/auth/verify", get(ph::auth::verify))
-        // ===== 对话 =====
-        // 网页对话功能已下线（2026-08-08）：仅保留模型列表供模型广场/控制台使用
-        .route("/api/chat/models", get(ph::chat::models))
-        // ===== 用户控制台 =====
+        // ===== 瀵硅瘽 =====
+        // 缃戦〉瀵硅瘽鍔熻兘宸蹭笅绾匡紙2026-08-08锛夛細浠呬繚鐣欐ā鍨嬪垪琛ㄤ緵妯″瀷骞垮満/鎺у埗鍙颁娇鐢?        .route("/api/chat/models", get(ph::chat::models))
+        // ===== 鐢ㄦ埛鎺у埗鍙?=====
         .route("/api/user/profile", get(ph::console::profile))
         .route("/api/user/stats", get(ph::console::stats))
         .route("/api/user/usage-overview", get(ph::console::usage_overview))
@@ -463,12 +439,11 @@ fn build_platform_router(state: Arc<AppState>) -> Router {
         .route("/api/user/system/ip-monitor/anomalies", get(ph::console::system_ip_anomalies))
         .route("/api/user/system/ip-monitor/unblock", post(ph::console::system_ip_unblock))
         .route("/api/user/system/user-stats", get(ph::console::system_user_stats))
-        // ===== 公开 API =====
+        // ===== 鍏紑 API =====
         .route("/api/public/stats", get(ph::public::public_stats))
-        // ⚠️ 2026-08-11 Codex 上游下线：/api/public/acu-usage 已注释（public_acu_usage 同步注释）
-        // .route("/api/public/acu-usage", get(ph::public::public_acu_usage))
+        // 鈿狅笍 2026-08-11 Codex 涓婃父涓嬬嚎锛?api/public/acu-usage 宸叉敞閲婏紙public_acu_usage 鍚屾娉ㄩ噴锛?        // .route("/api/public/acu-usage", get(ph::public::public_acu_usage))
         .route("/api/public/model-capabilities", get(ph::public::public_model_capabilities))
-        // ===== 管理后台 =====
+        // ===== 绠＄悊鍚庡彴 =====
         .route("/api/admin/login", post(ph::admin::login))
         .route("/api/admin/logout", post(ph::admin::logout))
         .route("/api/admin/check", get(ph::admin::check))
@@ -477,7 +452,7 @@ fn build_platform_router(state: Arc<AppState>) -> Router {
         .route("/api/admin/users/{id}", get(ph::admin::user_detail_handler).delete(ph::admin::delete_user_handler))
         .route("/api/admin/users/{id}/ban", put(ph::admin::ban_user_handler).patch(ph::admin::ban_user_handler))
         .route("/api/admin/users/{id}/unban", put(ph::admin::unban_user_handler).patch(ph::admin::unban_user_handler))
-        // ===== 蜜罐 =====
+        // ===== 铚滅綈 =====
         .route("/.env", get(ph::admin::honeypot_route).post(ph::admin::honeypot_route))
         .route("/.git/config", get(ph::admin::honeypot_route))
         .route("/.git/HEAD", get(ph::admin::honeypot_route))
@@ -499,7 +474,7 @@ fn build_platform_router(state: Arc<AppState>) -> Router {
         .layer(axum::middleware::from_fn(security_headers))
 }
 
-/// 网关 Router（公开 API + 健康检查 + 管理控制台）
+/// 缃戝叧 Router锛堝叕寮€ API + 鍋ュ悍妫€鏌?+ 绠＄悊鎺у埗鍙帮級
 fn build_gateway_router(state: Arc<AppState>) -> Router {
     use axum::routing::{delete, get, post, put};
     use gateway::handler::{admin, admin_monitoring, public};
@@ -508,8 +483,7 @@ fn build_gateway_router(state: Arc<AppState>) -> Router {
         .route("/healthz", axum::routing::get(healthz))
         .route("/v1/models", axum::routing::get(public::models_handler))
         .route("/api/v1/models", axum::routing::get(public::models_handler))
-        // ⚠️ 2026-08-11 Codex 上游下线：/v1/acu/usage 路由已注释（acu_usage 同步注释）
-        // .route("/v1/acu/usage", axum::routing::get(public::acu_usage))
+        // 鈿狅笍 2026-08-11 Codex 涓婃父涓嬬嚎锛?v1/acu/usage 璺敱宸叉敞閲婏紙acu_usage 鍚屾娉ㄩ噴锛?        // .route("/v1/acu/usage", axum::routing::get(public::acu_usage))
         // .route("/api/v1/acu/usage", axum::routing::get(public::acu_usage))
         .route("/v1/chat/completions", axum::routing::post(public::chat_completions_handler))
         .route("/api/v1/chat/completions", axum::routing::post(public::chat_completions_handler))
@@ -521,7 +495,7 @@ fn build_gateway_router(state: Arc<AppState>) -> Router {
         .route("/v1/responses", axum::routing::post(public::multi_protocol_handler))
         .route("/api/v1/responses", axum::routing::post(public::multi_protocol_handler))
         .route("/v1beta/models/{*rest}", axum::routing::post(public::multi_protocol_handler))
-        // ===== 网关管理后台 /gw/admin/* =====
+        // ===== 缃戝叧绠＄悊鍚庡彴 /gw/admin/* =====
         .route("/gw/admin/login", post(admin::login))
         .route("/gw/admin/dashboard", get(admin::dashboard))
         .route("/gw/admin/upstreams", get(admin::upstreams_list).post(admin::upstreams_create))
@@ -566,18 +540,15 @@ fn build_gateway_router(state: Arc<AppState>) -> Router {
         .layer(axum::middleware::from_fn(security_headers))
 }
 
-/// 网关控制台页面（console.html）
-async fn gw_console() -> Response {
+/// 缃戝叧鎺у埗鍙伴〉闈紙console.html锛?async fn gw_console() -> Response {
     crate::platform::handler::public::serve_file("web/gateway/static/console.html", "text/html; charset=utf-8").await
 }
 
-/// 健康检查
-async fn healthz() -> &'static str {
+/// 鍋ュ悍妫€鏌?async fn healthz() -> &'static str {
     "OK"
 }
 
-/// 从 DB 读取 upstream_master_key（base64 解码）
-async fn load_upstream_master_key(pool: &sqlx::PgPool) -> Result<Vec<u8>, String> {
+/// 浠?DB 璇诲彇 upstream_master_key锛坆ase64 瑙ｇ爜锛?async fn load_upstream_master_key(pool: &sqlx::PgPool) -> Result<Vec<u8>, String> {
     use base64::Engine as _;
     let b64: String = sqlx::query_scalar("SELECT value FROM admin_settings WHERE key = 'upstream_master_key'")
         .fetch_one(pool)
