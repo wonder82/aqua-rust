@@ -204,14 +204,20 @@ impl SurgeScheduler {
             return Err("no active upstream keys".into());
         }
         let now = Instant::now();
+        // 专属密钥优先：存在 model_scope 匹配当前模型的密钥时，通用密钥（空 scope）不参与该模型调度
+        let has_scoped = keys.iter().any(|k| !k.model_scope.is_empty() && (k.model_scope == model || k.model_scope.contains(model)));
         // 1) 收集候选（过滤已试/模型范围/冷却/健康度/RPM）
         let mut candidates: Vec<(&UpstreamKey, f64)> = Vec::new();
         for k in &keys {
             if tried.contains(&k.id) {
                 continue;
             }
-            // 模型范围过滤
-            if !k.model_scope.is_empty() && k.model_scope != model && !k.model_scope.contains(model) {
+            // 模型范围过滤（有专属密钥时通用密钥退出）
+            if has_scoped {
+                if k.model_scope.is_empty() || (k.model_scope != model && !k.model_scope.contains(model)) {
+                    continue;
+                }
+            } else if !k.model_scope.is_empty() && k.model_scope != model && !k.model_scope.contains(model) {
                 continue;
             }
             let b = self.buckets.get(&k.id).map(|b| b.value().clone()).unwrap_or_default();
@@ -239,7 +245,14 @@ impl SurgeScheduler {
             // P7 修正：坏 key（健康分过低）绝不放行，宁可快速失败也不把流量打到坏 key 上
             let mut fallback: Vec<(&UpstreamKey, f64)> = keys
                 .iter()
-                .filter(|k| !tried.contains(&k.id) && (k.model_scope.is_empty() || k.model_scope == model || k.model_scope.contains(model)))
+                .filter(|k| {
+                    if tried.contains(&k.id) { return false; }
+                    if has_scoped {
+                        !k.model_scope.is_empty() && (k.model_scope == model || k.model_scope.contains(model))
+                    } else {
+                        k.model_scope.is_empty() || k.model_scope == model || k.model_scope.contains(model)
+                    }
+                })
                 .filter(|k| {
                     let b = self.buckets.get(&k.id).map(|b| b.value().clone()).unwrap_or_default();
                     b.health_score >= HEALTH_SCORE_MIN
