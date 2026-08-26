@@ -229,8 +229,9 @@ impl SurgeScheduler {
             if k.rpm_limit > 0 && b.window_req >= k.rpm_limit as u64 {
                 continue;
             }
-            // 预热加权
-            let effective = b.health_score * (b.warmup_progress / WARMUP_FULL);
+            // 预热加权（专属范围密钥优先：非空 model_scope 匹配当前模型时加分）
+            let scope_bonus = if !k.model_scope.is_empty() && (k.model_scope == model || k.model_scope.contains(model)) { 1000.0 } else { 0.0 };
+            let effective = scope_bonus + b.health_score * (b.warmup_progress / WARMUP_FULL);
             candidates.push((k, effective));
         }
         if candidates.is_empty() {
