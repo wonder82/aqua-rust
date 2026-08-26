@@ -1,5 +1,5 @@
-//! 绠＄悊鍚庡彴璺敱锛歭ogin / logout / check / login-logs / users 绠＄悊 + 铚滅綈
-//! 涓?Go 鐗?internal/platform/handler/admin.go + honeypot.go 瀵归綈
+//! 管理后台路由：login / logout / check / login-logs / users 管理 + 蜜罐
+//! 与 Go 版 internal/platform/handler/admin.go + honeypot.go 对齐
 
 use std::collections::HashMap;
 use std::sync::LazyLock;
@@ -19,7 +19,7 @@ use crate::security::{generate_admin_token, generate_id, hash_password, hash_sha
 
 const ADMIN_SESSION_TTL_SECS: i64 = 8 * 3600;
 
-/// 鍐呭瓨 CSRF Token 缂撳瓨锛歛dmin_token -> csrf_token
+/// 内存 CSRF Token 缓存：admin_token -> csrf_token
 static ADMIN_CSRF_TOKENS: LazyLock<Mutex<HashMap<String, String>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
 
 /// POST /api/admin/login
@@ -32,22 +32,24 @@ pub async fn login(State(state): State<SharedState>, headers: HeaderMap, body: B
 async fn do_login(state: &SharedState, headers: &HeaderMap, body: &Bytes) -> Response {
     let client_ip = admin_client_ip(headers, "");
     let user_agent = headers.get(axum::http::header::USER_AGENT).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
-    // IP 鐧藉悕鍗?    if !is_ip_allowed(&client_ip, &state.cfg.admin.allowed_ips) {
-        return write_err(StatusCode::FORBIDDEN, "forbidden", "璁块棶琚嫆缁?);
+    // IP 白名单
+    if !is_ip_allowed(&client_ip, &state.cfg.admin.allowed_ips) {
+        return write_err(StatusCode::FORBIDDEN, "forbidden", "访问被拒绝");
     }
-    // IP 闄愰€?    if !ADMIN_LOGIN_RATE.allow(&client_ip, 5, 60) {
+    // IP 限速
+    if !ADMIN_LOGIN_RATE.allow(&client_ip, 5, 60) {
         log_admin_login(&state, &client_ip, &user_agent, false).await;
-        return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "灏濊瘯娆℃暟杩囧锛岃绋嶅悗鍐嶈瘯");
+        return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "尝试次数过多，请稍后再试");
     }
     let req: Value = match serde_json::from_slice(body) {
         Ok(v) => v,
         Err(_) => return write_err(StatusCode::BAD_REQUEST, "invalid_request", "Invalid JSON"),
     };
     let password = req.get("password").and_then(|p| p.as_str()).unwrap_or("");
-    // bcrypt 楠岃瘉
+    // bcrypt 验证
     if !verify_password(password, &state.cfg.admin.password_hash).unwrap_or(false) {
         log_admin_login(&state, &client_ip, &user_agent, false).await;
-        return write_err(StatusCode::UNAUTHORIZED, "auth_failed", "瀵嗙爜閿欒");
+        return write_err(StatusCode::UNAUTHORIZED, "auth_failed", "密码错误");
     }
     let secret = &state.cfg.admin.session_secret;
     if secret.is_empty() {
@@ -61,7 +63,8 @@ async fn do_login(state: &SharedState, headers: &HeaderMap, body: &Bytes) -> Res
         }
     };
     let csrf_token = generate_id();
-    // DB 鍐欏叆 admin_sessions锛堟敮鎸佸悐閿€锛?    let token_hash = hash_sha256(&token);
+    // DB 写入 admin_sessions（支持吊销）
+    let token_hash = hash_sha256(&token);
     let _ = sqlx::query(
         "INSERT INTO admin_sessions (token_hash, csrf_token, ip, user_agent, expires_at) VALUES ($1, $2, $3, $4, now() + interval '8 hours')",
     )
@@ -75,7 +78,7 @@ async fn do_login(state: &SharedState, headers: &HeaderMap, body: &Bytes) -> Res
     let is_https = headers.get("X-Forwarded-Proto").and_then(|v| v.to_str().ok()) == Some("https");
     let mut resp = write_ok(
         StatusCode::OK,
-        json!({"message": "鐧诲綍鎴愬姛", "csrf_token": csrf_token, "expires_in": ADMIN_SESSION_TTL_SECS}),
+        json!({"message": "登录成功", "csrf_token": csrf_token, "expires_in": ADMIN_SESSION_TTL_SECS}),
     );
     set_cookie(&mut resp, ADMIN_COOKIE, &token, ADMIN_SESSION_TTL_SECS, true, is_https, "Strict");
     set_cookie(&mut resp, ADMIN_CSRF_COOKIE, &csrf_token, ADMIN_SESSION_TTL_SECS, false, is_https, "Strict");
@@ -92,9 +95,9 @@ pub async fn logout(State(state): State<SharedState>, headers: HeaderMap) -> Res
             .bind(&token_hash)
             .execute(&state.pool)
             .await;
-        write_ok(StatusCode::OK, json!({"message": "宸茬櫥鍑?}))
+        write_ok(StatusCode::OK, json!({"message": "已登出"}))
     } else {
-        write_ok(StatusCode::OK, json!({"message": "宸茬櫥鍑?}))
+        write_ok(StatusCode::OK, json!({"message": "已登出"}))
     };
     clear_cookie(&mut resp, ADMIN_COOKIE);
     clear_cookie(&mut resp, ADMIN_CSRF_COOKIE);
@@ -147,7 +150,7 @@ pub async fn users(State(state): State<SharedState>, headers: HeaderMap, Query(q
         let page_size = q.page_size.unwrap_or(20).clamp(1, 200);
         let search = q.search.unwrap_or_default().trim().to_string();
         let status_filter = q.status.unwrap_or_default().trim().to_string();
-        // 鍔ㄦ€?WHERE锛堝€煎唴鑱旇浆涔夛級
+        // 动态 WHERE（值内联转义）
         let mut conditions: Vec<String> = Vec::new();
         if !search.is_empty() {
             conditions.push(format!("(username ILIKE '{}' OR email ILIKE '{}')", escape_like(&search), escape_like(&search)));
@@ -173,7 +176,7 @@ pub async fn users(State(state): State<SharedState>, headers: HeaderMap, Query(q
     resp
 }
 
-/// GET /api/admin/users/{id} - 鐢ㄦ埛璇︽儏
+/// GET /api/admin/users/{id} - 用户详情
 pub async fn user_detail_handler(State(state): State<SharedState>, headers: HeaderMap, Path(id): Path<i64>) -> Response {
     let mut resp = if let Err(r) = require_admin(&state, &headers).await {
         r
@@ -217,7 +220,7 @@ async fn ban_user(state: &SharedState, _headers: &HeaderMap, user_id: i64) -> Re
         return write_err(StatusCode::NOT_FOUND, "not_found", "User not found");
     };
     let _ = sqlx::query("UPDATE user_api_keys SET status = 'banned' WHERE user_id = $1").bind(user_id).execute(&state.pool).await;
-    write_ok(StatusCode::OK, json!({"message": format!("鐢ㄦ埛 {username} 宸插皝绂?)}))
+    write_ok(StatusCode::OK, json!({"message": format!("用户 {username} 已封禁")}))
 }
 
 /// PUT /api/admin/users/{id}/unban
@@ -248,10 +251,11 @@ async fn unban_user(state: &SharedState, _headers: &HeaderMap, user_id: i64) -> 
     .bind(user_id)
     .execute(&state.pool)
     .await;
-    write_ok(StatusCode::OK, json!({"message": format!("鐢ㄦ埛 {username} 宸茶В灏?)}))
+    write_ok(StatusCode::OK, json!({"message": format!("用户 {username} 已解封")}))
 }
 
-/// POST /api/admin/users - 绠＄悊鍛樺垱寤虹敤鎴?pub async fn create_user_handler(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
+/// POST /api/admin/users - 管理员创建用户
+pub async fn create_user_handler(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
     let mut resp = if let Err(r) = require_admin_csrf(&state, &headers).await {
         r
     } else {
@@ -263,24 +267,25 @@ async fn unban_user(state: &SharedState, _headers: &HeaderMap, user_id: i64) -> 
         let password = req.get("password").and_then(|p| p.as_str()).unwrap_or("").to_string();
         let email = req.get("email").and_then(|e| e.as_str()).map(|s| s.trim().to_lowercase()).unwrap_or_default();
         if username.is_empty() || password.is_empty() {
-            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "鐢ㄦ埛鍚嶅拰瀵嗙爜涓嶈兘涓虹┖"));
+            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "用户名和密码不能为空"));
         }
         if password.chars().count() < 6 {
-            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "瀵嗙爜闀垮害涓嶈兘灏戜簬6浣?));
+            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "密码长度不能少于6位"));
         }
-        // 妫€鏌ョ敤鎴峰悕鏄惁宸插瓨鍦?        let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE LOWER(username)=LOWER($1))")
+        // 检查用户名是否已存在
+        let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE LOWER(username)=LOWER($1))")
             .bind(&username)
             .fetch_one(&state.pool)
             .await
             .unwrap_or(false);
         if exists {
-            return admin_headers(write_err(StatusCode::CONFLICT, "exists", "鐢ㄦ埛鍚嶅凡瀛樺湪"));
+            return admin_headers(write_err(StatusCode::CONFLICT, "exists", "用户名已存在"));
         }
         let hash = match hash_password(&password) {
             Ok(h) => h,
             Err(e) => {
                 tracing::error!("hash password failed: {e}");
-                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "瀵嗙爜鍔犲瘑澶辫触"));
+                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "密码加密失败"));
             }
         };
         let uuid = generate_id();
@@ -300,7 +305,7 @@ async fn unban_user(state: &SharedState, _headers: &HeaderMap, user_id: i64) -> 
             Ok(v) => v,
             Err(e) => {
                 tracing::error!("create user failed: {e}");
-                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "鍒涘缓鐢ㄦ埛澶辫触"));
+                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "创建用户失败"));
             }
         };
         let _ = sqlx::query("INSERT INTO clients(id, name, status, user_type) VALUES($1, $2, 'active', 'normal')")
@@ -326,7 +331,7 @@ pub async fn delete_user_handler(State(state): State<SharedState>, headers: Head
                 .ok()
                 .flatten();
         match row {
-            Some(username) => write_ok(StatusCode::OK, json!({"message": format!("鐢ㄦ埛 {username} 宸插垹闄?)})),
+            Some(username) => write_ok(StatusCode::OK, json!({"message": format!("用户 {username} 已删除")})),
             None => write_err(StatusCode::NOT_FOUND, "not_found", "User not found"),
         }
     };
@@ -334,9 +339,9 @@ pub async fn delete_user_handler(State(state): State<SharedState>, headers: Head
     resp
 }
 
-/// ===================== 璁よ瘉杈呭姪 =====================
+/// ===================== 认证辅助 =====================
 
-/// 鏍￠獙绠＄悊鍛樹細璇濓紙HMAC token + DB 鍚婇攢妫€鏌ワ級
+/// 校验管理员会话（HMAC token + DB 吊销检查）
 async fn is_admin_authed(state: &SharedState, headers: &HeaderMap) -> bool {
     let Some(cookie) = get_cookie(headers, ADMIN_COOKIE) else {
         return false;
@@ -361,36 +366,37 @@ async fn is_admin_authed(state: &SharedState, headers: &HeaderMap) -> bool {
     }
 }
 
-/// 绠＄悊鍛樿璇佸寘瑁咃細IP 鐧藉悕鍗?+ 浼氳瘽鏍￠獙锛堝彧璇绘搷浣滐級
+/// 管理员认证包装：IP 白名单 + 会话校验（只读操作）
 async fn require_admin(state: &SharedState, headers: &HeaderMap) -> Result<(), Response> {
     let client_ip = admin_client_ip(headers, "");
     if !is_ip_allowed(&client_ip, &state.cfg.admin.allowed_ips) {
-        return Err(write_err(StatusCode::FORBIDDEN, "forbidden", "璁块棶琚嫆缁?));
+        return Err(write_err(StatusCode::FORBIDDEN, "forbidden", "访问被拒绝"));
     }
     if !is_admin_authed(state, headers).await {
-        return Err(write_err(StatusCode::UNAUTHORIZED, "auth_error", "鏈櫥褰曟垨浼氳瘽杩囨湡"));
+        return Err(write_err(StatusCode::UNAUTHORIZED, "auth_error", "未登录或会话过期"));
     }
     Ok(())
 }
 
-/// 绠＄悊鍛樿璇?+ CSRF 鏍￠獙锛堢姸鎬佸彉鏇存搷浣滐級
+/// 管理员认证 + CSRF 校验（状态变更操作）
 async fn require_admin_csrf(state: &SharedState, headers: &HeaderMap) -> Result<(), Response> {
     require_admin(state, headers).await?;
     let csrf_header = headers.get("X-CSRF-Token").and_then(|v| v.to_str().ok()).unwrap_or("");
     if csrf_header.is_empty() {
-        return Err(write_err(StatusCode::FORBIDDEN, "csrf_error", "缂哄皯CSRF Token"));
+        return Err(write_err(StatusCode::FORBIDDEN, "csrf_error", "缺少CSRF Token"));
     }
     let Some(cookie) = get_cookie(headers, ADMIN_COOKIE) else {
-        return Err(write_err(StatusCode::UNAUTHORIZED, "auth_error", "浼氳瘽鏃犳晥"));
+        return Err(write_err(StatusCode::UNAUTHORIZED, "auth_error", "会话无效"));
     };
     let tokens = ADMIN_CSRF_TOKENS.lock().unwrap();
     match tokens.get(&cookie) {
         Some(stored) if stored == csrf_header => Ok(()),
-        _ => Err(write_err(StatusCode::FORBIDDEN, "csrf_error", "CSRF Token鏃犳晥")),
+        _ => Err(write_err(StatusCode::FORBIDDEN, "csrf_error", "CSRF Token无效")),
     }
 }
 
-/// 璁板綍绠＄悊绔櫥褰曟棩蹇?async fn log_admin_login(state: &SharedState, ip: &str, user_agent: &str, success: bool) {
+/// 记录管理端登录日志
+async fn log_admin_login(state: &SharedState, ip: &str, user_agent: &str, success: bool) {
     let status = if success { "success" } else { "failed" };
     let state = state.clone();
     let ip = ip.to_string();
@@ -406,7 +412,7 @@ async fn require_admin_csrf(state: &SharedState, headers: &HeaderMap) -> Result<
     });
 }
 
-/// ===================== 铚滅綈 =====================
+/// ===================== 蜜罐 =====================
 
 pub const HONEYPOT_PATHS: [&str; 15] = [
     "/.env",
@@ -436,7 +442,8 @@ fn is_honeypot_path(path: &str) -> Option<&'static str> {
         .copied()
 }
 
-/// 铚滅綈璺敱锛氬皝绂佹壂鎻忚€呭苟杩斿洖鍋囨暟鎹?pub async fn honeypot_route(State(state): State<SharedState>, uri: axum::extract::OriginalUri, headers: HeaderMap) -> Response {
+/// 蜜罐路由：封禁扫描者并返回假数据
+pub async fn honeypot_route(State(state): State<SharedState>, uri: axum::extract::OriginalUri, headers: HeaderMap) -> Response {
     let path = uri.path().to_string();
     let ip = admin_client_ip(&headers, "");
     let ua = headers.get(axum::http::header::USER_AGENT).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
@@ -448,7 +455,8 @@ fn is_honeypot_path(path: &str) -> Option<&'static str> {
     write_ok(StatusCode::OK, json!({"status": "ok", "message": "Access granted", "data": "fake-data-please-do-not-use"}))
 }
 
-/// 灏?IP 鍔犲叆 ip_blacklist锛坔oneypot 鏉ユ簮锛?4h锛?async fn ban_ip(state: &SharedState, ip: &str, reason: &str, path: &str, user_agent: &str) {
+/// 将 IP 加入 ip_blacklist（honeypot 来源，24h）
+async fn ban_ip(state: &SharedState, ip: &str, reason: &str, path: &str, user_agent: &str) {
     let _ = sqlx::query(
         "INSERT INTO ip_blacklist (ip, reason, source, request_path, user_agent, expires_at) \
          VALUES ($1, $2, 'honeypot', $3, $4, now() + interval '24 hours') \
@@ -462,7 +470,7 @@ fn is_honeypot_path(path: &str) -> Option<&'static str> {
     .await;
 }
 
-/// 妫€鏌?IP 鏄惁鍦ㄩ粦鍚嶅崟
+/// 检查 IP 是否在黑名单
 pub async fn is_ip_banned(state: &SharedState, ip: &str) -> bool {
     let exists: Option<bool> = sqlx::query_scalar(
         "SELECT EXISTS(SELECT 1 FROM ip_blacklist WHERE ip = $1 AND (expires_at IS NULL OR expires_at > now()))",
