@@ -15,8 +15,8 @@
 
       <form id="login-form" onsubmit="return doLogin(event)">
         <div class="input-group">
-          <label>用户名 / 邮箱</label>
-          <input type="text" class="input" id="username" name="username" placeholder="输入用户名或邮箱" required autocomplete="username">
+          <label>用户名</label>
+          <input type="text" class="input" id="username" name="username" placeholder="输入用户名" required autocomplete="username">
         </div>
         <div class="input-group">
           <label>密码</label>
@@ -25,9 +25,8 @@
         <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">登录</button>
       </form>
 
-      <div class="auth-links">
-        <a href="/register">账号注册</a>
-        <a href="/reset-password">忘记密码？</a>
+      <div class="auth-subtitle" style="margin-top:16px;font-size:13px">
+        账号由管理员统一分配，如需开通请联系管理员
       </div>
 
       <div style="margin-top:24px;text-align:center">
