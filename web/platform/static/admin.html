@@ -3,64 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>绠＄悊鍚庡彴 - JHRY鍏泭</title>
+  <title>管理后台 - JHRY公益</title>
   <link rel="stylesheet" href="/static/css/platform.css?v=24.0">
 </head>
 <body>
   <nav class="navbar">
     <div class="navbar-inner">
-      <div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">JHRY</span><span class="brand-tag">绠＄悊鍚庡彴</span></a></div>
+      <div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">JHRY</span><span class="brand-tag">管理后台</span></a></div>
       <div class="navbar-actions">
-        <button class="icon-btn" data-theme-toggle title="鍒囨崲涓婚" onclick="Theme.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
-        <a href="/" class="btn btn-sm">鍥為椤?/a>
+        <button class="icon-btn" data-theme-toggle title="切换主题" onclick="Theme.toggle()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+        <a href="/" class="btn btn-sm">回首页</a>
       </div>
     </div>
   </nav>
 
-  <!-- 鐧诲綍瑙嗗浘 -->
+  <!-- 登录视图 -->
   <div id="login-view" class="auth-page">
     <div class="auth-card">
-      <div class="auth-title">绠＄悊鍛樼櫥褰?/div>
-      <div class="auth-subtitle">璇疯緭鍏ョ鐞嗗憳瀵嗙爜</div>
+      <div class="auth-title">管理员登录</div>
+      <div class="auth-subtitle">请输入管理员密码</div>
       <form onsubmit="return adminLogin(event)">
         <div class="input-group">
-          <label>绠＄悊鍛樺瘑鐮?/label>
-          <input type="password" class="input" id="admin-password" placeholder="杈撳叆瀵嗙爜" required>
+          <label>管理员密码</label>
+          <input type="password" class="input" id="admin-password" placeholder="输入密码" required>
         </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="admin-login-btn">鐧诲綍</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="admin-login-btn">登录</button>
       </form>
     </div>
   </div>
 
-  <!-- 绠＄悊瑙嗗浘 -->
+  <!-- 管理视图 -->
   <div id="admin-view" class="container" style="display:none">
     <div class="flex justify-between items-center mb-24">
-      <h1>鐢ㄦ埛绠＄悊</h1>
+      <h1>用户管理</h1>
       <div class="flex gap-8">
-        <button class="btn btn-sm" onclick="loadUsers(currentPage)">鍒锋柊</button>
-        <button class="btn btn-primary btn-sm" onclick="showCreateUser()">+ 鍒涘缓鐢ㄦ埛</button>
-        <button class="btn btn-sm btn-danger" onclick="adminLogout()">閫€鍑?/button>
+        <button class="btn btn-sm" onclick="loadUsers(currentPage)">刷新</button>
+        <button class="btn btn-primary btn-sm" onclick="showCreateUser()">+ 创建用户</button>
+        <button class="btn btn-sm btn-danger" onclick="adminLogout()">退出</button>
       </div>
     </div>
 
-    <!-- 鎼滅储 -->
+    <!-- 搜索 -->
     <div class="card mb-16" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-      <input type="text" class="input" id="search-input" placeholder="鎼滅储鐢ㄦ埛鍚?閭..." style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')loadUsers(1)">
+      <input type="text" class="input" id="search-input" placeholder="搜索用户名/邮箱..." style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')loadUsers(1)">
       <select class="select" id="status-filter" style="width:120px" onchange="loadUsers(1)">
-        <option value="">鎵€鏈夌姸鎬?/option>
-        <option value="active">娲昏穬</option>
-        <option value="banned">宸插皝绂?/option>
+        <option value="">所有状态</option>
+        <option value="active">活跃</option>
+        <option value="banned">已封禁</option>
       </select>
-      <button class="btn btn-primary btn-sm" onclick="loadUsers(1)">鎼滅储</button>
+      <button class="btn btn-primary btn-sm" onclick="loadUsers(1)">搜索</button>
     </div>
 
-    <!-- 鐢ㄦ埛琛ㄦ牸 -->
+    <!-- 用户表格 -->
     <div class="card">
       <div class="table-wrap">
         <table class="data-table">
-          <thead><tr><th>ID</th><th>鐢ㄦ埛鍚?/th><th>閭</th><th>鏄剧ず鍚?/th><th>鐘舵€?/th><th>绫诲瀷</th><th>娉ㄥ唽鏃堕棿</th><th>鎿嶄綔</th></tr></thead>
+          <thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>显示名</th><th>状态</th><th>类型</th><th>注册时间</th><th>操作</th></tr></thead>
           <tbody id="users-tbody">
-            <tr><td colspan="8" class="text-center text-muted">鍔犺浇涓?..</td></tr>
+            <tr><td colspan="8" class="text-center text-muted">加载中...</td></tr>
           </tbody>
         </table>
       </div>
@@ -73,7 +73,8 @@
     let currentPage = 1;
     const pageSize = 20;
 
-    // 妫€鏌ョ鐞嗗憳鐧诲綍鐘舵€?    API.get('/api/admin/check').then(function (data) {
+    // 检查管理员登录状态
+    API.get('/api/admin/check').then(function (data) {
       if (data && data.logged_in) {
         showAdminView();
       }
@@ -84,14 +85,14 @@
       const btn = document.getElementById('admin-login-btn');
       const password = document.getElementById('admin-password').value;
       btn.disabled = true;
-      btn.textContent = '鐧诲綍涓?..';
+      btn.textContent = '登录中...';
       API.post('/api/admin/login', { password: password }).then(function () {
-        Toast.success('鐧诲綍鎴愬姛');
+        Toast.success('登录成功');
         showAdminView();
       }).catch(function (err) {
-        Toast.error(err.message || '鐧诲綍澶辫触');
+        Toast.error(err.message || '登录失败');
         btn.disabled = false;
-        btn.textContent = '鐧诲綍';
+        btn.textContent = '登录';
       });
       return false;
     }
@@ -101,7 +102,7 @@
         document.getElementById('admin-view').style.display = 'none';
         document.getElementById('login-view').style.display = 'flex';
         document.getElementById('admin-password').value = '';
-        Toast.success('宸查€€鍑?);
+        Toast.success('已退出');
       }).catch(function () {});
     }
 
@@ -123,7 +124,7 @@
         const users = data.data || [];
         const tbody = document.getElementById('users-tbody');
         if (!users.length) {
-          tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-state-text">鏆傛棤鐢ㄦ埛</div></div></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-state-text">暂无用户</div></div></td></tr>';
           document.getElementById('pagination').innerHTML = '';
           return;
         }
@@ -139,9 +140,9 @@
             '<td class="text-sm text-muted">' + Fmt.time(u.created_at) + '</td>' +
             '<td><div class="flex gap-8">' +
               (isBanned ?
-                '<button class="btn btn-sm btn-success" onclick="banUser(' + u.id + ',false)">瑙ｅ皝</button>' :
-                '<button class="btn btn-sm btn-warning" onclick="banUser(' + u.id + ',true)">灏佺</button>') +
-              '<button class="btn btn-sm btn-danger" onclick="deleteUser(' + u.id + ')">鍒犻櫎</button>' +
+                '<button class="btn btn-sm btn-success" onclick="banUser(' + u.id + ',false)">解封</button>' :
+                '<button class="btn btn-sm btn-warning" onclick="banUser(' + u.id + ',true)">封禁</button>') +
+              '<button class="btn btn-sm btn-danger" onclick="deleteUser(' + u.id + ')">删除</button>' +
             '</div></td>' +
             '</tr>';
         }).join('');
@@ -154,43 +155,43 @@
           document.getElementById('admin-view').style.display = 'none';
           document.getElementById('login-view').style.display = 'flex';
         }
-        document.getElementById('users-tbody').innerHTML = '<tr><td colspan="8" class="text-center text-muted">鍔犺浇澶辫触</td></tr>';
+        document.getElementById('users-tbody').innerHTML = '<tr><td colspan="8" class="text-center text-muted">加载失败</td></tr>';
       });
     }
 
     async function banUser(id, ban) {
-      const action = ban ? '灏佺' : '瑙ｅ皝';
-      const ok = await Modal.confirm('纭畾' + action + '璇ョ敤鎴凤紵');
+      const action = ban ? '封禁' : '解封';
+      const ok = await Modal.confirm('确定' + action + '该用户？');
       if (!ok) return;
       const url = '/api/admin/users/' + id + (ban ? '/ban' : '/unban');
       API.put(url, {}).then(function (data) {
-        Toast.success(data.message || action + '鎴愬姛');
+        Toast.success(data.message || action + '成功');
         loadUsers(currentPage);
       }).catch(function (err) {
-        Toast.error(err.message || action + '澶辫触');
+        Toast.error(err.message || action + '失败');
       });
     }
 
     async function deleteUser(id) {
-      const ok = await Modal.confirm('纭畾鍒犻櫎璇ョ敤鎴凤紵姝ゆ搷浣滀笉鍙仮澶嶏紒');
+      const ok = await Modal.confirm('确定删除该用户？此操作不可恢复！');
       if (!ok) return;
       API.del('/api/admin/users/' + id).then(function (data) {
-        Toast.success(data.message || '鍒犻櫎鎴愬姛');
+        Toast.success(data.message || '删除成功');
         loadUsers(currentPage);
       }).catch(function (err) {
-        Toast.error(err.message || '鍒犻櫎澶辫触');
+        Toast.error(err.message || '删除失败');
       });
     }
 
     function showCreateUser() {
-      Modal.show('鍒涘缓鐢ㄦ埛',
+      Modal.show('创建用户',
         '<div style="padding:4px 0">' +
-          '<div class="input-group"><label>鐢ㄦ埛鍚?*</label><input type="text" class="input" id="new-username" placeholder="璇疯緭鍏ョ敤鎴峰悕" required></div>' +
-          '<div class="input-group"><label>瀵嗙爜 *</label><input type="text" class="input" id="new-password" placeholder="璇疯緭鍏ュ瘑鐮侊紙鑷冲皯6浣嶏級" required></div>' +
-          '<div class="input-group"><label>閭锛堝彲閫夛級</label><input type="email" class="input" id="new-email" placeholder="閫夊～"></div>' +
+          '<div class="input-group"><label>用户名 *</label><input type="text" class="input" id="new-username" placeholder="请输入用户名" required></div>' +
+          '<div class="input-group"><label>密码 *</label><input type="text" class="input" id="new-password" placeholder="请输入密码（至少6位）" required></div>' +
+          '<div class="input-group"><label>邮箱（可选）</label><input type="email" class="input" id="new-email" placeholder="选填"></div>' +
           '<div id="create-user-result" style="margin-top:12px;display:none;padding:10px;border-radius:6px;background:var(--bg2);font-size:13px"></div>' +
         '</div>',
-        '<button class="btn" onclick="Modal.close()">鍙栨秷</button><button class="btn btn-primary" onclick="createUser()">鍒涘缓</button>'
+        '<button class="btn" onclick="Modal.close()">取消</button><button class="btn btn-primary" onclick="createUser()">创建</button>'
       );
     }
 
@@ -198,18 +199,18 @@
       var username = document.getElementById('new-username').value.trim();
       var password = document.getElementById('new-password').value;
       var email = document.getElementById('new-email').value.trim();
-      if (!username || !password) { Toast.error('鐢ㄦ埛鍚嶅拰瀵嗙爜涓嶈兘涓虹┖'); return; }
-      if (password.length < 6) { Toast.error('瀵嗙爜鑷冲皯6浣?); return; }
+      if (!username || !password) { Toast.error('用户名和密码不能为空'); return; }
+      if (password.length < 6) { Toast.error('密码至少6位'); return; }
       var body = { username: username, password: password };
       if (email) body.email = email;
       API.post('/api/admin/users', body).then(function (data) {
         var r = document.getElementById('create-user-result');
         r.style.display = 'block';
         r.style.background = 'var(--success-bg, #e8f5e9)';
-        r.innerHTML = '<b>鍒涘缓鎴愬姛锛?/b><br>鐢ㄦ埛鍚嶏細<code>' + escapeHtml(data.username) + '</code><br>瀵嗙爜锛?code>' + escapeHtml(data.password) + '</code><br><br><span style="color:var(--text2)">璇峰皢瀵嗙爜鍛婄煡鐢ㄦ埛锛屽叧闂悗鏃犳硶鍐嶆鏌ョ湅銆?/span>';
+        r.innerHTML = '<b>创建成功！</b><br>用户名：<code>' + escapeHtml(data.username) + '</code><br>密码：<code>' + escapeHtml(data.password) + '</code><br><br><span style="color:var(--text2)">请将密码告知用户，关闭后无法再次查看。</span>';
         loadUsers(currentPage);
       }).catch(function (err) {
-        Toast.error(err.message || '鍒涘缓澶辫触');
+        Toast.error(err.message || '创建失败');
       });
     }
   </script>
