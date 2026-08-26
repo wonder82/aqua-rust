@@ -874,7 +874,8 @@ pub async fn embeddings_handler(
         UPSTREAM_EMBEDDINGS_ENDPOINT.to_string()
     };
     if !up_key.base_url.is_empty() {
-        if let Some(mapped) = map_model_for_key(&up_key.model_scope, &canonical) {
+        let cur_model = payload["model"].as_str().unwrap_or("").to_string();
+        if let Some(mapped) = map_model_for_key(&up_key.model_scope, &cur_model) {
             payload["model"] = Value::String(mapped);
         }
     }
@@ -972,7 +973,7 @@ pub async fn multi_protocol_handler(
         .into_response();
     }
     // 翻译请求
-    let translated = match translator::translate_request(protocol, &raw, &corrected) {
+    let mut translated = match translator::translate_request(protocol, &raw, &corrected) {
         Ok(t) => t,
         Err(e) => return ApiError::bad_request(&e).into_response(),
     };
