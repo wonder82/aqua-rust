@@ -184,16 +184,36 @@
     }
 
     function showCreateUser() {
-      Modal.show('创建用户',
-        '<div style="padding:4px 0">' +
-          '<div class="input-group"><label>用户名 *</label><input type="text" class="input" id="new-username" placeholder="请输入用户名" required></div>' +
-          '<div class="input-group"><label>密码 *</label><input type="text" class="input" id="new-password" placeholder="请输入密码（至少6位）" required></div>' +
-          '<div class="input-group"><label>邮箱（可选）</label><input type="email" class="input" id="new-email" placeholder="选填"></div>' +
-          '<div style="margin-top:4px"><button type="button" class="btn btn-sm" onclick="autoGenerate()">🎲 一键生成账号密码</button></div>' +
-          '<div id="create-user-result" style="margin-top:12px;display:none;padding:10px;border-radius:6px;background:var(--bg2);font-size:13px"></div>' +
-        '</div>',
-        '<button class="btn" onclick="Modal.close()">取消</button><button class="btn btn-primary" onclick="createUser()">创建</button>'
-      );
+      var bodyHtml =
+        '<div class="input-group"><label>用户名 *</label><input type="text" class="input" id="new-username" placeholder="请输入用户名"></div>' +
+        '<div class="input-group"><label>密码 *</label><input type="text" class="input" id="new-password" placeholder="请输入密码（至少6位）"></div>' +
+        '<div class="input-group"><label>邮箱（可选）</label><input type="email" class="input" id="new-email" placeholder="选填"></div>' +
+        '<div style="margin-top:4px"><button type="button" class="btn btn-sm" onclick="autoGenerate()">🎲 一键生成账号密码</button></div>' +
+        '<div id="create-user-result" style="margin-top:12px;display:none;padding:10px;border-radius:6px;background:var(--bg2);font-size:13px"></div>';
+      Modal.show({
+        title: '创建用户',
+        body: bodyHtml,
+        confirmText: '创建',
+        onConfirm: function () {
+          var username = document.getElementById('new-username').value.trim();
+          var password = document.getElementById('new-password').value;
+          var email = document.getElementById('new-email').value.trim();
+          if (!username || !password) { Toast.error('用户名和密码不能为空'); return false; }
+          if (password.length < 6) { Toast.error('密码至少6位'); return false; }
+          var body = { username: username, password: password };
+          if (email) body.email = email;
+          return API.post('/api/admin/users', body).then(function (data) {
+            var r = document.getElementById('create-user-result');
+            r.style.display = 'block';
+            r.innerHTML = '<b>创建成功！</b><br>用户名：<code>' + escapeHtml(data.username) + '</code><br>密码：<code>' + escapeHtml(data.password) + '</code><br><br><span style="color:var(--text2)">请截图保存，关闭后无法再次查看</span>';
+            loadUsers(currentPage);
+            return false;
+          }).catch(function (err) {
+            Toast.error(err.message || '创建失败');
+            return false;
+          });
+        }
+      });
     }
 
     function randomStr(len) {
@@ -208,25 +228,6 @@
       var password = randomStr(4) + Math.floor(100 + Math.random() * 900) + randomStr(3);
       document.getElementById('new-username').value = username;
       document.getElementById('new-password').value = password;
-    }
-
-    function createUser() {
-      var username = document.getElementById('new-username').value.trim();
-      var password = document.getElementById('new-password').value;
-      var email = document.getElementById('new-email').value.trim();
-      if (!username || !password) { Toast.error('用户名和密码不能为空'); return; }
-      if (password.length < 6) { Toast.error('密码至少6位'); return; }
-      var body = { username: username, password: password };
-      if (email) body.email = email;
-      API.post('/api/admin/users', body).then(function (data) {
-        var r = document.getElementById('create-user-result');
-        r.style.display = 'block';
-        r.style.background = 'var(--success-bg, #e8f5e9)';
-        r.innerHTML = '<b>创建成功！</b><br>用户名：<code>' + escapeHtml(data.username) + '</code><br>密码：<code>' + escapeHtml(data.password) + '</code><br><br><span style="color:var(--text2)">请将密码告知用户，关闭后无法再次查看。</span>';
-        loadUsers(currentPage);
-      }).catch(function (err) {
-        Toast.error(err.message || '创建失败');
-      });
     }
   </script>
 
