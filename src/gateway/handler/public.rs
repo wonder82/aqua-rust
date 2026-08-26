@@ -484,6 +484,12 @@ pub async fn chat_completions_handler(
         } else {
             crate::constants::UPSTREAM_CHAT_ENDPOINT.to_string()
         };
+        // 密钥级模型名映射（自定义厂商上游时，把平台模型名换成上游真实模型名）
+        if !up_key.base_url.is_empty() {
+            if let Some(mapped) = map_model_for_key(&up_key.model_scope, &corrected) {
+                body_map["model"] = Value::String(mapped);
+            }
+        }
         let upstream_req = match build_upstream_request(&body_map, &api_key_plain, &endpoint).await {
             Ok(r) => r,
             Err(e) => {
@@ -645,6 +651,15 @@ async fn build_upstream_request(body_map: &Value, api_key: &str, endpoint: &str)
         req.headers_mut().insert("Accept", "application/json".parse().unwrap());
     }
     Ok(req)
+}
+
+/// 密钥级模型名映射：model_scope 支持 "平台模型=上游模型" 逗号分隔格式
+/// 例："z-ai/glm-5.2=glm-4.7-flash" 表示请求 z-ai/glm-5.2 时上游实际用 glm-4.7-flash
+fn map_model_for_key(scope: &str, model: &str) -> Option<String> {
+    scope.split(',').filter_map(|pair| {
+        let (p, u) = pair.trim().split_once('=')?;
+        if p.trim() == model { Some(u.trim().to_string()) } else { None }
+    }).next()
 }
 
 /// 透传上游原始状态码与响应体
@@ -858,6 +873,11 @@ pub async fn embeddings_handler(
     } else {
         UPSTREAM_EMBEDDINGS_ENDPOINT.to_string()
     };
+    if !up_key.base_url.is_empty() {
+        if let Some(mapped) = map_model_for_key(&up_key.model_scope, &canonical) {
+            payload["model"] = Value::String(mapped);
+        }
+    }
     match client
         .post(&embed_url)
         .header("Authorization", format!("Bearer {api_key_plain}"))
@@ -977,6 +997,11 @@ pub async fn multi_protocol_handler(
     } else {
         UPSTREAM_CHAT_ENDPOINT.to_string()
     };
+    if !up_key.base_url.is_empty() {
+        if let Some(mapped) = map_model_for_key(&up_key.model_scope, &corrected) {
+            translated["model"] = Value::String(mapped);
+        }
+    }
     let mut req_builder = client
         .post(&mp_url)
         .header("Authorization", format!("Bearer {api_key_plain}"))
