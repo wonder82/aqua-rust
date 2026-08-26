@@ -433,6 +433,7 @@ function upstreamFormHtml(u,isEdit){
     '<div class="form-row"><label>名称</label><input class="input" name="name" value="'+esc(u.name||"")+'" required></div>'+
     '<div class="form-row"><label>Provider</label><select class="input" name="provider">'+opts+'</select></div>'+
     '<div class="form-row"><label>API 地址（留空使用默认 NVIDIA NIM）</label><input class="input" name="base_url" value="'+esc(u.base_url||"")+'" placeholder="https://api.example.com/v1"></div>'+
+    '<div class="form-row"><label>模型范围（逗号分隔，留空=服务所有模型，如：glm-4-flash,glm-4-plus）</label><input class="input" name="model_scope" value="'+esc(u.model_scope||"")+'" placeholder="留空服务所有模型"></div>'+
     (isEdit?'':'<div class="form-row"><label>API Key</label><input class="input" name="api_key" placeholder="sk-..." required></div>')+
     '<div class="form-grid"><div class="form-row"><label>权重</label><input class="input" type="number" name="weight" value="'+(u.weight||1)+'" min="1"></div>'+
     '<div class="form-row"><label>RPM 限制</label><input class="input" type="number" name="rpm_limit" value="'+(u.rpm_limit||40)+'" min="0"></div></div>'+
@@ -449,10 +450,10 @@ function openUpstreamModal(u,isEdit){
 function submitUpstream(id){
   var d=formToJson($("#up-form"));
   if(id){
-    api("PUT","/upstreams/"+id,{name:d.name,base_url:d.base_url,weight:+d.weight,rpm_limit:+d.rpm_limit,switch_threshold:+d.switch_threshold})
+    api("PUT","/upstreams/"+id,{name:d.name,base_url:d.base_url,model_scope:d.model_scope,weight:+d.weight,rpm_limit:+d.rpm_limit,switch_threshold:+d.switch_threshold})
     .then(function(){toast("保存成功","success");closeModal();loadUpstreams();}).catch(function(e){toast(e.message,"error");});
   }else{
-    api("POST","/upstreams",{name:d.name,provider:d.provider,api_key:d.api_key,base_url:d.base_url,weight:+d.weight,rpm_limit:+d.rpm_limit,switch_threshold:+d.switch_threshold})
+    api("POST","/upstreams",{name:d.name,provider:d.provider,api_key:d.api_key,base_url:d.base_url,model_scope:d.model_scope,weight:+d.weight,rpm_limit:+d.rpm_limit,switch_threshold:+d.switch_threshold})
     .then(function(){toast("创建成功","success");closeModal();loadUpstreams();}).catch(function(e){toast(e.message,"error");});
   }
 }
