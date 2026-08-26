@@ -1,4 +1,4 @@
-/* AQUA 平台共享脚本 - vanilla JS */
+/* JHRY公益 平台共享脚本 - vanilla JS */
 (function (window) {
   'use strict';
 
@@ -42,6 +42,10 @@
   const API = {
     async request(method, url, body) {
       const opts = { method, credentials: 'same-origin', headers: {} };
+      if (['POST','PUT','PATCH','DELETE'].includes(method.toUpperCase())) {
+        const m = document.cookie.match(/(?:^|;\s*)admin_csrf=([^;]+)/);
+        if (m) opts.headers['X-CSRF-Token'] = decodeURIComponent(m[1]);
+      }
       if (body !== undefined && body !== null) {
         opts.headers['Content-Type'] = 'application/json';
         opts.body = JSON.stringify(body);
@@ -417,7 +421,7 @@
       { href: '/docs', label: 'API文档', key: 'docs' },
     ];
     let html = '<nav class="navbar"><div class="navbar-inner">';
-    html += '<div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">AQUA</span><span class="brand-tag">AI</span></a></div>';
+    html += '<div class="navbar-brand"><a href="/" class="brand-logo"><span class="brand-name">JHRY</span><span class="brand-tag">公益</span></a></div>';
     html += '<div class="navbar-links">';
     links.forEach(function (l) {
       const cls = active === l.key ? ' style="color:var(--text-primary)"' : '';
@@ -430,6 +434,7 @@
     // 已登录显示"控制台/退出"两按钮，未登录显示"登录/注册"
     if (_currentUser && _currentUser.id) {
       html += '<a href="/console" class="btn btn-sm btn-primary">' + Icons.shield + ' 控制台</a>';
+      html += '<a href="https://qm.qq.com/q/your-group" class="btn btn-sm" target="_blank">' + Icons.chat + ' QQ群</a>';
       html += '<button class="btn btn-sm btn-ghost" onclick="logout()">' + Icons.logout + ' 退出</button>';
     } else {
       html += '<a href="/login" class="btn btn-sm">登录</a>';
@@ -441,7 +446,7 @@
 
   function renderFooter() {
     return '<footer class="footer">' +
-      '<div class="footer-brand"><span>AQUA</span> AI · 免费 AI 模型平台</div>' +
+      '<div class="footer-brand"><span>JHRY</span> 公益 · 免费 AI 模型平台</div>' +
       '<div class="footer-links">' +
         '<a href="/">首页</a>' +
         '<a href="/models">模型列表</a>' +
@@ -451,8 +456,9 @@
       '<div class="footer-friends" style="margin-top:8px;font-size:12px;color:var(--text-muted)">' +
         '<span style="opacity:.7">友情链接：</span>' +
         '<a href="https://cloudagnetnew.nsdmc.top/" target="_blank" rel="noopener" style="color:var(--text-secondary);text-decoration:none">CloudAgnet</a>' +
+        '<a href="https://qm.qq.com/q/your-group" target="_blank" style="color:var(--text-secondary);text-decoration:none">QQ交流群</a>' +
       '</div>' +
-      '<div class="footer-copy">© 2026 AQUA AI · 让 AI 回归公益 · 本站为社区公益项目，非商业运营</div>' +
+      '<div class="footer-copy">© 2026 JHRY公益 · 免费 AI 模型平台</div>' +
     '</footer>';
   }
 
