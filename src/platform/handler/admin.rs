@@ -1,1 +1,493 @@
-Ly8hIOeuoeeQhuWQjuWPsOi3r+eUse+8mmxvZ2luIC8gbG9nb3V0IC8gY2hlY2sgLyBsb2dpbi1sb2dzIC8gdXNlcnMg566h55CGICsg6Jyc572QCi8vISDkuI4gR28g54mIIGludGVybmFsL3BsYXRmb3JtL2hhbmRsZXIvYWRtaW4uZ28gKyBob25leXBvdC5nbyDlr7npvZAKCnVzZSBzdGQ6OmNvbGxlY3Rpb25zOjpIYXNoTWFwOwp1c2Ugc3RkOjpzeW5jOjpMYXp5TG9jazsKdXNlIHN0ZDo6c3luYzo6TXV0ZXg7Cgp1c2UgYXh1bTo6Ym9keTo6Qnl0ZXM7CnVzZSBheHVtOjpleHRyYWN0Ojp7UGF0aCwgUXVlcnksIFN0YXRlfTsKdXNlIGF4dW06Omh0dHA6OntIZWFkZXJNYXAsIFN0YXR1c0NvZGV9Owp1c2UgYXh1bTo6cmVzcG9uc2U6OntJbnRvUmVzcG9uc2UsIFJlc3BvbnNlfTsKdXNlIHNlcmRlOjpEZXNlcmlhbGl6ZTsKdXNlIHNlcmRlX2pzb246Ontqc29uLCBWYWx1ZX07Cgp1c2Ugc3VwZXI6Oio7CnVzZSBjcmF0ZTo6YXBwc3RhdGU6OlNoYXJlZFN0YXRlOwp1c2UgY3JhdGU6OmNvbmZpZzo6aXNfaXBfYWxsb3dlZDsKdXNlIGNyYXRlOjpzZWN1cml0eTo6e2dlbmVyYXRlX2FkbWluX3Rva2VuLCBnZW5lcmF0ZV9pZCwgaGFzaF9wYXNzd29yZCwgaGFzaF9zaGEyNTYsIHZlcmlmeV9hZG1pbl90b2tlbiwgdmVyaWZ5X3Bhc3N3b3JkfTsKCmNvbnN0IEFETUlOX1NFU1NJT05fVFRMX1NFQ1M6IGk2NCA9IDggKiAzNjAwOwoKLy8vIOWGheWtmCBDU1JGIFRva2VuIOe8k+WtmO+8mmFkbWluX3Rva2VuIC0+IGNzcmZfdG9rZW4Kc3RhdGljIEFETUlOX0NTUkZfVE9LRU5TOiBMYXp5TG9jazxNdXRleDxIYXNoTWFwPFN0cmluZywgU3RyaW5nPj4+ID0gTGF6eUxvY2s6Om5ldyh8fCBNdXRleDo6bmV3KEhhc2hNYXA6Om5ldygpKSk7CgovLy8gUE9TVCAvYXBpL2FkbWluL2xvZ2luCnB1YiBhc3luYyBmbiBsb2dpbihTdGF0ZShzdGF0ZSk6IFN0YXRlPFNoYXJlZFN0YXRlPiwgaGVhZGVyczogSGVhZGVyTWFwLCBib2R5OiBCeXRlcykgLT4gUmVzcG9uc2UgewogICAgbGV0IG11dCByZXNwID0gZG9fbG9naW4oJnN0YXRlLCAmaGVhZGVycywgJmJvZHkpLmF3YWl0OwogICAgYWRtaW5faGVhZGVycygmbXV0IHJlc3ApOwogICAgcmVzcAp9Cgphc3luYyBmbiBkb19sb2dpbihzdGF0ZTogJlNoYXJlZFN0YXRlLCBoZWFkZXJzOiAmSGVhZGVyTWFwLCBib2R5OiAmQnl0ZXMpIC0+IFJlc3BvbnNlIHsKICAgIGxldCBjbGllbnRfaXAgPSBhZG1pbl9jbGllbnRfaXAoaGVhZGVycywgIiIpOwogICAgbGV0IHVzZXJfYWdlbnQgPSBoZWFkZXJzLmdldChheHVtOjpodHRwOjpoZWFkZXI6OlVTRVJfQUdFTlQpLmFuZF90aGVuKHx2fCB2LnRvX3N0cigpLm9rKCkpLnVud3JhcF9vcigiIikudG9fc3RyaW5nKCk7CiAgICAvLyBJUCDnmb3lkI3ljZUKICAgIGlmICFpc19pcF9hbGxvd2VkKCZjbGllbnRfaXAsICZzdGF0ZS5jZmcuYWRtaW4uYWxsb3dlZF9pcHMpIHsKICAgICAgICByZXR1cm4gd3JpdGVfZXJyKFN0YXR1c0NvZGU6OkZPUkJJRERFTiwgImZvcmJpZGRlbiIsICLorr/pl67ooqvmi5Lnu50iKTsKICAgIH0KICAgIC8vIElQIOmZkOmAnwogICAgaWYgIUFETUlOX0xPR0lOX1JBVEUuYWxsb3coJmNsaWVudF9pcCwgNSwgNjApIHsKICAgICAgICBsb2dfYWRtaW5fbG9naW4oJnN0YXRlLCAmY2xpZW50X2lwLCAmdXNlcl9hZ2VudCwgZmFsc2UpLmF3YWl0OwogICAgICAgIHJldHVybiB3cml0ZV9lcnIoU3RhdHVzQ29kZTo6VE9PX01BTllfUkVRVUVTVFMsICJyYXRlX2xpbWl0ZWQiLCAi5bCd6K+V5qyh5pWw6L+H5aSa77yM6K+356iN5ZCO5YaN6K+VIik7CiAgICB9CiAgICBsZXQgcmVxOiBWYWx1ZSA9IG1hdGNoIHNlcmRlX2pzb246OmZyb21fc2xpY2UoYm9keSkgewogICAgICAgIE9rKHYpID0+IHYsCiAgICAgICAgRXJyKF8pID0+IHJldHVybiB3cml0ZV9lcnIoU3RhdHVzQ29kZTo6QkFEX1JFUVVFU1QsICJpbnZhbGlkX3JlcXVlc3QiLCAiSW52YWxpZCBKU09OIiksCiAgICB9OwogICAgbGV0IHBhc3N3b3JkID0gcmVxLmdldCgicGFzc3dvcmQiKS5hbmRfdGhlbih8cHwgcC5hc19zdHIoKSkudW53cmFwX29yKCIiKTsKICAgIC8vIGJjcnlwdCDpqozor4EKICAgIGlmICF2ZXJpZnlfcGFzc3dvcmQocGFzc3dvcmQsICZzdGF0ZS5jZmcuYWRtaW4ucGFzc3dvcmRfaGFzaCkudW53cmFwX29yKGZhbHNlKSB7CiAgICAgICAgbG9nX2FkbWluX2xvZ2luKCZzdGF0ZSwgJmNsaWVudF9pcCwgJnVzZXJfYWdlbnQsIGZhbHNlKS5hd2FpdDsKICAgICAgICByZXR1cm4gd3JpdGVfZXJyKFN0YXR1c0NvZGU6OlVOQVVUSE9SSVpFRCwgImF1dGhfZmFpbGVkIiwgIuWvhueggemUmeivryIpOwogICAgfQogICAgbGV0IHNlY3JldCA9ICZzdGF0ZS5jZmcuYWRtaW4uc2Vzc2lvbl9zZWNyZXQ7CiAgICBpZiBzZWNyZXQuaXNfZW1wdHkoKSB7CiAgICAgICAgcmV0dXJuIHdyaXRlX2VycihTdGF0dXNDb2RlOjpJTlRFUk5BTF9TRVJWRVJfRVJST1IsICJzZXJ2ZXJfZXJyb3IiLCAiU2VydmVyIGNvbmZpZ3VyYXRpb24gZXJyb3IiKTsKICAgIH0KICAgIGxldCB0b2tlbiA9IG1hdGNoIGdlbmVyYXRlX2FkbWluX3Rva2VuKHNlY3JldCwgImFkbWluIikgewogICAgICAgIE9rKHQpID0+IHQsCiAgICAgICAgRXJyKGUpID0+IHsKICAgICAgICAgICAgdHJhY2luZzo6ZXJyb3IhKCJnZW5lcmF0ZSBhZG1pbiB0b2tlbiBmYWlsZWQ6IHtlfSIpOwogICAgICAgICAgICByZXR1cm4gd3JpdGVfZXJyKFN0YXR1c0NvZGU6OklOVEVSTkFMX1NFUlZFUl9FUlJPUiwgInNlcnZlcl9lcnJvciIsICJGYWlsZWQgdG8gZ2VuZXJhdGUgdG9rZW4iKTsKICAgICAgICB9CiAgICB9OwogICAgbGV0IGNzcmZfdG9rZW4gPSBnZW5lcmF0ZV9pZCgpOwogICAgLy8gREIg5YaZ5YWlIGFkbWluX3Nlc3Npb25z77yI5pSv5oyB5ZCK6ZSA77yJCiAgICBsZXQgdG9rZW5faGFzaCA9IGhhc2hfc2hhMjU2KCZ0b2tlbik7CiAgICBsZXQgXyA9IHNxbHg6OnF1ZXJ5KAogICAgICAgICJJTlNFUlQgSU5UTyBhZG1pbl9zZXNzaW9ucyAodG9rZW5faGFzaCwgY3NyZl90b2tlbiwgaXAsIHVzZXJfYWdlbnQsIGV4cGlyZXNfYXQpIFZBTFVFUyAoJDEsICQyLCAkMywgJDQsIG5vdygpICsgaW50ZXJ2YWwgJzggaG91cnMnKSIsCiAgICApCiAgICAuYmluZCgmdG9rZW5faGFzaCkKICAgIC5iaW5kKCZjc3JmX3Rva2VuKQogICAgLmJpbmQoJmNsaWVudF9pcCkKICAgIC5iaW5kKCZ1c2VyX2FnZW50KQogICAgLmV4ZWN1dGUoJnN0YXRlLnBvb2wpCiAgICAuYXdhaXQ7CiAgICBBRE1JTl9DU1JGX1RPS0VOUy5sb2NrKCkudW53cmFwKCkuaW5zZXJ0KHRva2VuLmNsb25lKCksIGNzcmZfdG9rZW4uY2xvbmUoKSk7CiAgICBsZXQgaXNfaHR0cHMgPSBoZWFkZXJzLmdldCgiWC1Gb3J3YXJkZWQtUHJvdG8iKS5hbmRfdGhlbih8dnwgdi50b19zdHIoKS5vaygpKSA9PSBTb21lKCJodHRwcyIpOwogICAgbGV0IG11dCByZXNwID0gd3JpdGVfb2soCiAgICAgICAgU3RhdHVzQ29kZTo6T0ssCiAgICAgICAganNvbiEoeyJtZXNzYWdlIjogIueZu+W9leaIkOWKnyIsICJjc3JmX3Rva2VuIjogY3NyZl90b2tlbiwgImV4cGlyZXNfaW4iOiBBRE1JTl9TRVNTSU9OX1RUTF9TRUNTfSksCiAgICApOwogICAgc2V0X2Nvb2tpZSgmbXV0IHJlc3AsIEFETUlOX0NPT0tJRSwgJnRva2VuLCBBRE1JTl9TRVNTSU9OX1RUTF9TRUNTLCB0cnVlLCBpc19odHRwcywgIlN0cmljdCIpOwogICAgc2V0X2Nvb2tpZSgmbXV0IHJlc3AsIEFETUlOX0NTUkZfQ09PS0lFLCAmY3NyZl90b2tlbiwgQURNSU5fU0VTU0lPTl9UVExfU0VDUywgZmFsc2UsIGlzX2h0dHBzLCAiU3RyaWN0Iik7CiAgICBsb2dfYWRtaW5fbG9naW4oJnN0YXRlLCAmY2xpZW50X2lwLCAmdXNlcl9hZ2VudCwgdHJ1ZSkuYXdhaXQ7CiAgICByZXNwCn0KCi8vLyBQT1NUIC9hcGkvYWRtaW4vbG9nb3V0CnB1YiBhc3luYyBmbiBsb2dvdXQoU3RhdGUoc3RhdGUpOiBTdGF0ZTxTaGFyZWRTdGF0ZT4sIGhlYWRlcnM6IEhlYWRlck1hcCkgLT4gUmVzcG9uc2UgewogICAgbGV0IG11dCByZXNwID0gaWYgbGV0IFNvbWUoY29va2llKSA9IGdldF9jb29raWUoJmhlYWRlcnMsIEFETUlOX0NPT0tJRSkgewogICAgICAgIEFETUlOX0NTUkZfVE9LRU5TLmxvY2soKS51bndyYXAoKS5yZW1vdmUoJmNvb2tpZSk7CiAgICAgICAgbGV0IHRva2VuX2hhc2ggPSBoYXNoX3NoYTI1NigmY29va2llKTsKICAgICAgICBsZXQgXyA9IHNxbHg6OnF1ZXJ5KCJVUERBVEUgYWRtaW5fc2Vzc2lvbnMgU0VUIHJldm9rZWQgPSB0cnVlIFdIRVJFIHRva2VuX2hhc2ggPSAkMSIpCiAgICAgICAgICAgIC5iaW5kKCZ0b2tlbl9oYXNoKQogICAgICAgICAgICAuZXhlY3V0ZSgmc3RhdGUucG9vbCkKICAgICAgICAgICAgLmF3YWl0OwogICAgICAgIHdyaXRlX29rKFN0YXR1c0NvZGU6Ok9LLCBqc29uISh7Im1lc3NhZ2UiOiAi5bey55m75Ye6In0pKQogICAgfSBlbHNlIHsKICAgICAgICB3cml0ZV9vayhTdGF0dXNDb2RlOjpPSywganNvbiEoeyJtZXNzYWdlIjogIuW3sueZu+WHuiJ9KSkKICAgIH07CiAgICBjbGVhcl9jb29raWUoJm11dCByZXNwLCBBRE1JTl9DT09LSUUpOwogICAgY2xlYXJfY29va2llKCZtdXQgcmVzcCwgQURNSU5fQ1NSRl9DT09LSUUpOwogICAgYWRtaW5faGVhZGVycygmbXV0IHJlc3ApOwogICAgcmVzcAp9CgovLy8gR0VUIC9hcGkvYWRtaW4vY2hlY2sKcHViIGFzeW5jIGZuIGNoZWNrKFN0YXRlKHN0YXRlKTogU3RhdGU8U2hhcmVkU3RhdGU+LCBoZWFkZXJzOiBIZWFkZXJNYXApIC0+IFJlc3BvbnNlIHsKICAgIGxldCBsb2dnZWRfaW4gPSBpc19hZG1pbl9hdXRoZWQoJnN0YXRlLCAmaGVhZGVycykuYXdhaXQ7CiAgICBsZXQgbXV0IHJlc3AgPSB3cml0ZV9vayhTdGF0dXNDb2RlOjpPSywganNvbiEoeyJsb2dnZWRfaW4iOiBsb2dnZWRfaW59KSk7CiAgICBhZG1pbl9oZWFkZXJzKCZtdXQgcmVzcCk7CiAgICByZXNwCn0KCi8vLyBHRVQgL2FwaS9hZG1pbi9sb2dpbi1sb2dzCnB1YiBhc3luYyBmbiBsb2dpbl9sb2dzKFN0YXRlKHN0YXRlKTogU3RhdGU8U2hhcmVkU3RhdGU+LCBoZWFkZXJzOiBIZWFkZXJNYXAsIFF1ZXJ5KHEpOiBRdWVyeTxBZG1pblBhZ2VRdWVyeT4pIC0+IFJlc3BvbnNlIHsKICAgIGxldCBtdXQgcmVzcCA9IGlmIGxldCBFcnIocikgPSByZXF1aXJlX2FkbWluKCZzdGF0ZSwgJmhlYWRlcnMpLmF3YWl0IHsKICAgICAgICByCiAgICB9IGVsc2UgewogICAgICAgIGxldCBwYWdlID0gcS5wYWdlLnVud3JhcF9vcigxKS5tYXgoMSk7CiAgICAgICAgbGV0IHBhZ2Vfc2l6ZSA9IHEucGFnZV9zaXplLnVud3JhcF9vcig1MCkuY2xhbXAoMSwgMjAwKTsKICAgICAgICBsZXQgb2Zmc2V0ID0gKHBhZ2UgLSAxKSAqIHBhZ2Vfc2l6ZTsKICAgICAgICBsZXQgcm93cyA9IHNxbHg6OnF1ZXJ5X2FzOjo8XywgKGk2NCwgU3RyaW5nLCBTdHJpbmcsIFN0cmluZywgaTY0KT4oCiAgICAgICAgICAgICJTRUxFQ1QgaWQsIGlwLCB1c2VyX2FnZW50LCBzdGF0dXMsIGV4dHJhY3QoZXBvY2ggZnJvbSBjcmVhdGVkX2F0KTo6YmlnaW50IFwKICAgICAgICAgICAgIEZST00gYWRtaW5fbG9naW5fbG9ncyBPUkRFUiBCWSBjcmVhdGVkX2F0IERFU0MgTElNSVQgJDEgT0ZGU0VUICQyIiwKICAgICAgICApCiAgICAgICAgLmJpbmQocGFnZV9zaXplKQogICAgICAgIC5iaW5kKG9mZnNldCkKICAgICAgICAuZmV0Y2hfYWxsKCZzdGF0ZS5wb29sKQogICAgICAgIC5hd2FpdAogICAgICAgIC51bndyYXBfb3JfZGVmYXVsdCgpOwogICAgICAgIGxldCBkYXRhOiBWZWM8VmFsdWU+ID0gcm93cwogICAgICAgICAgICAuaW50b19pdGVyKCkKICAgICAgICAgICAgLm1hcCh8KGlkLCBpcCwgdXNlcl9hZ2VudCwgc3RhdHVzLCBjcmVhdGVkX2F0KXwganNvbiEoeyJpZCI6IGlkLCAiaXAiOiBpcCwgInVzZXJfYWdlbnQiOiB1c2VyX2FnZW50LCAic3RhdHVzIjogc3RhdHVzLCAiY3JlYXRlZF9hdCI6IGNyZWF0ZWRfYXR9KSkKICAgICAgICAgICAgLmNvbGxlY3QoKTsKICAgICAgICBsZXQgdG90YWw6IGk2NCA9IHNxbHg6OnF1ZXJ5X3NjYWxhcigiU0VMRUNUIGNvdW50KCopIEZST00gYWRtaW5fbG9naW5fbG9ncyIpLmZldGNoX29uZSgmc3RhdGUucG9vbCkuYXdhaXQudW53cmFwX29yKDApOwogICAgICAgIHdyaXRlX29rKFN0YXR1c0NvZGU6Ok9LLCBqc29uISh7ImRhdGEiOiBkYXRhLCAidG90YWwiOiB0b3RhbCwgInBhZ2UiOiBwYWdlLCAicGFnZXNpemUiOiBwYWdlX3NpemV9KSkKICAgIH07CiAgICBhZG1pbl9oZWFkZXJzKCZtdXQgcmVzcCk7CiAgICByZXNwCn0KCi8vLyBHRVQgL2FwaS9hZG1pbi91c2VycwpwdWIgYXN5bmMgZm4gdXNlcnMoU3RhdGUoc3RhdGUpOiBTdGF0ZTxTaGFyZWRTdGF0ZT4sIGhlYWRlcnM6IEhlYWRlck1hcCwgUXVlcnkocSk6IFF1ZXJ5PFVzZXJzUXVlcnk+KSAtPiBSZXNwb25zZSB7CiAgICBsZXQgbXV0IHJlc3AgPSBpZiBsZXQgRXJyKHIpID0gcmVxdWlyZV9hZG1pbigmc3RhdGUsICZoZWFkZXJzKS5hd2FpdCB7CiAgICAgICAgcgogICAgfSBlbHNlIHsKICAgICAgICBsZXQgcGFnZSA9IHEucGFnZS51bndyYXBfb3IoMSkubWF4KDEpOwogICAgICAgIGxldCBwYWdlX3NpemUgPSBxLnBhZ2Vfc2l6ZS51bndyYXBfb3IoMjApLmNsYW1wKDEsIDIwMCk7CiAgICAgICAgbGV0IHNlYXJjaCA9IHEuc2VhcmNoLnVud3JhcF9vcl9kZWZhdWx0KCkudHJpbSgpLnRvX3N0cmluZygpOwogICAgICAgIGxldCBzdGF0dXNfZmlsdGVyID0gcS5zdGF0dXMudW53cmFwX29yX2RlZmF1bHQoKS50cmltKCkudG9fc3RyaW5nKCk7CiAgICAgICAgLy8g5Yqo5oCBIFdIRVJF77yI5YC85YaF6IGU6L2s5LmJ77yJCiAgICAgICAgbGV0IG11dCBjb25kaXRpb25zOiBWZWM8U3RyaW5nPiA9IFZlYzo6bmV3KCk7CiAgICAgICAgaWYgIXNlYXJjaC5pc19lbXB0eSgpIHsKICAgICAgICAgICAgY29uZGl0aW9ucy5wdXNoKGZvcm1hdCEoIih1c2VybmFtZSBJTElLRSAne30nIE9SIGVtYWlsIElMSUtFICd7fScpIiwgZXNjYXBlX2xpa2UoJnNlYXJjaCksIGVzY2FwZV9saWtlKCZzZWFyY2gpKSk7CiAgICAgICAgfQogICAgICAgIGlmICFzdGF0dXNfZmlsdGVyLmlzX2VtcHR5KCkgewogICAgICAgICAgICBjb25kaXRpb25zLnB1c2goZm9ybWF0ISgic3RhdHVzID0gJ3t9JyIsIHN0YXR1c19maWx0ZXIucmVwbGFjZSgnXCcnLCAiJyciKSkpOwogICAgICAgIH0KICAgICAgICBsZXQgd2hlcmVfY2xhdXNlID0gaWYgY29uZGl0aW9ucy5pc19lbXB0eSgpIHsgU3RyaW5nOjpuZXcoKSB9IGVsc2UgeyBmb3JtYXQhKCIgV0hFUkUge30iLCBjb25kaXRpb25zLmpvaW4oIiBBTkQgIikpIH07CiAgICAgICAgbGV0IHRvdGFsOiBpNjQgPSBzcWx4OjpxdWVyeV9zY2FsYXIoJmZvcm1hdCEoIlNFTEVDVCBjb3VudCgqKSBGUk9NIHVzZXJze3doZXJlX2NsYXVzZX0iKSkuZmV0Y2hfb25lKCZzdGF0ZS5wb29sKS5hd2FpdC51bndyYXBfb3IoMCk7CiAgICAgICAgbGV0IG9mZnNldCA9IChwYWdlIC0gMSkgKiBwYWdlX3NpemU7CiAgICAgICAgbGV0IHF1ZXJ5X3N0ciA9IGZvcm1hdCEoCiAgICAgICAgICAgICJTRUxFQ1QgaWQsIHVzZXJuYW1lLCBlbWFpbCwgZGlzcGxheV9uYW1lLCBzdGF0dXMsIHVzZXJfdHlwZSwgZXh0cmFjdChlcG9jaCBmcm9tIGNyZWF0ZWRfYXQpOjpiaWdpbnQgRlJPTSB1c2Vyc3t3aGVyZV9jbGF1c2V9IE9SREVSIEJZIGNyZWF0ZWRfYXQgREVTQyBMSU1JVCB7fSBPRkZTRVQge30iLAogICAgICAgICAgICBwYWdlX3NpemUsIG9mZnNldAogICAgICAgICk7CiAgICAgICAgbGV0IHJvd3MgPSBzcWx4OjpxdWVyeV9hczo6PF8sIChpNjQsIFN0cmluZywgU3RyaW5nLCBTdHJpbmcsIFN0cmluZywgU3RyaW5nLCBpNjQpPigmcXVlcnlfc3RyKS5mZXRjaF9hbGwoJnN0YXRlLnBvb2wpLmF3YWl0LnVud3JhcF9vcl9kZWZhdWx0KCk7CiAgICAgICAgbGV0IGRhdGE6IFZlYzxWYWx1ZT4gPSByb3dzCiAgICAgICAgICAgIC5pbnRvX2l0ZXIoKQogICAgICAgICAgICAubWFwKHwoaWQsIHVzZXJuYW1lLCBlbWFpbCwgZGlzcGxheV9uYW1lLCBzdGF0dXMsIHVzZXJfdHlwZSwgY3JlYXRlZF9hdCl8IGpzb24hKHsiaWQiOiBpZCwgInVzZXJuYW1lIjogdXNlcm5hbWUsICJlbWFpbCI6IGVtYWlsLCAiZGlzcGxheV9uYW1lIjogZGlzcGxheV9uYW1lLCAic3RhdHVzIjogc3RhdHVzLCAidXNlcl90eXBlIjogdXNlcl90eXBlLCAiY3JlYXRlZF9hdCI6IGNyZWF0ZWRfYXR9KSkKICAgICAgICAgICAgLmNvbGxlY3QoKTsKICAgICAgICB3cml0ZV9vayhTdGF0dXNDb2RlOjpPSywganNvbiEoeyJkYXRhIjogZGF0YSwgInRvdGFsIjogdG90YWwsICJwYWdlIjogcGFnZSwgInBhZ2VzaXplIjogcGFnZV9zaXplfSkpCiAgICB9OwogICAgYWRtaW5faGVhZGVycygmbXV0IHJlc3ApOwogICAgcmVzcAp9CgovLy8gR0VUIC9hcGkvYWRtaW4vdXNlcnMve2lkfSAtIOeUqOaIt+ivpuaDhQpwdWIgYXN5bmMgZm4gdXNlcl9kZXRhaWxfaGFuZGxlcihTdGF0ZShzdGF0ZSk6IFN0YXRlPFNoYXJlZFN0YXRlPiwgaGVhZGVyczogSGVhZGVyTWFwLCBQYXRoKGlkKTogUGF0aDxpNjQ+KSAtPiBSZXNwb25zZSB7CiAgICBsZXQgbXV0IHJlc3AgPSBpZiBsZXQgRXJyKHIpID0gcmVxdWlyZV9hZG1pbigmc3RhdGUsICZoZWFkZXJzKS5hd2FpdCB7CiAgICAgICAgcgogICAgfSBlbHNlIHsKICAgICAgICBsZXQgcm93ID0gc3FseDo6cXVlcnlfYXM6OjxfLCAoU3RyaW5nLCBTdHJpbmcsIFN0cmluZywgaTY0KT4oCiAgICAgICAgICAgICJTRUxFQ1QgdXNlcm5hbWUsIGVtYWlsLCBzdGF0dXMsIGV4dHJhY3QoZXBvY2ggZnJvbSBjcmVhdGVkX2F0KTo6YmlnaW50IEZST00gdXNlcnMgV0hFUkUgaWQgPSAkMSIsCiAgICAgICAgKQogICAgICAgIC5iaW5kKGlkKQogICAgICAgIC5mZXRjaF9vcHRpb25hbCgmc3RhdGUucG9vbCkKICAgICAgICAuYXdhaXQKICAgICAgICAub2soKQogICAgICAgIC5mbGF0dGVuKCk7CiAgICAgICAgbGV0IFNvbWUoKHVzZXJuYW1lLCBlbWFpbCwgc3RhdHVzLCBjcmVhdGVkX2F0KSkgPSByb3cgZWxzZSB7CiAgICAgICAgICAgIHJldHVybiB3cml0ZV9lcnIoU3RhdHVzQ29kZTo6Tk9UX0ZPVU5ELCAibm90X2ZvdW5kIiwgIlVzZXIgbm90IGZvdW5kIik7CiAgICAgICAgfTsKICAgICAgICB3cml0ZV9vayhTdGF0dXNDb2RlOjpPSywganNvbiEoeyJpZCI6IGlkLCAidXNlcm5hbWUiOiB1c2VybmFtZSwgImVtYWlsIjogZW1haWwsICJzdGF0dXMiOiBzdGF0dXMsICJjcmVhdGVkX2F0IjogY3JlYXRlZF9hdH0pKQogICAgfTsKICAgIGFkbWluX2hlYWRlcnMoJm11dCByZXNwKTsKICAgIHJlc3AKfQoKLy8vIFBVVCAvYXBpL2FkbWluL3VzZXJzL3tpZH0vYmFuCnB1YiBhc3luYyBmbiBiYW5fdXNlcl9oYW5kbGVyKFN0YXRlKHN0YXRlKTogU3RhdGU8U2hhcmVkU3RhdGU+LCBoZWFkZXJzOiBIZWFkZXJNYXAsIFBhdGgoaWQpOiBQYXRoPGk2ND4pIC0+IFJlc3BvbnNlIHsKICAgIGxldCBtdXQgcmVzcCA9IGlmIGxldCBFcnIocikgPSByZXF1aXJlX2FkbWluX2NzcmYoJnN0YXRlLCAmaGVhZGVycykuYXdhaXQgewogICAgICAgIHIKICAgIH0gZWxzZSB7CiAgICAgICAgYmFuX3VzZXIoJnN0YXRlLCAmaGVhZGVycywgaWQpLmF3YWl0CiAgICB9OwogICAgYWRtaW5faGVhZGVycygmbXV0IHJlc3ApOwogICAgcmVzcAp9Cgphc3luYyBmbiBiYW5fdXNlcihzdGF0ZTogJlNoYXJlZFN0YXRlLCBfaGVhZGVyczogJkhlYWRlck1hcCwgdXNlcl9pZDogaTY0KSAtPiBSZXNwb25zZSB7CiAgICBsZXQgcm93OiBPcHRpb248U3RyaW5nPiA9IHNxbHg6OnF1ZXJ5X3NjYWxhcigiVVBEQVRFIHVzZXJzIFNFVCBzdGF0dXMgPSAnYmFubmVkJyBXSEVSRSBpZCA9ICQxIFJFVFVSTklORyB1c2VybmFtZSIpCiAgICAgICAgLmJpbmQodXNlcl9pZCkKICAgICAgICAuZmV0Y2hfb3B0aW9uYWwoJnN0YXRlLnBvb2wpCiAgICAgICAgLmF3YWl0CiAgICAgICAgLm9rKCkKICAgICAgICAuZmxhdHRlbigpOwogICAgbGV0IFNvbWUodXNlcm5hbWUpID0gcm93IGVsc2UgewogICAgICAgIHJldHVybiB3cml0ZV9lcnIoU3RhdHVzQ29kZTo6Tk9UX0ZPVU5ELCAibm90X2ZvdW5kIiwgIlVzZXIgbm90IGZvdW5kIik7CiAgICB9OwogICAgbGV0IF8gPSBzcWx4OjpxdWVyeSgiVVBEQVRFIHVzZXJfYXBpX2tleXMgU0VUIHN0YXR1cyA9ICdiYW5uZWQnIFdIRVJFIHVzZXJfaWQgPSAkMSIpLmJpbmQodXNlcl9pZCkuZXhlY3V0ZSgmc3RhdGUucG9vbCkuYXdhaXQ7CiAgICB3cml0ZV9vayhTdGF0dXNDb2RlOjpPSywganNvbiEoeyJtZXNzYWdlIjogZm9ybWF0ISgi55So5oi3IHt1c2VybmFtZX0g5bey5bCB56aBIil9KSkKfQoKLy8vIFBVVCAvYXBpL2FkbWluL3VzZXJzL3tpZH0vdW5iYW4KcHViIGFzeW5jIGZuIHVuYmFuX3VzZXJfaGFuZGxlcihTdGF0ZShzdGF0ZSk6IFN0YXRlPFNoYXJlZFN0YXRlPiwgaGVhZGVyczogSGVhZGVyTWFwLCBQYXRoKGlkKTogUGF0aDxpNjQ+KSAtPiBSZXNwb25zZSB7CiAgICBsZXQgbXV0IHJlc3AgPSBpZiBsZXQgRXJyKHIpID0gcmVxdWlyZV9hZG1pbl9jc3JmKCZzdGF0ZSwgJmhlYWRlcnMpLmF3YWl0IHsKICAgICAgICByCiAgICB9IGVsc2UgewogICAgICAgIHVuYmFuX3VzZXIoJnN0YXRlLCAmaGVhZGVycywgaWQpLmF3YWl0CiAgICB9OwogICAgYWRtaW5faGVhZGVycygmbXV0IHJlc3ApOwogICAgcmVzcAp9Cgphc3luYyBmbiB1bmJhbl91c2VyKHN0YXRlOiAmU2hhcmVkU3RhdGUsIF9oZWFkZXJzOiAmSGVhZGVyTWFwLCB1c2VyX2lkOiBpNjQpIC0+IFJlc3BvbnNlIHsKICAgIGxldCByb3c6IE9wdGlvbjxTdHJpbmc+ID0gc3FseDo6cXVlcnlfc2NhbGFyKCJVUERBVEUgdXNlcnMgU0VUIHN0YXR1cyA9ICdhY3RpdmUnIFdIRVJFIGlkID0gJDEgUkVUVVJOSU5HIHVzZXJuYW1lIikKICAgICAgICAuYmluZCh1c2VyX2lkKQogICAgICAgIC5mZXRjaF9vcHRpb25hbCgmc3RhdGUucG9vbCkKICAgICAgICAuYXdhaXQKICAgICAgICAub2soKQogICAgICAgIC5mbGF0dGVuKCk7CiAgICBsZXQgU29tZSh1c2VybmFtZSkgPSByb3cgZWxzZSB7CiAgICAgICAgcmV0dXJuIHdyaXRlX2VycihTdGF0dXNDb2RlOjpOT1RfRk9VTkQsICJub3RfZm91bmQiLCAiVXNlciBub3QgZm91bmQiKTsKICAgIH07CiAgICBsZXQgXyA9IHNxbHg6OnF1ZXJ5KCJVUERBVEUgdXNlcl9hcGlfa2V5cyBTRVQgc3RhdHVzID0gJ2FjdGl2ZScgV0hFUkUgdXNlcl9pZCA9ICQxIEFORCBzdGF0dXMgPSAnYmFubmVkJyIpLmJpbmQodXNlcl9pZCkuZXhlY3V0ZSgmc3RhdGUucG9vbCkuYXdhaXQ7CiAgICBsZXQgXyA9IHNxbHg6OnF1ZXJ5KAogICAgICAgICJVUERBVEUgdXNlcnMgU0VUIHBlbmFsdHlfYWN0aXZlID0gdHJ1ZSwgcGVuYWx0eV9ycG1fbGltaXQgPSAxMCwgcGVuYWx0eV9jb25jdXJyZW5jeV9jYXAgPSAxLCBwZW5hbHR5X3JlYXNvbiA9ICdhcHBlYWxfdW5iYW5fcmVzdHJpY3Rpb24nLCBwZW5hbHR5X3N0YXJ0ZWRfYXQgPSBDT0FMRVNDRShwZW5hbHR5X3N0YXJ0ZWRfYXQsIG5vdygpKSBXSEVSRSBpZCA9ICQxIiwKICAgICkKICAgIC5iaW5kKHVzZXJfaWQpCiAgICAuZXhlY3V0ZSgmc3RhdGUucG9vbCkKICAgIC5hd2FpdDsKICAgIHdyaXRlX29rKFN0YXR1c0NvZGU6Ok9LLCBqc29uISh7Im1lc3NhZ2UiOiBmb3JtYXQhKCLnlKjmiLcge3VzZXJuYW1lfSDlt7Lop6PlsIEiKX0pKQp9CgovLy8gUE9TVCAvYXBpL2FkbWluL3VzZXJzIC0g566h55CG5ZGY5Yib5bu655So5oi3CnB1YiBhc3luYyBmbiBjcmVhdGVfdXNlcl9oYW5kbGVyKFN0YXRlKHN0YXRlKTogU3RhdGU8U2hhcmVkU3RhdGU+LCBoZWFkZXJzOiBIZWFkZXJNYXAsIGJvZHk6IEJ5dGVzKSAtPiBSZXNwb25zZSB7CiAgICBsZXQgbXV0IHJlc3AgPSBpZiBsZXQgRXJyKHIpID0gcmVxdWlyZV9hZG1pbl9jc3JmKCZzdGF0ZSwgJmhlYWRlcnMpLmF3YWl0IHsKICAgICAgICByCiAgICB9IGVsc2UgewogICAgICAgIGxldCByZXE6IFZhbHVlID0gbWF0Y2ggc2VyZGVfanNvbjo6ZnJvbV9zbGljZSgmYm9keSkgewogICAgICAgICAgICBPayh2KSA9PiB2LAogICAgICAgICAgICBFcnIoXykgPT4gcmV0dXJuIGFkbWluX2hlYWRlcnMod3JpdGVfZXJyKFN0YXR1c0NvZGU6OkJBRF9SRVFVRVNULCAiaW52YWxpZF9yZXF1ZXN0IiwgIkludmFsaWQgSlNPTiIpKSwKICAgICAgICB9OwogICAgICAgIGxldCB1c2VybmFtZSA9IHJlcS5nZXQoInVzZXJuYW1lIikuYW5kX3RoZW4ofHV8IHUuYXNfc3RyKCkpLm1hcCh8c3wgcy50cmltKCkudG9fc3RyaW5nKCkpLnVud3JhcF9vcl9kZWZhdWx0KCk7CiAgICAgICAgbGV0IHBhc3N3b3JkID0gcmVxLmdldCgicGFzc3dvcmQiKS5hbmRfdGhlbih8cHwgcC5hc19zdHIoKSkudW53cmFwX29yKCIiKS50b19zdHJpbmcoKTsKICAgICAgICBsZXQgZW1haWwgPSByZXEuZ2V0KCJlbWFpbCIpLmFuZF90aGVuKHxlfCBlLmFzX3N0cigpKS5tYXAofHN8IHMudHJpbSgpLnRvX2xvd2VyY2FzZSgpKS51bndyYXBfb3JfZGVmYXVsdCgpOwogICAgICAgIGlmIHVzZXJuYW1lLmlzX2VtcHR5KCkgfHwgcGFzc3dvcmQuaXNfZW1wdHkoKSB7CiAgICAgICAgICAgIHJldHVybiBhZG1pbl9oZWFkZXJzKHdyaXRlX2VycihTdGF0dXNDb2RlOjpCQURfUkVRVUVTVCwgImludmFsaWRfcmVxdWVzdCIsICLnlKjmiLflkI3lkozlr4bnoIHkuI3og73kuLrnqboiKSk7CiAgICAgICAgfQogICAgICAgIGlmIHBhc3N3b3JkLmNoYXJzKCkuY291bnQoKSA8IDYgewogICAgICAgICAgICByZXR1cm4gYWRtaW5faGVhZGVycyh3cml0ZV9lcnIoU3RhdHVzQ29kZTo6QkFEX1JFUVVFU1QsICJpbnZhbGlkX3JlcXVlc3QiLCAi5a+G56CB6ZW/5bqm5LiN6IO95bCR5LqONuS9jSIpKTsKICAgICAgICB9CiAgICAgICAgLy8g5qOA5p+l55So5oi35ZCN5piv5ZCm5bey5a2Y5ZyoCiAgICAgICAgbGV0IGV4aXN0czogYm9vbCA9IHNxbHg6OnF1ZXJ5X3NjYWxhcigiU0VMRUNUIEVYSVNUUyhTRUxFQ1QgMSBGUk9NIHVzZXJzIFdIRVJFIExPV0VSKHVzZXJuYW1lKT1MT1dFUigkMSkpIikKICAgICAgICAgICAgLmJpbmQoJnVzZXJuYW1lKQogICAgICAgICAgICAuZmV0Y2hfb25lKCZzdGF0ZS5wb29sKQogICAgICAgICAgICAuYXdhaXQKICAgICAgICAgICAgLnVud3JhcF9vcihmYWxzZSk7CiAgICAgICAgaWYgZXhpc3RzIHsKICAgICAgICAgICAgcmV0dXJuIGFkbWluX2hlYWRlcnMod3JpdGVfZXJyKFN0YXR1c0NvZGU6OkNPTkZMSUNULCAiZXhpc3RzIiwgIueUqOaIt+WQjeW3suWtmOWcqCIpKTsKICAgICAgICB9CiAgICAgICAgbGV0IGhhc2ggPSBtYXRjaCBoYXNoX3Bhc3N3b3JkKCZwYXNzd29yZCkgewogICAgICAgICAgICBPayhoKSA9PiBoLAogICAgICAgICAgICBFcnIoZSkgPT4gewogICAgICAgICAgICAgICAgdHJhY2luZzo6ZXJyb3IhKCJoYXNoIHBhc3N3b3JkIGZhaWxlZDoge2V9Iik7CiAgICAgICAgICAgICAgICByZXR1cm4gYWRtaW5faGVhZGVycyh3cml0ZV9lcnIoU3RhdHVzQ29kZTo6SU5URVJOQUxfU0VSVkVSX0VSUk9SLCAic2VydmVyX2Vycm9yIiwgIuWvhueggeWKoOWvhuWksei0pSIpKTsKICAgICAgICAgICAgfQogICAgICAgIH07CiAgICAgICAgbGV0IHV1aWQgPSBnZW5lcmF0ZV9pZCgpOwogICAgICAgIGxldCBlbWFpbF92YWwgPSBpZiBlbWFpbC5pc19lbXB0eSgpIHsgZm9ybWF0ISgie3VzZXJuYW1lfUBsb2NhbC5nZW5lcmF0ZWQiKSB9IGVsc2UgeyBlbWFpbC5jbG9uZSgpIH07CiAgICAgICAgbGV0IHJvdzogUmVzdWx0PChpNjQsIFN0cmluZyksIF8+ID0gc3FseDo6cXVlcnlfYXMoCiAgICAgICAgICAgICJJTlNFUlQgSU5UTyB1c2Vycyh1dWlkLCB1c2VybmFtZSwgZW1haWwsIHBhc3N3b3JkX2hhc2gsIGRpc3BsYXlfbmFtZSwgc3RhdHVzLCB1c2VyX3R5cGUsIGd3X2NsaWVudF9pZCkgXAogICAgICAgICAgICAgVkFMVUVTKCQxLCAkMiwgJDMsICQ0LCAkNSwgJ2FjdGl2ZScsICdub3JtYWwnLCBuZXh0dmFsKCdjbGllbnRfaWRfc2VxJyk6OnRleHQpIFJFVFVSTklORyBpZCwgZ3dfY2xpZW50X2lkIiwKICAgICAgICApCiAgICAgICAgLmJpbmQoJnV1aWQpCiAgICAgICAgLmJpbmQoJnVzZXJuYW1lKQogICAgICAgIC5iaW5kKCZlbWFpbF92YWwpCiAgICAgICAgLmJpbmQoJmhhc2gpCiAgICAgICAgLmJpbmQoJnVzZXJuYW1lKQogICAgICAgIC5mZXRjaF9vbmUoJnN0YXRlLnBvb2wpCiAgICAgICAgLmF3YWl0OwogICAgICAgIGxldCAodXNlcl9pZCwgZ3dfY2xpZW50X2lkKSA9IG1hdGNoIHJvdyB7CiAgICAgICAgICAgIE9rKHYpID0+IHYsCiAgICAgICAgICAgIEVycihlKSA9PiB7CiAgICAgICAgICAgICAgICB0cmFjaW5nOjplcnJvciEoImNyZWF0ZSB1c2VyIGZhaWxlZDoge2V9Iik7CiAgICAgICAgICAgICAgICByZXR1cm4gYWRtaW5faGVhZGVycyh3cml0ZV9lcnIoU3RhdHVzQ29kZTo6SU5URVJOQUxfU0VSVkVSX0VSUk9SLCAic2VydmVyX2Vycm9yIiwgIuWIm+W7uueUqOaIt+Wksei0pSIpKTsKICAgICAgICAgICAgfQogICAgICAgIH07CiAgICAgICAgbGV0IF8gPSBzcWx4OjpxdWVyeSgiSU5TRVJUIElOVE8gY2xpZW50cyhpZCwgbmFtZSwgc3RhdHVzLCB1c2VyX3R5cGUpIFZBTFVFUygkMSwgJDIsICdhY3RpdmUnLCAnbm9ybWFsJykiKQogICAgICAgICAgICAuYmluZCgmZ3dfY2xpZW50X2lkKQogICAgICAgICAgICAuYmluZCgmdXNlcm5hbWUpCiAgICAgICAgICAgIC5leGVjdXRlKCZzdGF0ZS5wb29sKQogICAgICAgICAgICAuYXdhaXQ7CiAgICAgICAgd3JpdGVfb2soU3RhdHVzQ29kZTo6Q1JFQVRFRCwganNvbiEoeyJpZCI6IHVzZXJfaWQsICJ1c2VybmFtZSI6IHVzZXJuYW1lLCAicGFzc3dvcmQiOiBwYXNzd29yZH0pKQogICAgfTsKICAgIGFkbWluX2hlYWRlcnMoJm11dCByZXNwKTsKICAgIHJlc3AKfQoKLy8vIERFTEVURSAvYXBpL2FkbWluL3VzZXJzL3tpZH0KcHViIGFzeW5jIGZuIGRlbGV0ZV91c2VyX2hhbmRsZXIoU3RhdGUoc3RhdGUpOiBTdGF0ZTxTaGFyZWRTdGF0ZT4sIGhlYWRlcnM6IEhlYWRlck1hcCwgUGF0aChpZCk6IFBhdGg8aTY0PikgLT4gUmVzcG9uc2UgewogICAgbGV0IG11dCByZXNwID0gaWYgbGV0IEVycihyKSA9IHJlcXVpcmVfYWRtaW5fY3NyZigmc3RhdGUsICZoZWFkZXJzKS5hd2FpdCB7CiAgICAgICAgcgogICAgfSBlbHNlIHsKICAgICAgICBsZXQgcm93OiBPcHRpb248U3RyaW5nPiA9IHNxbHg6OnF1ZXJ5X3NjYWxhcigiREVMRVRFIEZST00gdXNlcnMgV0hFUkUgaWQgPSAkMSBSRVRVUk5JTkcgdXNlcm5hbWUiKQogICAgICAgICAgICAgICAgLmJpbmQoaWQpCiAgICAgICAgICAgICAgICAuZmV0Y2hfb3B0aW9uYWwoJnN0YXRlLnBvb2wpCiAgICAgICAgICAgICAgICAuYXdhaXQKICAgICAgICAgICAgICAgIC5vaygpCiAgICAgICAgICAgICAgICAuZmxhdHRlbigpOwogICAgICAgIG1hdGNoIHJvdyB7CiAgICAgICAgICAgIFNvbWUodXNlcm5hbWUpID0+IHdyaXRlX29rKFN0YXR1c0NvZGU6Ok9LLCBqc29uISh7Im1lc3NhZ2UiOiBmb3JtYXQhKCLnlKjmiLcge3VzZXJuYW1lfSDlt7LliKDpmaQiKX0pKSwKICAgICAgICAgICAgTm9uZSA9PiB3cml0ZV9lcnIoU3RhdHVzQ29kZTo6Tk9UX0ZPVU5ELCAibm90X2ZvdW5kIiwgIlVzZXIgbm90IGZvdW5kIiksCiAgICAgICAgfQogICAgfTsKICAgIGFkbWluX2hlYWRlcnMoJm11dCByZXNwKTsKICAgIHJlc3AKfQoKLy8vID09PT09PT09PT09PT09PT09PT09PSDorqTor4HovoXliqkgPT09PT09PT09PT09PT09PT09PT09CgovLy8g5qCh6aqM566h55CG5ZGY5Lya6K+d77yISE1BQyB0b2tlbiArIERCIOWQiumUgOajgOafpe+8iQphc3luYyBmbiBpc19hZG1pbl9hdXRoZWQoc3RhdGU6ICZTaGFyZWRTdGF0ZSwgaGVhZGVyczogJkhlYWRlck1hcCkgLT4gYm9vbCB7CiAgICBsZXQgU29tZShjb29raWUpID0gZ2V0X2Nvb2tpZShoZWFkZXJzLCBBRE1JTl9DT09LSUUpIGVsc2UgewogICAgICAgIHJldHVybiBmYWxzZTsKICAgIH07CiAgICBsZXQgc2VjcmV0ID0gJnN0YXRlLmNmZy5hZG1pbi5zZXNzaW9uX3NlY3JldDsKICAgIGlmIHNlY3JldC5pc19lbXB0eSgpIHsKICAgICAgICByZXR1cm4gZmFsc2U7CiAgICB9CiAgICBpZiB2ZXJpZnlfYWRtaW5fdG9rZW4oJmNvb2tpZSwgc2VjcmV0KS5pc19lcnIoKSB7CiAgICAgICAgcmV0dXJuIGZhbHNlOwogICAgfQogICAgbGV0IHRva2VuX2hhc2ggPSBoYXNoX3NoYTI1NigmY29va2llKTsKICAgIGxldCByZXZva2VkOiBPcHRpb248Ym9vbD4gPSBzcWx4OjpxdWVyeV9zY2FsYXIoIlNFTEVDVCByZXZva2VkIEZST00gYWRtaW5fc2Vzc2lvbnMgV0hFUkUgdG9rZW5faGFzaCA9ICQxIEFORCBleHBpcmVzX2F0ID4gbm93KCkiKQogICAgICAgIC5iaW5kKCZ0b2tlbl9oYXNoKQogICAgICAgIC5mZXRjaF9vcHRpb25hbCgmc3RhdGUucG9vbCkKICAgICAgICAuYXdhaXQKICAgICAgICAub2soKQogICAgICAgIC5mbGF0dGVuKCk7CiAgICBtYXRjaCByZXZva2VkIHsKICAgICAgICBTb21lKGZhbHNlKSA9PiB0cnVlLAogICAgICAgIF8gPT4gZmFsc2UsCiAgICB9Cn0KCi8vLyDnrqHnkIblkZjorqTor4HljIXoo4XvvJpJUCDnmb3lkI3ljZUgKyDkvJror53moKHpqozvvIjlj6ror7vmk43kvZzvvIkKYXN5bmMgZm4gcmVxdWlyZV9hZG1pbihzdGF0ZTogJlNoYXJlZFN0YXRlLCBoZWFkZXJzOiAmSGVhZGVyTWFwKSAtPiBSZXN1bHQ8KCksIFJlc3BvbnNlPiB7CiAgICBsZXQgY2xpZW50X2lwID0gYWRtaW5fY2xpZW50X2lwKGhlYWRlcnMsICIiKTsKICAgIGlmICFpc19pcF9hbGxvd2VkKCZjbGllbnRfaXAsICZzdGF0ZS5jZmcuYWRtaW4uYWxsb3dlZF9pcHMpIHsKICAgICAgICByZXR1cm4gRXJyKHdyaXRlX2VycihTdGF0dXNDb2RlOjpGT1JCSURERU4sICJmb3JiaWRkZW4iLCAi6K6/6Zeu6KKr5ouS57udIikpOwogICAgfQogICAgaWYgIWlzX2FkbWluX2F1dGhlZChzdGF0ZSwgaGVhZGVycykuYXdhaXQgewogICAgICAgIHJldHVybiBFcnIod3JpdGVfZXJyKFN0YXR1c0NvZGU6OlVOQVVUSE9SSVpFRCwgImF1dGhfZXJyb3IiLCAi5pyq55m75b2V5oiW5Lya6K+d6L+H5pyfIikpOwogICAgfQogICAgT2soKCkpCn0KCi8vLyDnrqHnkIblkZjorqTor4EgKyBDU1JGIOagoemqjO+8iOeKtuaAgeWPmOabtOaTjeS9nO+8iQphc3luYyBmbiByZXF1aXJlX2FkbWluX2NzcmYoc3RhdGU6ICZTaGFyZWRTdGF0ZSwgaGVhZGVyczogJkhlYWRlck1hcCkgLT4gUmVzdWx0PCgpLCBSZXNwb25zZT4gewogICAgcmVxdWlyZV9hZG1pbihzdGF0ZSwgaGVhZGVycykuYXdhaXQ/OwogICAgbGV0IGNzcmZfaGVhZGVyID0gaGVhZGVycy5nZXQoIlgtQ1NSRi1Ub2tlbiIpLmFuZF90aGVuKHx2fCB2LnRvX3N0cigpLm9rKCkpLnVud3JhcF9vcigiIik7CiAgICBpZiBjc3JmX2hlYWRlci5pc19lbXB0eSgpIHsKICAgICAgICByZXR1cm4gRXJyKHdyaXRlX2VycihTdGF0dXNDb2RlOjpGT1JCSURERU4sICJjc3JmX2Vycm9yIiwgIue8uuWwkUNTUkYgVG9rZW4iKSk7CiAgICB9CiAgICBsZXQgU29tZShjb29raWUpID0gZ2V0X2Nvb2tpZShoZWFkZXJzLCBBRE1JTl9DT09LSUUpIGVsc2UgewogICAgICAgIHJldHVybiBFcnIod3JpdGVfZXJyKFN0YXR1c0NvZGU6OlVOQVVUSE9SSVpFRCwgImF1dGhfZXJyb3IiLCAi5Lya6K+d5peg5pWIIikpOwogICAgfTsKICAgIGxldCB0b2tlbnMgPSBBRE1JTl9DU1JGX1RPS0VOUy5sb2NrKCkudW53cmFwKCk7CiAgICBtYXRjaCB0b2tlbnMuZ2V0KCZjb29raWUpIHsKICAgICAgICBTb21lKHN0b3JlZCkgaWYgc3RvcmVkID09IGNzcmZfaGVhZGVyID0+IE9rKCgpKSwKICAgICAgICBfID0+IEVycih3cml0ZV9lcnIoU3RhdHVzQ29kZTo6Rk9SQklEREVOLCAiY3NyZl9lcnJvciIsICJDU1JGIFRva2Vu5peg5pWIIikpLAogICAgfQp9CgovLy8g6K6w5b2V566h55CG56uv55m75b2V5pel5b+XCmFzeW5jIGZuIGxvZ19hZG1pbl9sb2dpbihzdGF0ZTogJlNoYXJlZFN0YXRlLCBpcDogJnN0ciwgdXNlcl9hZ2VudDogJnN0ciwgc3VjY2VzczogYm9vbCkgewogICAgbGV0IHN0YXR1cyA9IGlmIHN1Y2Nlc3MgeyAic3VjY2VzcyIgfSBlbHNlIHsgImZhaWxlZCIgfTsKICAgIGxldCBzdGF0ZSA9IHN0YXRlLmNsb25lKCk7CiAgICBsZXQgaXAgPSBpcC50b19zdHJpbmcoKTsKICAgIGxldCB1YSA9IHVzZXJfYWdlbnQudG9fc3RyaW5nKCk7CiAgICBsZXQgc3RhdHVzID0gc3RhdHVzLnRvX3N0cmluZygpOwogICAgdG9raW86OnNwYXduKGFzeW5jIG1vdmUgewogICAgICAgIGxldCBfID0gc3FseDo6cXVlcnkoIklOU0VSVCBJTlRPIGFkbWluX2xvZ2luX2xvZ3MgKGlwLCB1c2VyX2FnZW50LCBzdGF0dXMsIGNyZWF0ZWRfYXQpIFZBTFVFUyAoJDEsICQyLCAkMywgbm93KCkpIikKICAgICAgICAgICAgLmJpbmQoJmlwKQogICAgICAgICAgICAuYmluZCgmdWEpCiAgICAgICAgICAgIC5iaW5kKCZzdGF0dXMpCiAgICAgICAgICAgIC5leGVjdXRlKCZzdGF0ZS5wb29sKQogICAgICAgICAgICAuYXdhaXQ7CiAgICB9KTsKfQoKLy8vID09PT09PT09PT09PT09PT09PT09PSDonJznvZAgPT09PT09PT09PT09PT09PT09PT09CgpwdWIgY29uc3QgSE9ORVlQT1RfUEFUSFM6IFsmc3RyOyAxNV0gPSBbCiAgICAiLy5lbnYiLAogICAgIi9hZG1pbi9waHBteWFkbWluIiwKICAgICIvcGhwbXlhZG1pbiIsCiAgICAiL3dwLWFkbWluIiwKICAgICIvd3AtbG9naW4ucGhwIiwKICAgICIvYXBpL2FkbWluL2RlYnVnIiwKICAgICIvYXBpL2FkbWluL2NvbmZpZyIsCiAgICAiL2d3L2FkbWluL3N5c3RlbS9kdW1wIiwKICAgICIvLmdpdC9jb25maWciLAogICAgIi8uZ2l0L0hFQUQiLAogICAgIi9jb25maWcvZGF0YWJhc2UueW1sIiwKICAgICIvc2VydmVyLXN0YXR1cyIsCiAgICAiL2FjdHVhdG9yL2VudiIsCiAgICAiL2FjdHVhdG9yL2hlYWx0aCIsCiAgICAiL2FwaS9hZG1pbi8uZW52IiwKXTsKCmZuIGlzX2hvbmV5cG90X3BhdGgocGF0aDogJnN0cikgLT4gT3B0aW9uPCYnc3RhdGljIHN0cj4gewogICAgaWYgbGV0IFNvbWUoJnApID0gSE9ORVlQT1RfUEFUSFMuaXRlcigpLmZpbmQofCYmcHwgcGF0aCA9PSBwKSB7CiAgICAgICAgcmV0dXJuIFNvbWUocCk7CiAgICB9CiAgICBIT05FWVBPVF9QQVRIUwogICAgICAgIC5pdGVyKCkKICAgICAgICAuZmluZCh8JiZwfCBwYXRoLnN0YXJ0c193aXRoKHApKQogICAgICAgIC5jb3BpZWQoKQp9CgovLy8g6Jyc572Q6Lev55Sx77ya5bCB56aB5omr5o+P6ICF5bm26L+U5Zue5YGH5pWw5o2uCnB1YiBhc3luYyBmbiBob25leXBvdF9yb3V0ZShTdGF0ZShzdGF0ZSk6IFN0YXRlPFNoYXJlZFN0YXRlPiwgdXJpOiBheHVtOjpleHRyYWN0OjpPcmlnaW5hbFVyaSwgaGVhZGVyczogSGVhZGVyTWFwKSAtPiBSZXNwb25zZSB7CiAgICBsZXQgcGF0aCA9IHVyaS5wYXRoKCkudG9fc3RyaW5nKCk7CiAgICBsZXQgaXAgPSBhZG1pbl9jbGllbnRfaXAoJmhlYWRlcnMsICIiKTsKICAgIGxldCB1YSA9IGhlYWRlcnMuZ2V0KGF4dW06Omh0dHA6OmhlYWRlcjo6VVNFUl9BR0VOVCkuYW5kX3RoZW4ofHZ8IHYudG9fc3RyKCkub2soKSkudW53cmFwX29yKCIiKS50b19zdHJpbmcoKTsKICAgIGxldCByZWFzb24gPSBpc19ob25leXBvdF9wYXRoKCZwYXRoKS51bndyYXBfb3IoInVua25vd24gc2NhbiIpOwogICAgdHJhY2luZzo6d2FybiEocGF0aCA9ICVwYXRoLCBpcCA9ICVpcCwgcmVhc29uID0gJXJlYXNvbiwgImhvbmV5cG90IHRyaWdnZXJlZCIpOwogICAgaWYgIWlzX3ByaXZhdGVfaXAoJmlwKSB7CiAgICAgICAgYmFuX2lwKCZzdGF0ZSwgJmlwLCByZWFzb24sICZwYXRoLCAmdWEpLmF3YWl0OwogICAgfQogICAgd3JpdGVfb2soU3RhdHVzQ29kZTo6T0ssIGpzb24hKHsic3RhdHVzIjogIm9rIiwgIm1lc3NhZ2UiOiAiQWNjZXNzIGdyYW50ZWQiLCAiZGF0YSI6ICJmYWtlLWRhdGEtcGxlYXNlLWRvLW5vdC11c2UifSkpCn0KCi8vLyDlsIYgSVAg5Yqg5YWlIGlwX2JsYWNrbGlzdO+8iGhvbmV5cG90IOadpea6kO+8jDI0aO+8iQphc3luYyBmbiBiYW5faXAoc3RhdGU6ICZTaGFyZWRTdGF0ZSwgaXA6ICZzdHIsIHJlYXNvbjogJnN0ciwgcGF0aDogJnN0ciwgdXNlcl9hZ2VudDogJnN0cikgewogICAgbGV0IF8gPSBzcWx4OjpxdWVyeSgKICAgICAgICAiSU5TRVJUIElOVE8gaXBfYmxhY2tsaXN0IChpcCwgcmVhc29uLCBzb3VyY2UsIHJlcXVlc3RfcGF0aCwgdXNlcl9hZ2VudCwgZXhwaXJlc19hdCkgXAogICAgICAgICBWQUxVRVMgKCQxLCAkMiwgJ2hvbmV5cG90JywgJDMsICQ0LCBub3coKSArIGludGVydmFsICcyNCBob3VycycpIFwKICAgICAgICAgT04gQ09ORkxJQ1QgKGlwKSBETyBVUERBVEUgU0VUIHJlYXNvbiA9ICQyLCBleHBpcmVzX2F0ID0gbm93KCkgKyBpbnRlcnZhbCAnMjQgaG91cnMnIiwKICAgICkKICAgIC5iaW5kKGlwKQogICAgLmJpbmQocmVhc29uKQogICAgLmJpbmQocGF0aCkKICAgIC5iaW5kKHVzZXJfYWdlbnQpCiAgICAuZXhlY3V0ZSgmc3RhdGUucG9vbCkKICAgIC5hd2FpdDsKfQoKLy8vIOajgOafpSBJUCDmmK/lkKblnKjpu5HlkI3ljZUKcHViIGFzeW5jIGZuIGlzX2lwX2Jhbm5lZChzdGF0ZTogJlNoYXJlZFN0YXRlLCBpcDogJnN0cikgLT4gYm9vbCB7CiAgICBsZXQgZXhpc3RzOiBPcHRpb248Ym9vbD4gPSBzcWx4OjpxdWVyeV9zY2FsYXIoCiAgICAgICAgIlNFTEVDVCBFWElTVFMoU0VMRUNUIDEgRlJPTSBpcF9ibGFja2xpc3QgV0hFUkUgaXAgPSAkMSBBTkQgKGV4cGlyZXNfYXQgSVMgTlVMTCBPUiBleHBpcmVzX2F0ID4gbm93KCkpKSIsCiAgICApCiAgICAuYmluZChpcCkKICAgIC5mZXRjaF9vbmUoJnN0YXRlLnBvb2wpCiAgICAuYXdhaXQKICAgIC5vaygpOwogICAgZXhpc3RzLnVud3JhcF9vcihmYWxzZSkKfQoKZm4gZXNjYXBlX2xpa2UoczogJnN0cikgLT4gU3RyaW5nIHsKICAgIHMucmVwbGFjZSgnXCcnLCAiJyciKS5yZXBsYWNlKCclJywgIlxcJSIpLnJlcGxhY2UoJ18nLCAiXFxfIikKfQoKI1tkZXJpdmUoRGVidWcsIERlc2VyaWFsaXplKV0KcHViIHN0cnVjdCBBZG1pblBhZ2VRdWVyeSB7CiAgICBwdWIgcGFnZTogT3B0aW9uPGk2ND4sCiAgICBwdWIgcGFnZV9zaXplOiBPcHRpb248aTY0PiwKfQoKI1tkZXJpdmUoRGVidWcsIERlc2VyaWFsaXplKV0KcHViIHN0cnVjdCBVc2Vyc1F1ZXJ5IHsKICAgIHB1YiBwYWdlOiBPcHRpb248aTY0PiwKICAgIHB1YiBwYWdlX3NpemU6IE9wdGlvbjxpNjQ+LAogICAgcHViIHNlYXJjaDogT3B0aW9uPFN0cmluZz4sCiAgICBwdWIgc3RhdHVzOiBPcHRpb248U3RyaW5nPiwKfQo=
+//! 绠＄悊鍚庡彴璺敱锛歭ogin / logout / check / login-logs / users 绠＄悊 + 铚滅綈
+//! 涓?Go 鐗?internal/platform/handler/admin.go + honeypot.go 瀵归綈
+
+use std::collections::HashMap;
+use std::sync::LazyLock;
+use std::sync::Mutex;
+
+use axum::body::Bytes;
+use axum::extract::{Path, Query, State};
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::{IntoResponse, Response};
+use serde::Deserialize;
+use serde_json::{json, Value};
+
+use super::*;
+use crate::appstate::SharedState;
+use crate::config::is_ip_allowed;
+use crate::security::{generate_admin_token, generate_id, hash_password, hash_sha256, verify_admin_token, verify_password};
+
+const ADMIN_SESSION_TTL_SECS: i64 = 8 * 3600;
+
+/// 鍐呭瓨 CSRF Token 缂撳瓨锛歛dmin_token -> csrf_token
+static ADMIN_CSRF_TOKENS: LazyLock<Mutex<HashMap<String, String>>> = LazyLock::new(|| Mutex::new(HashMap::new()));
+
+/// POST /api/admin/login
+pub async fn login(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
+    let mut resp = do_login(&state, &headers, &body).await;
+    admin_headers(&mut resp);
+    resp
+}
+
+async fn do_login(state: &SharedState, headers: &HeaderMap, body: &Bytes) -> Response {
+    let client_ip = admin_client_ip(headers, "");
+    let user_agent = headers.get(axum::http::header::USER_AGENT).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
+    // IP 鐧藉悕鍗?    if !is_ip_allowed(&client_ip, &state.cfg.admin.allowed_ips) {
+        return write_err(StatusCode::FORBIDDEN, "forbidden", "璁块棶琚嫆缁?);
+    }
+    // IP 闄愰€?    if !ADMIN_LOGIN_RATE.allow(&client_ip, 5, 60) {
+        log_admin_login(&state, &client_ip, &user_agent, false).await;
+        return write_err(StatusCode::TOO_MANY_REQUESTS, "rate_limited", "灏濊瘯娆℃暟杩囧锛岃绋嶅悗鍐嶈瘯");
+    }
+    let req: Value = match serde_json::from_slice(body) {
+        Ok(v) => v,
+        Err(_) => return write_err(StatusCode::BAD_REQUEST, "invalid_request", "Invalid JSON"),
+    };
+    let password = req.get("password").and_then(|p| p.as_str()).unwrap_or("");
+    // bcrypt 楠岃瘉
+    if !verify_password(password, &state.cfg.admin.password_hash).unwrap_or(false) {
+        log_admin_login(&state, &client_ip, &user_agent, false).await;
+        return write_err(StatusCode::UNAUTHORIZED, "auth_failed", "瀵嗙爜閿欒");
+    }
+    let secret = &state.cfg.admin.session_secret;
+    if secret.is_empty() {
+        return write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "Server configuration error");
+    }
+    let token = match generate_admin_token(secret, "admin") {
+        Ok(t) => t,
+        Err(e) => {
+            tracing::error!("generate admin token failed: {e}");
+            return write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "Failed to generate token");
+        }
+    };
+    let csrf_token = generate_id();
+    // DB 鍐欏叆 admin_sessions锛堟敮鎸佸悐閿€锛?    let token_hash = hash_sha256(&token);
+    let _ = sqlx::query(
+        "INSERT INTO admin_sessions (token_hash, csrf_token, ip, user_agent, expires_at) VALUES ($1, $2, $3, $4, now() + interval '8 hours')",
+    )
+    .bind(&token_hash)
+    .bind(&csrf_token)
+    .bind(&client_ip)
+    .bind(&user_agent)
+    .execute(&state.pool)
+    .await;
+    ADMIN_CSRF_TOKENS.lock().unwrap().insert(token.clone(), csrf_token.clone());
+    let is_https = headers.get("X-Forwarded-Proto").and_then(|v| v.to_str().ok()) == Some("https");
+    let mut resp = write_ok(
+        StatusCode::OK,
+        json!({"message": "鐧诲綍鎴愬姛", "csrf_token": csrf_token, "expires_in": ADMIN_SESSION_TTL_SECS}),
+    );
+    set_cookie(&mut resp, ADMIN_COOKIE, &token, ADMIN_SESSION_TTL_SECS, true, is_https, "Strict");
+    set_cookie(&mut resp, ADMIN_CSRF_COOKIE, &csrf_token, ADMIN_SESSION_TTL_SECS, false, is_https, "Strict");
+    log_admin_login(&state, &client_ip, &user_agent, true).await;
+    resp
+}
+
+/// POST /api/admin/logout
+pub async fn logout(State(state): State<SharedState>, headers: HeaderMap) -> Response {
+    let mut resp = if let Some(cookie) = get_cookie(&headers, ADMIN_COOKIE) {
+        ADMIN_CSRF_TOKENS.lock().unwrap().remove(&cookie);
+        let token_hash = hash_sha256(&cookie);
+        let _ = sqlx::query("UPDATE admin_sessions SET revoked = true WHERE token_hash = $1")
+            .bind(&token_hash)
+            .execute(&state.pool)
+            .await;
+        write_ok(StatusCode::OK, json!({"message": "宸茬櫥鍑?}))
+    } else {
+        write_ok(StatusCode::OK, json!({"message": "宸茬櫥鍑?}))
+    };
+    clear_cookie(&mut resp, ADMIN_COOKIE);
+    clear_cookie(&mut resp, ADMIN_CSRF_COOKIE);
+    admin_headers(&mut resp);
+    resp
+}
+
+/// GET /api/admin/check
+pub async fn check(State(state): State<SharedState>, headers: HeaderMap) -> Response {
+    let logged_in = is_admin_authed(&state, &headers).await;
+    let mut resp = write_ok(StatusCode::OK, json!({"logged_in": logged_in}));
+    admin_headers(&mut resp);
+    resp
+}
+
+/// GET /api/admin/login-logs
+pub async fn login_logs(State(state): State<SharedState>, headers: HeaderMap, Query(q): Query<AdminPageQuery>) -> Response {
+    let mut resp = if let Err(r) = require_admin(&state, &headers).await {
+        r
+    } else {
+        let page = q.page.unwrap_or(1).max(1);
+        let page_size = q.page_size.unwrap_or(50).clamp(1, 200);
+        let offset = (page - 1) * page_size;
+        let rows = sqlx::query_as::<_, (i64, String, String, String, i64)>(
+            "SELECT id, ip, user_agent, status, extract(epoch from created_at)::bigint \
+             FROM admin_login_logs ORDER BY created_at DESC LIMIT $1 OFFSET $2",
+        )
+        .bind(page_size)
+        .bind(offset)
+        .fetch_all(&state.pool)
+        .await
+        .unwrap_or_default();
+        let data: Vec<Value> = rows
+            .into_iter()
+            .map(|(id, ip, user_agent, status, created_at)| json!({"id": id, "ip": ip, "user_agent": user_agent, "status": status, "created_at": created_at}))
+            .collect();
+        let total: i64 = sqlx::query_scalar("SELECT count(*) FROM admin_login_logs").fetch_one(&state.pool).await.unwrap_or(0);
+        write_ok(StatusCode::OK, json!({"data": data, "total": total, "page": page, "pagesize": page_size}))
+    };
+    admin_headers(&mut resp);
+    resp
+}
+
+/// GET /api/admin/users
+pub async fn users(State(state): State<SharedState>, headers: HeaderMap, Query(q): Query<UsersQuery>) -> Response {
+    let mut resp = if let Err(r) = require_admin(&state, &headers).await {
+        r
+    } else {
+        let page = q.page.unwrap_or(1).max(1);
+        let page_size = q.page_size.unwrap_or(20).clamp(1, 200);
+        let search = q.search.unwrap_or_default().trim().to_string();
+        let status_filter = q.status.unwrap_or_default().trim().to_string();
+        // 鍔ㄦ€?WHERE锛堝€煎唴鑱旇浆涔夛級
+        let mut conditions: Vec<String> = Vec::new();
+        if !search.is_empty() {
+            conditions.push(format!("(username ILIKE '{}' OR email ILIKE '{}')", escape_like(&search), escape_like(&search)));
+        }
+        if !status_filter.is_empty() {
+            conditions.push(format!("status = '{}'", status_filter.replace('\'', "''")));
+        }
+        let where_clause = if conditions.is_empty() { String::new() } else { format!(" WHERE {}", conditions.join(" AND ")) };
+        let total: i64 = sqlx::query_scalar(&format!("SELECT count(*) FROM users{where_clause}")).fetch_one(&state.pool).await.unwrap_or(0);
+        let offset = (page - 1) * page_size;
+        let query_str = format!(
+            "SELECT id, username, email, display_name, status, user_type, extract(epoch from created_at)::bigint FROM users{where_clause} ORDER BY created_at DESC LIMIT {} OFFSET {}",
+            page_size, offset
+        );
+        let rows = sqlx::query_as::<_, (i64, String, String, String, String, String, i64)>(&query_str).fetch_all(&state.pool).await.unwrap_or_default();
+        let data: Vec<Value> = rows
+            .into_iter()
+            .map(|(id, username, email, display_name, status, user_type, created_at)| json!({"id": id, "username": username, "email": email, "display_name": display_name, "status": status, "user_type": user_type, "created_at": created_at}))
+            .collect();
+        write_ok(StatusCode::OK, json!({"data": data, "total": total, "page": page, "pagesize": page_size}))
+    };
+    admin_headers(&mut resp);
+    resp
+}
+
+/// GET /api/admin/users/{id} - 鐢ㄦ埛璇︽儏
+pub async fn user_detail_handler(State(state): State<SharedState>, headers: HeaderMap, Path(id): Path<i64>) -> Response {
+    let mut resp = if let Err(r) = require_admin(&state, &headers).await {
+        r
+    } else {
+        let row = sqlx::query_as::<_, (String, String, String, i64)>(
+            "SELECT username, email, status, extract(epoch from created_at)::bigint FROM users WHERE id = $1",
+        )
+        .bind(id)
+        .fetch_optional(&state.pool)
+        .await
+        .ok()
+        .flatten();
+        let Some((username, email, status, created_at)) = row else {
+            return write_err(StatusCode::NOT_FOUND, "not_found", "User not found");
+        };
+        write_ok(StatusCode::OK, json!({"id": id, "username": username, "email": email, "status": status, "created_at": created_at}))
+    };
+    admin_headers(&mut resp);
+    resp
+}
+
+/// PUT /api/admin/users/{id}/ban
+pub async fn ban_user_handler(State(state): State<SharedState>, headers: HeaderMap, Path(id): Path<i64>) -> Response {
+    let mut resp = if let Err(r) = require_admin_csrf(&state, &headers).await {
+        r
+    } else {
+        ban_user(&state, &headers, id).await
+    };
+    admin_headers(&mut resp);
+    resp
+}
+
+async fn ban_user(state: &SharedState, _headers: &HeaderMap, user_id: i64) -> Response {
+    let row: Option<String> = sqlx::query_scalar("UPDATE users SET status = 'banned' WHERE id = $1 RETURNING username")
+        .bind(user_id)
+        .fetch_optional(&state.pool)
+        .await
+        .ok()
+        .flatten();
+    let Some(username) = row else {
+        return write_err(StatusCode::NOT_FOUND, "not_found", "User not found");
+    };
+    let _ = sqlx::query("UPDATE user_api_keys SET status = 'banned' WHERE user_id = $1").bind(user_id).execute(&state.pool).await;
+    write_ok(StatusCode::OK, json!({"message": format!("鐢ㄦ埛 {username} 宸插皝绂?)}))
+}
+
+/// PUT /api/admin/users/{id}/unban
+pub async fn unban_user_handler(State(state): State<SharedState>, headers: HeaderMap, Path(id): Path<i64>) -> Response {
+    let mut resp = if let Err(r) = require_admin_csrf(&state, &headers).await {
+        r
+    } else {
+        unban_user(&state, &headers, id).await
+    };
+    admin_headers(&mut resp);
+    resp
+}
+
+async fn unban_user(state: &SharedState, _headers: &HeaderMap, user_id: i64) -> Response {
+    let row: Option<String> = sqlx::query_scalar("UPDATE users SET status = 'active' WHERE id = $1 RETURNING username")
+        .bind(user_id)
+        .fetch_optional(&state.pool)
+        .await
+        .ok()
+        .flatten();
+    let Some(username) = row else {
+        return write_err(StatusCode::NOT_FOUND, "not_found", "User not found");
+    };
+    let _ = sqlx::query("UPDATE user_api_keys SET status = 'active' WHERE user_id = $1 AND status = 'banned'").bind(user_id).execute(&state.pool).await;
+    let _ = sqlx::query(
+        "UPDATE users SET penalty_active = true, penalty_rpm_limit = 10, penalty_concurrency_cap = 1, penalty_reason = 'appeal_unban_restriction', penalty_started_at = COALESCE(penalty_started_at, now()) WHERE id = $1",
+    )
+    .bind(user_id)
+    .execute(&state.pool)
+    .await;
+    write_ok(StatusCode::OK, json!({"message": format!("鐢ㄦ埛 {username} 宸茶В灏?)}))
+}
+
+/// POST /api/admin/users - 绠＄悊鍛樺垱寤虹敤鎴?pub async fn create_user_handler(State(state): State<SharedState>, headers: HeaderMap, body: Bytes) -> Response {
+    let mut resp = if let Err(r) = require_admin_csrf(&state, &headers).await {
+        r
+    } else {
+        let req: Value = match serde_json::from_slice(&body) {
+            Ok(v) => v,
+            Err(_) => return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "Invalid JSON")),
+        };
+        let username = req.get("username").and_then(|u| u.as_str()).map(|s| s.trim().to_string()).unwrap_or_default();
+        let password = req.get("password").and_then(|p| p.as_str()).unwrap_or("").to_string();
+        let email = req.get("email").and_then(|e| e.as_str()).map(|s| s.trim().to_lowercase()).unwrap_or_default();
+        if username.is_empty() || password.is_empty() {
+            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "鐢ㄦ埛鍚嶅拰瀵嗙爜涓嶈兘涓虹┖"));
+        }
+        if password.chars().count() < 6 {
+            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "瀵嗙爜闀垮害涓嶈兘灏戜簬6浣?));
+        }
+        // 妫€鏌ョ敤鎴峰悕鏄惁宸插瓨鍦?        let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE LOWER(username)=LOWER($1))")
+            .bind(&username)
+            .fetch_one(&state.pool)
+            .await
+            .unwrap_or(false);
+        if exists {
+            return admin_headers(write_err(StatusCode::CONFLICT, "exists", "鐢ㄦ埛鍚嶅凡瀛樺湪"));
+        }
+        let hash = match hash_password(&password) {
+            Ok(h) => h,
+            Err(e) => {
+                tracing::error!("hash password failed: {e}");
+                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "瀵嗙爜鍔犲瘑澶辫触"));
+            }
+        };
+        let uuid = generate_id();
+        let email_val = if email.is_empty() { format!("{username}@local.generated") } else { email.clone() };
+        let row: Result<(i64, String), _> = sqlx::query_as(
+            "INSERT INTO users(uuid, username, email, password_hash, display_name, status, user_type, gw_client_id) \
+             VALUES($1, $2, $3, $4, $5, 'active', 'normal', nextval('client_id_seq')::text) RETURNING id, gw_client_id",
+        )
+        .bind(&uuid)
+        .bind(&username)
+        .bind(&email_val)
+        .bind(&hash)
+        .bind(&username)
+        .fetch_one(&state.pool)
+        .await;
+        let (user_id, gw_client_id) = match row {
+            Ok(v) => v,
+            Err(e) => {
+                tracing::error!("create user failed: {e}");
+                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "鍒涘缓鐢ㄦ埛澶辫触"));
+            }
+        };
+        let _ = sqlx::query("INSERT INTO clients(id, name, status, user_type) VALUES($1, $2, 'active', 'normal')")
+            .bind(&gw_client_id)
+            .bind(&username)
+            .execute(&state.pool)
+            .await;
+        write_ok(StatusCode::CREATED, json!({"id": user_id, "username": username, "password": password}))
+    };
+    admin_headers(&mut resp);
+    resp
+}
+
+/// DELETE /api/admin/users/{id}
+pub async fn delete_user_handler(State(state): State<SharedState>, headers: HeaderMap, Path(id): Path<i64>) -> Response {
+    let mut resp = if let Err(r) = require_admin_csrf(&state, &headers).await {
+        r
+    } else {
+        let row: Option<String> = sqlx::query_scalar("DELETE FROM users WHERE id = $1 RETURNING username")
+                .bind(id)
+                .fetch_optional(&state.pool)
+                .await
+                .ok()
+                .flatten();
+        match row {
+            Some(username) => write_ok(StatusCode::OK, json!({"message": format!("鐢ㄦ埛 {username} 宸插垹闄?)})),
+            None => write_err(StatusCode::NOT_FOUND, "not_found", "User not found"),
+        }
+    };
+    admin_headers(&mut resp);
+    resp
+}
+
+/// ===================== 璁よ瘉杈呭姪 =====================
+
+/// 鏍￠獙绠＄悊鍛樹細璇濓紙HMAC token + DB 鍚婇攢妫€鏌ワ級
+async fn is_admin_authed(state: &SharedState, headers: &HeaderMap) -> bool {
+    let Some(cookie) = get_cookie(headers, ADMIN_COOKIE) else {
+        return false;
+    };
+    let secret = &state.cfg.admin.session_secret;
+    if secret.is_empty() {
+        return false;
+    }
+    if verify_admin_token(&cookie, secret).is_err() {
+        return false;
+    }
+    let token_hash = hash_sha256(&cookie);
+    let revoked: Option<bool> = sqlx::query_scalar("SELECT revoked FROM admin_sessions WHERE token_hash = $1 AND expires_at > now()")
+        .bind(&token_hash)
+        .fetch_optional(&state.pool)
+        .await
+        .ok()
+        .flatten();
+    match revoked {
+        Some(false) => true,
+        _ => false,
+    }
+}
+
+/// 绠＄悊鍛樿璇佸寘瑁咃細IP 鐧藉悕鍗?+ 浼氳瘽鏍￠獙锛堝彧璇绘搷浣滐級
+async fn require_admin(state: &SharedState, headers: &HeaderMap) -> Result<(), Response> {
+    let client_ip = admin_client_ip(headers, "");
+    if !is_ip_allowed(&client_ip, &state.cfg.admin.allowed_ips) {
+        return Err(write_err(StatusCode::FORBIDDEN, "forbidden", "璁块棶琚嫆缁?));
+    }
+    if !is_admin_authed(state, headers).await {
+        return Err(write_err(StatusCode::UNAUTHORIZED, "auth_error", "鏈櫥褰曟垨浼氳瘽杩囨湡"));
+    }
+    Ok(())
+}
+
+/// 绠＄悊鍛樿璇?+ CSRF 鏍￠獙锛堢姸鎬佸彉鏇存搷浣滐級
+async fn require_admin_csrf(state: &SharedState, headers: &HeaderMap) -> Result<(), Response> {
+    require_admin(state, headers).await?;
+    let csrf_header = headers.get("X-CSRF-Token").and_then(|v| v.to_str().ok()).unwrap_or("");
+    if csrf_header.is_empty() {
+        return Err(write_err(StatusCode::FORBIDDEN, "csrf_error", "缂哄皯CSRF Token"));
+    }
+    let Some(cookie) = get_cookie(headers, ADMIN_COOKIE) else {
+        return Err(write_err(StatusCode::UNAUTHORIZED, "auth_error", "浼氳瘽鏃犳晥"));
+    };
+    let tokens = ADMIN_CSRF_TOKENS.lock().unwrap();
+    match tokens.get(&cookie) {
+        Some(stored) if stored == csrf_header => Ok(()),
+        _ => Err(write_err(StatusCode::FORBIDDEN, "csrf_error", "CSRF Token鏃犳晥")),
+    }
+}
+
+/// 璁板綍绠＄悊绔櫥褰曟棩蹇?async fn log_admin_login(state: &SharedState, ip: &str, user_agent: &str, success: bool) {
+    let status = if success { "success" } else { "failed" };
+    let state = state.clone();
+    let ip = ip.to_string();
+    let ua = user_agent.to_string();
+    let status = status.to_string();
+    tokio::spawn(async move {
+        let _ = sqlx::query("INSERT INTO admin_login_logs (ip, user_agent, status, created_at) VALUES ($1, $2, $3, now())")
+            .bind(&ip)
+            .bind(&ua)
+            .bind(&status)
+            .execute(&state.pool)
+            .await;
+    });
+}
+
+/// ===================== 铚滅綈 =====================
+
+pub const HONEYPOT_PATHS: [&str; 15] = [
+    "/.env",
+    "/admin/phpmyadmin",
+    "/phpmyadmin",
+    "/wp-admin",
+    "/wp-login.php",
+    "/api/admin/debug",
+    "/api/admin/config",
+    "/gw/admin/system/dump",
+    "/.git/config",
+    "/.git/HEAD",
+    "/config/database.yml",
+    "/server-status",
+    "/actuator/env",
+    "/actuator/health",
+    "/api/admin/.env",
+];
+
+fn is_honeypot_path(path: &str) -> Option<&'static str> {
+    if let Some(&p) = HONEYPOT_PATHS.iter().find(|&&p| path == p) {
+        return Some(p);
+    }
+    HONEYPOT_PATHS
+        .iter()
+        .find(|&&p| path.starts_with(p))
+        .copied()
+}
+
+/// 铚滅綈璺敱锛氬皝绂佹壂鎻忚€呭苟杩斿洖鍋囨暟鎹?pub async fn honeypot_route(State(state): State<SharedState>, uri: axum::extract::OriginalUri, headers: HeaderMap) -> Response {
+    let path = uri.path().to_string();
+    let ip = admin_client_ip(&headers, "");
+    let ua = headers.get(axum::http::header::USER_AGENT).and_then(|v| v.to_str().ok()).unwrap_or("").to_string();
+    let reason = is_honeypot_path(&path).unwrap_or("unknown scan");
+    tracing::warn!(path = %path, ip = %ip, reason = %reason, "honeypot triggered");
+    if !is_private_ip(&ip) {
+        ban_ip(&state, &ip, reason, &path, &ua).await;
+    }
+    write_ok(StatusCode::OK, json!({"status": "ok", "message": "Access granted", "data": "fake-data-please-do-not-use"}))
+}
+
+/// 灏?IP 鍔犲叆 ip_blacklist锛坔oneypot 鏉ユ簮锛?4h锛?async fn ban_ip(state: &SharedState, ip: &str, reason: &str, path: &str, user_agent: &str) {
+    let _ = sqlx::query(
+        "INSERT INTO ip_blacklist (ip, reason, source, request_path, user_agent, expires_at) \
+         VALUES ($1, $2, 'honeypot', $3, $4, now() + interval '24 hours') \
+         ON CONFLICT (ip) DO UPDATE SET reason = $2, expires_at = now() + interval '24 hours'",
+    )
+    .bind(ip)
+    .bind(reason)
+    .bind(path)
+    .bind(user_agent)
+    .execute(&state.pool)
+    .await;
+}
+
+/// 妫€鏌?IP 鏄惁鍦ㄩ粦鍚嶅崟
+pub async fn is_ip_banned(state: &SharedState, ip: &str) -> bool {
+    let exists: Option<bool> = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM ip_blacklist WHERE ip = $1 AND (expires_at IS NULL OR expires_at > now()))",
+    )
+    .bind(ip)
+    .fetch_one(&state.pool)
+    .await
+    .ok();
+    exists.unwrap_or(false)
+}
+
+fn escape_like(s: &str) -> String {
+    s.replace('\'', "''").replace('%', "\\%").replace('_', "\\_")
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AdminPageQuery {
+    pub page: Option<i64>,
+    pub page_size: Option<i64>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UsersQuery {
+    pub page: Option<i64>,
+    pub page_size: Option<i64>,
+    pub search: Option<String>,
+    pub status: Option<String>,
+}
