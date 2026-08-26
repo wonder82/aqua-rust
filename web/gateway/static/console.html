@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AQUA Gateway 绠＄悊鎺у埗鍙?/title>
+<title>AQUA Gateway 管理控制台</title>
 <style>
 :root{
   --bg:#f5f7fa; --surface:#ffffff; --card:#ffffff;
@@ -135,26 +135,26 @@ td.actions{display:flex;gap:4px;align-items:center}
   <div class="login-box">
     <div class="logo">A</div>
     <h1>AQUA Gateway</h1>
-    <div class="sub">v11.0 绠＄悊鎺у埗鍙?/div>
+    <div class="sub">v11.0 管理控制台</div>
     <form id="login-form">
-      <div class="form-row"><label>绠＄悊鍛樺瘑鐮?/label><input type="password" id="login-password" class="input" placeholder="璇疯緭鍏ュ瘑鐮? autocomplete="current-password" required></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;padding:9px">鐧诲綍</button>
+      <div class="form-row"><label>管理员密码</label><input type="password" id="login-password" class="input" placeholder="请输入密码" autocomplete="current-password" required></div>
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:9px">登录</button>
     </form>
   </div>
 </div>
 <div id="app" class="hidden">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-head"><div class="brand">缃戝叧绠＄悊</div><div class="brand-sub">AQUA Gateway v11.0</div></div>
+    <div class="sidebar-head"><div class="brand">网关管理</div><div class="brand-sub">AQUA Gateway v11.0</div></div>
     <nav class="nav" id="nav"></nav>
     <div class="sidebar-foot" style="display:flex;flex-direction:column;gap:4px">
-    <a href="/" class="btn btn-sm" style="width:100%">鍥炲钩鍙伴椤?/a>
-    <button class="btn btn-sm" style="width:100%;margin-top:4px" onclick="logout()">閫€鍑虹櫥褰?/button>
+    <a href="/" class="btn btn-sm" style="width:100%">回平台首页</a>
+    <button class="btn btn-sm" style="width:100%;margin-top:4px" onclick="logout()">退出登录</button>
   </div>
   </aside>
   <div class="main">
     <div class="topbar">
       <button class="hamburger" onclick="toggleSidebar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-      <h2 id="page-title">浠〃鐩?/h2>
+      <h2 id="page-title">仪表盘</h2>
       <div class="spacer"></div>
       <span class="tag" id="maint-tag"></span>
     </div>
@@ -166,7 +166,7 @@ td.actions{display:flex;gap:4px;align-items:center}
 <script>
 "use strict";
 var API_BASE="/gw/admin", TOKEN_KEY="aqua_admin_token", CSRF_KEY="aqua_admin_csrf";
-/* 瀹夊叏瀛樺偍锛歭ocalStorage 涓嶅彲鐢紙闅愮妯″紡/绂佺敤瀛樺偍锛夋椂鍥為€€鍐呭瓨锛岄伩鍏嶉《灞傛姏閿欏鑷寸櫧灞?*/
+/* 安全存储：localStorage 不可用（隐私模式/禁用存储）时回退内存，避免顶层抛错导致白屏 */
 var _memStore={};
 function sGet(k){try{var v=localStorage.getItem(k);return v!=null?v:_memStore[k]||null;}catch(e){return _memStore[k]||null;}}
 function sSet(k,v){_memStore[k]=v;try{localStorage.setItem(k,v);}catch(e){}}
@@ -176,13 +176,13 @@ var state={page:"dashboard",token:sGet(TOKEN_KEY)||"",csrf:sGet(CSRF_KEY)||"",
   clientPage:1,clientPageSize:15,
   logPage:1,logPageSize:20,logFilter:{q:"",code:"",model:"",path:""},logData:[],settings:{},selectedClient:null};
 var NAV=[
-  {id:"dashboard",name:"浠〃鐩?,ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>'},
-  {id:"upstreams",name:"涓婃父瀵嗛挜",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 11-7.07 7.07A5 5 0 0111.4 11.6zm0 0L15 8m0 0l3 3m-3-3l3-3"/></svg>'},
-  {id:"clients",name:"瀹㈡埛绔鐞?,ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'},
-  {id:"logs",name:"璇锋眰鏃ュ織",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg>'},
-  {id:"settings",name:"绯荤粺閰嶇疆",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'},
-  {id:"monitor",name:"绯荤粺鐩戞帶",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>'},
-  {id:"mail",name:"閭欢绠＄悊",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>'}
+  {id:"dashboard",name:"仪表盘",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>'},
+  {id:"upstreams",name:"上游密钥",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 11-7.07 7.07A5 5 0 0111.4 11.6zm0 0L15 8m0 0l3 3m-3-3l3-3"/></svg>'},
+  {id:"clients",name:"客户端管理",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>'},
+  {id:"logs",name:"请求日志",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg>'},
+  {id:"settings",name:"系统配置",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'},
+  {id:"monitor",name:"系统监控",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>'},
+  {id:"mail",name:"邮件管理",ic:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>'}
 ];
 function $(s,p){return (p||document).querySelector(s);}
 function el(t,a,h){var e=document.createElement(t);if(a)for(var k in a){if(k==="class")e.className=a[k];else if(k==="style")e.setAttribute("style",a[k]);else e.setAttribute(k,a[k]);}if(h!=null)e.innerHTML=h;return e;}
@@ -195,15 +195,16 @@ function pct(a,b){if(!b)return 0;return Math.round(a/b*1000)/10;}
 function rateBadge(r){var c=r>=95?"success":r>=80?"warn":"danger";return '<span class="card-value '+c+'">'+r.toFixed(1)+'%</span>';}
 function toast(msg,type){var t=el("div",{class:"toast "+(type||"")},esc(msg));$("#toast-wrap").appendChild(t);setTimeout(function(){t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(function(){t.remove();},300);},3000);}
 function showModal(title,bodyHtml,footHtml,wide){
-  $("#modal-root").innerHTML='<div class="modal-mask" id="modal-mask"><div class="modal'+(wide?' wide':'')+'"><button class="close" onclick="closeModal()">脳</button><div class="modal-head"><h3>'+esc(title)+'</h3></div><div class="modal-body">'+bodyHtml+'</div>'+(footHtml?'<div class="modal-foot">'+footHtml+'</div>':'')+'</div></div>';
+  $("#modal-root").innerHTML='<div class="modal-mask" id="modal-mask"><div class="modal'+(wide?' wide':'')+'"><button class="close" onclick="closeModal()">×</button><div class="modal-head"><h3>'+esc(title)+'</h3></div><div class="modal-body">'+bodyHtml+'</div>'+(footHtml?'<div class="modal-foot">'+footHtml+'</div>':'')+'</div></div>';
   $("#modal-mask").addEventListener("click",function(e){if(e.target===this)closeModal();});
 }
 function closeModal(){$("#modal-root").innerHTML="";}
-// 鑷畾涔夌‘璁ゅ脊绐楋紙鏇夸唬娴忚鍣ㄥ師鐢?confirm锛?function gwConfirm(msg){
+// 自定义确认弹窗（替代浏览器原生 confirm）
+function gwConfirm(msg){
   return new Promise(function(resolve){
-    showModal("纭鎿嶄綔",
+    showModal("确认操作",
       '<div style="padding:8px 0;font-size:14px">'+esc(msg)+'</div>',
-      '<button class="btn" onclick="closeModal();window._gwConfirmResolve(false)">鍙栨秷</button><button class="btn btn-primary" onclick="closeModal();window._gwConfirmResolve(true)">纭</button>');
+      '<button class="btn" onclick="closeModal();window._gwConfirmResolve(false)">取消</button><button class="btn btn-primary" onclick="closeModal();window._gwConfirmResolve(true)">确认</button>');
     window._gwConfirmResolve=resolve;
   });
 }
@@ -213,7 +214,7 @@ function api(method,path,body,raw){
   if(state.csrf)opt.headers["X-CSRF-Token"]=state.csrf;
   if(body!=null)opt.body=JSON.stringify(body);
   return fetch(API_BASE+path,opt).then(function(r){
-    if(r.status===401){logout();throw new Error("鏈巿鏉冿紝璇烽噸鏂扮櫥褰?);}
+    if(r.status===401){logout();throw new Error("未授权，请重新登录");}
     if(raw)return r.text();
     return r.json().then(function(d){if(!r.ok){var m=(d.error&&d.error.message)||r.statusText;throw new Error(m);}return d;});
   });
@@ -230,7 +231,7 @@ function navigate(page){
   state.page=page;
   var items=document.querySelectorAll(".nav-item");
   NAV.forEach(function(n,i){items[i].className="nav-item"+(n.id===page?" active":"");});
-  var titles={dashboard:"浠〃鐩?,upstreams:"涓婃父瀵嗛挜绠＄悊",clients:"瀹㈡埛绔鐞?,logs:"璇锋眰鏃ュ織",settings:"绯荤粺閰嶇疆",monitor:"绯荤粺鐩戞帶",mail:"閭欢绠＄悊"};
+  var titles={dashboard:"仪表盘",upstreams:"上游密钥管理",clients:"客户端管理",logs:"请求日志",settings:"系统配置",monitor:"系统监控",mail:"邮件管理"};
   $("#page-title").textContent=titles[page];
   $("#content").scrollTop=0;
   var loaders={dashboard:loadDashboard,upstreams:loadUpstreams,clients:loadClients,logs:loadLogs,settings:loadSettings,monitor:loadMonitor,mail:loadMail};
@@ -238,81 +239,82 @@ function navigate(page){
 }
 function toggleSidebar(){$("#sidebar").classList.toggle("open");}
 function closeSidebar(){$("#sidebar").classList.remove("open");}
-function setLoading(){return '<div class="empty"><span class="loading"></span> 鍔犺浇涓?..</div>';}
+function setLoading(){return '<div class="empty"><span class="loading"></span> 加载中...</div>';}
 
-/* 浠〃鐩?*/
+/* 仪表盘 */
 function loadDashboard(){
   $("#content").innerHTML=setLoading();
   Promise.all([api("GET","/dashboard"),api("GET","/request-logs-stats/summary"),api("GET","/error-stats"),api("GET","/stats/request-trend?hours=168")])
   .then(function(r){renderDashboard(r[0],r[1],r[2],r[3]);})
-  .catch(function(e){$("#content").innerHTML='<div class="empty">鍔犺浇澶辫触锛?+esc(e.message)+'</div>';});
+  .catch(function(e){$("#content").innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';});
 }
 function renderDashboard(dash,summary,errs,trend){
   var s=dash.status||{}, sr=summary.success_rate||0;
   var cards=[
-    {t:"浠婃棩璇锋眰 (24h)",v:fmtNum(dash.requests_24h||0)},
-    {t:"鎴愬姛鐜?,v:sr.toFixed(1)+"%",cls:sr>=95?"success":sr>=80?"warn":"danger"},
-    {t:"娲昏穬涓婃父瀵嗛挜",v:fmtNum(dash.active_upstreams||0)},
-    {t:"瀹㈡埛绔瘑閽?,v:fmtNum(dash.api_keys||0)},
-    {t:"429 闄愭祦娆℃暟",v:fmtNum(errs.rate_limited_429||0),cls:"warn"},
-    {t:"5xx 閿欒娆℃暟",v:fmtNum(errs.server_5xx||0),cls:"danger"},
-    {t:"杈撳叆 Token",v:fmtNum(summary.prompt_tokens_24h||0)},
-    {t:"杈撳嚭 Token",v:fmtNum(summary.completion_tokens_24h||0)},
-    {t:"缂撳瓨 Token",v:fmtNum(summary.cached_tokens_24h||0)},
-    {t:"鎬?Token",v:fmtNum(summary.total_tokens_24h||0)},
-    {t:"骞冲潎棣栧瓧寤惰繜",v:fmtNum(Math.round(summary.avg_ttft_ms||0))+" ms"},
-    {t:"娴佸紡璇锋眰",v:fmtNum(summary.stream_requests_24h||0)},
-    {t:"闈炴祦寮忚姹?,v:fmtNum(summary.non_stream_requests_24h||0)}
+    {t:"今日请求 (24h)",v:fmtNum(dash.requests_24h||0)},
+    {t:"成功率",v:sr.toFixed(1)+"%",cls:sr>=95?"success":sr>=80?"warn":"danger"},
+    {t:"活跃上游密钥",v:fmtNum(dash.active_upstreams||0)},
+    {t:"客户端密钥",v:fmtNum(dash.api_keys||0)},
+    {t:"429 限流次数",v:fmtNum(errs.rate_limited_429||0),cls:"warn"},
+    {t:"5xx 错误次数",v:fmtNum(errs.server_5xx||0),cls:"danger"},
+    {t:"输入 Token",v:fmtNum(summary.prompt_tokens_24h||0)},
+    {t:"输出 Token",v:fmtNum(summary.completion_tokens_24h||0)},
+    {t:"缓存 Token",v:fmtNum(summary.cached_tokens_24h||0)},
+    {t:"总 Token",v:fmtNum(summary.total_tokens_24h||0)},
+    {t:"平均首字延迟",v:fmtNum(Math.round(summary.avg_ttft_ms||0))+" ms"},
+    {t:"流式请求",v:fmtNum(summary.stream_requests_24h||0)},
+    {t:"非流式请求",v:fmtNum(summary.non_stream_requests_24h||0)}
   ];
   var h='<div class="grid-stats">';
   cards.forEach(function(c){h+='<div class="card"><div class="card-title">'+c.t+'</div><div class="card-value '+(c.cls||"")+'">'+c.v+'</div></div>';});
   h+='</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">'+
-    '<div class="card"><div class="card-title">璋冨害鍣ㄧ姸鎬?/div>'+
-    '<div class="kv"><span class="k">鎬绘《鏁?/span><span class="v">'+(s.total_buckets||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鍋ュ悍妗?/span><span class="v" style="color:var(--success)">'+(s.healthy_keys||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鍐峰嵈涓?/span><span class="v" style="color:var(--warn)">'+(s.cooling_keys||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鑷剤涓?/span><span class="v">'+(s.healing_keys||0)+'</span></div>'+
-    '<div class="kv"><span class="k">褰撳墠骞跺彂</span><span class="v">'+(s.global_inflight||0)+'</span></div></div>'+
-    '<div class="card"><div class="card-title">缁熻鎽樿 (24h)</div>'+
-    '<div class="kv"><span class="k">鎬昏姹?/span><span class="v">'+fmtNum(summary.total||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鎴愬姛</span><span class="v" style="color:var(--success)">'+fmtNum(summary.success||0)+'</span></div>'+
-    '<div class="kv"><span class="k">澶辫触</span><span class="v" style="color:var(--danger)">'+fmtNum(summary.failed||0)+'</span></div>'+
-    '<div class="kv"><span class="k">閲嶈瘯</span><span class="v">'+fmtNum(summary.retried||0)+'</span></div>'+
-    '<div class="kv"><span class="k">骞冲潎寤惰繜</span><span class="v">'+fmtNum(Math.round((summary.avg_latency_us||0)/1000))+' ms</span></div>'+
-    '<div class="kv"><span class="k">杈撳叆 Token</span><span class="v">'+fmtNum(summary.prompt_tokens_24h||0)+'</span></div>'+
-    '<div class="kv"><span class="k">杈撳嚭 Token</span><span class="v">'+fmtNum(summary.completion_tokens_24h||0)+'</span></div>'+
-    '<div class="kv"><span class="k">缂撳瓨 Token</span><span class="v">'+fmtNum(summary.cached_tokens_24h||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鎬?Token</span><span class="v">'+fmtNum(summary.total_tokens_24h||0)+'</span></div>'+
-    '<div class="kv"><span class="k">骞冲潎棣栧瓧寤惰繜</span><span class="v">'+fmtNum(Math.round(summary.avg_ttft_ms||0))+' ms</span></div>'+
-    '<div class="kv"><span class="k">娴佸紡璇锋眰</span><span class="v">'+fmtNum(summary.stream_requests_24h||0)+'</span></div>'+
-    '<div class="kv"><span class="k">闈炴祦寮忚姹?/span><span class="v">'+fmtNum(summary.non_stream_requests_24h||0)+'</span></div></div></div>';
-  h+='<div class="card" style="margin-top:12px"><div class="card-title">7 澶╄姹傝秼鍔?/div>';
+    '<div class="card"><div class="card-title">调度器状态</div>'+
+    '<div class="kv"><span class="k">总桶数</span><span class="v">'+(s.total_buckets||0)+'</span></div>'+
+    '<div class="kv"><span class="k">健康桶</span><span class="v" style="color:var(--success)">'+(s.healthy_keys||0)+'</span></div>'+
+    '<div class="kv"><span class="k">冷却中</span><span class="v" style="color:var(--warn)">'+(s.cooling_keys||0)+'</span></div>'+
+    '<div class="kv"><span class="k">自愈中</span><span class="v">'+(s.healing_keys||0)+'</span></div>'+
+    '<div class="kv"><span class="k">当前并发</span><span class="v">'+(s.global_inflight||0)+'</span></div></div>'+
+    '<div class="card"><div class="card-title">统计摘要 (24h)</div>'+
+    '<div class="kv"><span class="k">总请求</span><span class="v">'+fmtNum(summary.total||0)+'</span></div>'+
+    '<div class="kv"><span class="k">成功</span><span class="v" style="color:var(--success)">'+fmtNum(summary.success||0)+'</span></div>'+
+    '<div class="kv"><span class="k">失败</span><span class="v" style="color:var(--danger)">'+fmtNum(summary.failed||0)+'</span></div>'+
+    '<div class="kv"><span class="k">重试</span><span class="v">'+fmtNum(summary.retried||0)+'</span></div>'+
+    '<div class="kv"><span class="k">平均延迟</span><span class="v">'+fmtNum(Math.round((summary.avg_latency_us||0)/1000))+' ms</span></div>'+
+    '<div class="kv"><span class="k">输入 Token</span><span class="v">'+fmtNum(summary.prompt_tokens_24h||0)+'</span></div>'+
+    '<div class="kv"><span class="k">输出 Token</span><span class="v">'+fmtNum(summary.completion_tokens_24h||0)+'</span></div>'+
+    '<div class="kv"><span class="k">缓存 Token</span><span class="v">'+fmtNum(summary.cached_tokens_24h||0)+'</span></div>'+
+    '<div class="kv"><span class="k">总 Token</span><span class="v">'+fmtNum(summary.total_tokens_24h||0)+'</span></div>'+
+    '<div class="kv"><span class="k">平均首字延迟</span><span class="v">'+fmtNum(Math.round(summary.avg_ttft_ms||0))+' ms</span></div>'+
+    '<div class="kv"><span class="k">流式请求</span><span class="v">'+fmtNum(summary.stream_requests_24h||0)+'</span></div>'+
+    '<div class="kv"><span class="k">非流式请求</span><span class="v">'+fmtNum(summary.non_stream_requests_24h||0)+'</span></div></div></div>';
+  h+='<div class="card" style="margin-top:12px"><div class="card-title">7 天请求趋势</div>';
   var data=trend.data||[];
   if(data.length){
     var mx=1;data.forEach(function(d){if(d.total>mx)mx=d.total;});
     h+='<div class="chart">';
-    data.forEach(function(d){var hh=Math.max(2,Math.round(d.total/mx*100));var dt=new Date(d.hour);h+='<div class="bar" style="height:'+hh+'%" title="'+(dt.getMonth()+1)+'/'+dt.getDate()+' 鎬?'+d.total+' 閿欒:'+d.errors+' 杈撳叆T:'+(d.prompt_tokens||0)+' 杈撳嚭T:'+(d.completion_tokens||0)+' 缂撳瓨T:'+(d.cached_tokens||0)+' 鎬籘:'+(d.tokens||0)+'"></div>';});
+    data.forEach(function(d){var hh=Math.max(2,Math.round(d.total/mx*100));var dt=new Date(d.hour);h+='<div class="bar" style="height:'+hh+'%" title="'+(dt.getMonth()+1)+'/'+dt.getDate()+' 总:'+d.total+' 错误:'+d.errors+' 输入T:'+(d.prompt_tokens||0)+' 输出T:'+(d.completion_tokens||0)+' 缓存T:'+(d.cached_tokens||0)+' 总T:'+(d.tokens||0)+'"></div>';});
     h+='</div><div class="chart-axis"><span>'+(data.length?fmtDay(data[0].hour):"")+'</span><span>'+(data.length?fmtDay(data[data.length-1].hour):"")+'</span></div>';
-  }else{h+='<div class="empty">鏆傛棤瓒嬪娍鏁版嵁</div>';}
+  }else{h+='<div class="empty">暂无趋势数据</div>';}
   h+='</div>';
   $("#content").innerHTML=h;
   setMaintTag(dash.maintenance_mode);
 }
 function fmtDay(t){var d=new Date(t);return d.getMonth()+1+"/"+d.getDate();}
 
-/* 涓婃父瀵嗛挜 */
+/* 上游密钥 */
 function loadUpstreams(){
-  $("#content").innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:15px">涓婃父瀵嗛挜鍒楄〃</h3><button class="btn btn-primary" onclick="showUpstreamModal()">+ 鍒涘缓瀵嗛挜</button></div><div id="up-list">'+setLoading()+'</div>';
-  api("GET","/upstreams").then(function(r){state.upstreamData=r.data||[];renderUpstreams(state.upstreamData);}).catch(function(e){$("#up-list").innerHTML='<div class="empty">鍔犺浇澶辫触锛?+esc(e.message)+'</div>';});
-  // 鍚姩鏈湴鍊掕鏃讹紙姣忕鏇存柊锛夛紝鍚庡彴姣?30 绉掑埛鏂版暟鎹?  startCooldownTicker();
+  $("#content").innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:15px">上游密钥列表</h3><button class="btn btn-primary" onclick="showUpstreamModal()">+ 创建密钥</button></div><div id="up-list">'+setLoading()+'</div>';
+  api("GET","/upstreams").then(function(r){state.upstreamData=r.data||[];renderUpstreams(state.upstreamData);}).catch(function(e){$("#up-list").innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';});
+  // 启动本地倒计时（每秒更新），后台每 30 秒刷新数据
+  startCooldownTicker();
   if(state._upstreamRefresh)clearInterval(state._upstreamRefresh);
   state._upstreamRefresh=setInterval(function(){
     if(state.page!=="upstreams"){clearInterval(state._upstreamRefresh);return;}
     api("GET","/upstreams").then(function(r){state.upstreamData=r.data||[];renderUpstreams(state.upstreamData);}).catch(function(){});
   },30000);
 }
-// 鏈湴鍊掕鏃讹細姣忕鍒锋柊鍐峰嵈鍊掕鏃跺拰鐘舵€侊紝鏃犻渶 API 璋冪敤
+// 本地倒计时：每秒刷新冷却倒计时和状态，无需 API 调用
 function startCooldownTicker(){
   if(state._cdTicker)clearInterval(state._cdTicker);
   state._cdTicker=setInterval(function(){
@@ -328,21 +330,21 @@ function startCooldownTicker(){
         cdCell.setAttribute("data-cd",remain);
         var cdMin=Math.floor(remain/60), cdRem=remain%60;
         cdCell.innerHTML='<span style="color:var(--warn);font-weight:500">'+(cdMin>0?cdMin+'m'+cdRem+'s':remain+'s')+'</span>';
-        // 鏇存柊鐘舵€佸垪棰滆壊
+        // 更新状态列颜色
         if(stCell&&!stCell.querySelector(".badge-cooling")){
-          stCell.innerHTML='<span class="badge badge-cooling">鍐峰嵈涓?/span>';
+          stCell.innerHTML='<span class="badge badge-cooling">冷却中</span>';
         }
       }else{
         cdCell.innerHTML='<span style="color:var(--text2)">-</span>';
         if(stCell&&stCell.querySelector(".badge-cooling")){
-          stCell.innerHTML='<span class="badge badge-active">娲昏穬</span>';
+          stCell.innerHTML='<span class="badge badge-active">活跃</span>';
         }
       }
     });
   },1000);
 }
 function renderUpstreams(data){
-  if(!data.length){$("#up-list").innerHTML='<div class="empty">鏆傛棤涓婃父瀵嗛挜</div>';return;}
+  if(!data.length){$("#up-list").innerHTML='<div class="empty">暂无上游密钥</div>';return;}
   var total=data.length;
   var s=state.upstreamSort;
   var rows=data.slice().sort(function(a,b){
@@ -362,25 +364,26 @@ function renderUpstreams(data){
   });
   function sortTh(key,label){
     var arrow="";
-    if(s.key===key)arrow=s.dir>0?" 鈻?:" 鈻?;
+    if(s.key===key)arrow=s.dir>0?" ▲":" ▼";
     return '<th onclick="sortUpstreams(\''+key+'\')">'+label+arrow+'</th>';
   }
   var h='<div class="table-wrap"><table><thead><tr>'+
-    sortTh("name","鍚嶇О")+sortTh("provider","Provider")+
-    '<th>API 鍦板潃</th>'+
-    sortTh("status","鐘舵€?)+sortTh("cooldown_remaining","鍐峰嵈")+sortTh("health_score","鍋ュ悍")+
-    sortTh("total_429","429娆℃暟")+sortTh("total_5xx","5xx娆℃暟")+
-    sortTh("created_at","鍒涘缓鏃堕棿")+'<th>鎿嶄綔</th></tr></thead><tbody>';
+    sortTh("name","名称")+sortTh("provider","Provider")+
+    '<th>API 地址</th>'+
+    sortTh("status","状态")+sortTh("cooldown_remaining","冷却")+sortTh("health_score","健康")+
+    sortTh("total_429","429次数")+sortTh("total_5xx","5xx次数")+
+    sortTh("created_at","创建时间")+'<th>操作</th></tr></thead><tbody>';
   rows.forEach(function(u){
     var statusBtn;
     if(u.status==="active"){
-      statusBtn='<button class="btn btn-sm" onclick="toggleUpstream(\''+u.id+'\',true)">鍋滅敤</button>';
+      statusBtn='<button class="btn btn-sm" onclick="toggleUpstream(\''+u.id+'\',true)">停用</button>';
     }else if(u.status==="frozen"||u.status==="cooling"){
-      statusBtn='<button class="btn btn-sm" onclick="unfreezeUpstream(\''+u.id+'\')">瑙ｅ喕</button>';
+      statusBtn='<button class="btn btn-sm" onclick="unfreezeUpstream(\''+u.id+'\')">解冻</button>';
     }else{
-      statusBtn='<button class="btn btn-sm" onclick="toggleUpstream(\''+u.id+'\',false)">鍚敤</button>';
+      statusBtn='<button class="btn btn-sm" onclick="toggleUpstream(\''+u.id+'\',false)">启用</button>';
     }
-    // 鍐峰嵈鍊掕鏃讹細瀛樺偍鍓╀綑绉掓暟锛岀敱鏈湴瀹氭椂鍣ㄦ瘡绉掓洿鏂?    var cdSec=u.cooldown_active?u.cooldown_remaining||0:0;
+    // 冷却倒计时：存储剩余秒数，由本地定时器每秒更新
+    var cdSec=u.cooldown_active?u.cooldown_remaining||0:0;
     var cdHtml;
     if(cdSec>0){
       var cdMin=Math.floor(cdSec/60), cdRem=cdSec%60;
@@ -388,9 +391,10 @@ function renderUpstreams(data){
     }else{
       cdHtml='<span class="cd-cell" data-cd="0" style="color:var(--text2)">-</span>';
     }
-    // 鐘舵€侊細鍐峰嵈涓樉绀烘鑹?    var stHtml;
+    // 状态：冷却中显示橙色
+    var stHtml;
     if(u.cooldown_active){
-      stHtml='<span class="st-cell badge badge-cooling">鍐峰嵈涓?/span>';
+      stHtml='<span class="st-cell badge badge-cooling">冷却中</span>';
     }else{
       stHtml='<span class="st-cell">'+statusBadge(u.status)+'</span>';
     }
@@ -400,106 +404,107 @@ function renderUpstreams(data){
     var sr=u.success_rate!=null?u.success_rate:100;
     var srHtml='<span style="color:'+(sr>=80?'var(--success)':sr>=50?'var(--warn)':'var(--danger)')+'">'+sr.toFixed(0)+'%</span>';
     h+='<tr><td>'+esc(u.name)+'</td><td><span class="tag">'+esc(u.provider)+'</span></td>'+
-      '<td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(u.base_url||"榛樿")+'">'+esc(u.base_url||"榛樿 NVIDIA NIM")+'</td>'+
+      '<td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(u.base_url||"默认")+'">'+esc(u.base_url||"默认 NVIDIA NIM")+'</td>'+
       '<td>'+stHtml+'</td><td>'+cdHtml+'</td><td>'+hsHtml+'</td>'+
       '<td>'+(u.total_requests||0)+'</td><td>'+srHtml+'</td>'+
       '<td>'+(u.total_429||0)+'</td><td>'+(u.total_5xx||0)+'</td>'+
       '<td style="color:var(--text2)">'+fmtTime(u.created_at)+'</td>'+
-      '<td class="actions"><button class="btn btn-sm" onclick="editUpstream(\''+u.id+'\')">缂栬緫</button>'+
-      '<button class="btn btn-sm" onclick="revealUpstream(\''+u.id+'\')">鏌ョ湅鏄庢枃</button>'+
+      '<td class="actions"><button class="btn btn-sm" onclick="editUpstream(\''+u.id+'\')">编辑</button>'+
+      '<button class="btn btn-sm" onclick="revealUpstream(\''+u.id+'\')">查看明文</button>'+
       statusBtn+
-      '<button class="btn btn-sm btn-danger" onclick="deleteUpstream(\''+u.id+'\',\''+esc(u.name).replace(/'/g,"")+'\')">鍒犻櫎</button></td></tr>';
+      '<button class="btn btn-sm btn-danger" onclick="deleteUpstream(\''+u.id+'\',\''+esc(u.name).replace(/'/g,"")+'\')">删除</button></td></tr>';
   });
-  h+='</tbody></table></div><div class="pager"><span>鍏?'+total+' 鏉?/span></div>';
+  h+='</tbody></table></div><div class="pager"><span>共 '+total+' 条</span></div>';
   $("#up-list").innerHTML=h;
-  // 閲嶆柊鍚姩鍊掕鏃讹紙renderUpstreams 鏇挎崲浜?DOM锛岄渶瑕侀噸鏂扮粦瀹氾級
+  // 重新启动倒计时（renderUpstreams 替换了 DOM，需要重新绑定）
   startCooldownTicker();
 }
 function statusBadge(s){
-  if(s==="active")return '<span class="badge badge-active">娲昏穬</span>';
-  if(s==="frozen"||s==="cooling")return '<span class="badge badge-frozen">鍐荤粨</span>';
-  if(s==="inactive")return '<span class="badge badge-inactive">鍋滅敤</span>';
-  if(s==="banned"||s==="revoked")return '<span class="badge badge-banned">绂佺敤</span>';
+  if(s==="active")return '<span class="badge badge-active">活跃</span>';
+  if(s==="frozen"||s==="cooling")return '<span class="badge badge-frozen">冻结</span>';
+  if(s==="inactive")return '<span class="badge badge-inactive">停用</span>';
+  if(s==="banned"||s==="revoked")return '<span class="badge badge-banned">禁用</span>';
   return '<span class="badge badge-inactive">'+esc(s||"-")+'</span>';
 }
 function upstreamFormHtml(u,isEdit){
   var pv=u.provider||"nvidia";
   var opts=["nvidia","openai","anthropic","custom"].map(function(p){return '<option value="'+p+'"'+(pv===p?"selected":"")+">"+p+"</option>";}).join("");
   return '<form id="up-form" onsubmit="return false">'+
-    '<div class="form-row"><label>鍚嶇О</label><input class="input" name="name" value="'+esc(u.name||"")+'" required></div>'+
+    '<div class="form-row"><label>名称</label><input class="input" name="name" value="'+esc(u.name||"")+'" required></div>'+
     '<div class="form-row"><label>Provider</label><select class="input" name="provider">'+opts+'</select></div>'+
-    '<div class="form-row"><label>API 鍦板潃锛堢暀绌轰娇鐢ㄩ粯璁?NVIDIA NIM锛?/label><input class="input" name="base_url" value="'+esc(u.base_url||"")+'" placeholder="https://api.example.com/v1"></div>'+
+    '<div class="form-row"><label>API 地址（留空使用默认 NVIDIA NIM）</label><input class="input" name="base_url" value="'+esc(u.base_url||"")+'" placeholder="https://api.example.com/v1"></div>'+
     (isEdit?'':'<div class="form-row"><label>API Key</label><input class="input" name="api_key" placeholder="sk-..." required></div>')+
-    '<div class="form-grid"><div class="form-row"><label>鏉冮噸</label><input class="input" type="number" name="weight" value="'+(u.weight||1)+'" min="1"></div>'+
-    '<div class="form-row"><label>RPM 闄愬埗</label><input class="input" type="number" name="rpm_limit" value="'+(u.rpm_limit||40)+'" min="0"></div></div>'+
-    '<div class="form-row"><label>鍒囨崲闃堝€?/label><input class="input" type="number" name="switch_threshold" value="'+(u.switch_threshold||38)+'" min="0"></div></form>';
+    '<div class="form-grid"><div class="form-row"><label>权重</label><input class="input" type="number" name="weight" value="'+(u.weight||1)+'" min="1"></div>'+
+    '<div class="form-row"><label>RPM 限制</label><input class="input" type="number" name="rpm_limit" value="'+(u.rpm_limit||40)+'" min="0"></div></div>'+
+    '<div class="form-row"><label>切换阈值</label><input class="input" type="number" name="switch_threshold" value="'+(u.switch_threshold||38)+'" min="0"></div></form>';
 }
 function showUpstreamModal(id){
   if(!id){openUpstreamModal({},false);return;}
   api("GET","/upstreams/"+id).then(function(u){openUpstreamModal(u,true);}).catch(function(){openUpstreamModal({},false);});
 }
 function openUpstreamModal(u,isEdit){
-  showModal(isEdit?"缂栬緫涓婃父瀵嗛挜":"鍒涘缓涓婃父瀵嗛挜",upstreamFormHtml(u,isEdit),
-    '<button class="btn" onclick="closeModal()">鍙栨秷</button><button class="btn btn-primary" onclick="submitUpstream('+(isEdit?"'"+u.id+"'":"''")+')">'+(isEdit?"淇濆瓨":"鍒涘缓")+'</button>');
+  showModal(isEdit?"编辑上游密钥":"创建上游密钥",upstreamFormHtml(u,isEdit),
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="submitUpstream('+(isEdit?"'"+u.id+"'":"''")+')">'+(isEdit?"保存":"创建")+'</button>');
 }
 function submitUpstream(id){
   var d=formToJson($("#up-form"));
   if(id){
     api("PUT","/upstreams/"+id,{name:d.name,base_url:d.base_url,weight:+d.weight,rpm_limit:+d.rpm_limit,switch_threshold:+d.switch_threshold})
-    .then(function(){toast("淇濆瓨鎴愬姛","success");closeModal();loadUpstreams();}).catch(function(e){toast(e.message,"error");});
+    .then(function(){toast("保存成功","success");closeModal();loadUpstreams();}).catch(function(e){toast(e.message,"error");});
   }else{
     api("POST","/upstreams",{name:d.name,provider:d.provider,api_key:d.api_key,base_url:d.base_url,weight:+d.weight,rpm_limit:+d.rpm_limit,switch_threshold:+d.switch_threshold})
-    .then(function(){toast("鍒涘缓鎴愬姛","success");closeModal();loadUpstreams();}).catch(function(e){toast(e.message,"error");});
+    .then(function(){toast("创建成功","success");closeModal();loadUpstreams();}).catch(function(e){toast(e.message,"error");});
   }
 }
 function editUpstream(id){showUpstreamModal(id);}
 function revealUpstream(id){
   api("GET","/upstreams/"+id+"/reveal").then(function(r){
-    showModal("鏌ョ湅鏄庢枃瀵嗛挜 - "+esc(r.name),
+    showModal("查看明文密钥 - "+esc(r.name),
       '<div class="kv"><span class="k">Provider</span><span class="v">'+esc(r.provider)+'</span></div>'+
-      '<div class="kv"><span class="k">鍓嶇紑</span><span class="v">'+esc(r.prefix)+'</span></div>'+
-      '<div class="kv"><span class="k">鐘舵€?/span><span class="v">'+statusBadge(r.status)+'</span></div>'+
-      '<div class="form-row" style="margin-top:12px"><label>API Key 鏄庢枃锛堜粎鏈鏄剧ず锛?/label><textarea class="input" rows="3" id="reveal-text" readonly>'+esc(r.api_key)+'</textarea></div>',
-      '<button class="btn" onclick="copyText(\'reveal-text\')">澶嶅埗</button><button class="btn btn-primary" onclick="closeModal()">鍏抽棴</button>');
+      '<div class="kv"><span class="k">前缀</span><span class="v">'+esc(r.prefix)+'</span></div>'+
+      '<div class="kv"><span class="k">状态</span><span class="v">'+statusBadge(r.status)+'</span></div>'+
+      '<div class="form-row" style="margin-top:12px"><label>API Key 明文（仅本次显示）</label><textarea class="input" rows="3" id="reveal-text" readonly>'+esc(r.api_key)+'</textarea></div>',
+      '<button class="btn" onclick="copyText(\'reveal-text\')">复制</button><button class="btn btn-primary" onclick="closeModal()">关闭</button>');
   }).catch(function(e){toast(e.message,"error");});
 }
-function unfreezeUpstream(id){gwConfirm("纭畾瑙ｅ喕璇ヤ笂娓稿瘑閽ワ紵").then(function(ok){if(!ok)return;api("POST","/upstreams/"+id+"/unfreeze").then(function(){toast("宸茶В鍐?,"success");loadUpstreams();}).catch(function(e){toast(e.message,"error");});});}
-function deleteUpstream(id,name){gwConfirm("纭畾鍒犻櫎瀵嗛挜銆?+name+"銆嶏紵姝ゆ搷浣滀笉鍙仮澶嶃€?).then(function(ok){if(!ok)return;api("DELETE","/upstreams/"+id).then(function(){toast("宸插垹闄?,"success");loadUpstreams();}).catch(function(e){toast(e.message,"error");});});}
-// 鍒囨崲涓婃父瀵嗛挜鍒楄〃鎺掑簭锛氱偣鍑昏〃澶存寜璇ュ垪鎺掑簭锛屽啀娆＄偣鍑诲弽杞柟鍚?function sortUpstreams(key){
+function unfreezeUpstream(id){gwConfirm("确定解冻该上游密钥？").then(function(ok){if(!ok)return;api("POST","/upstreams/"+id+"/unfreeze").then(function(){toast("已解冻","success");loadUpstreams();}).catch(function(e){toast(e.message,"error");});});}
+function deleteUpstream(id,name){gwConfirm("确定删除密钥「"+name+"」？此操作不可恢复。").then(function(ok){if(!ok)return;api("DELETE","/upstreams/"+id).then(function(){toast("已删除","success");loadUpstreams();}).catch(function(e){toast(e.message,"error");});});}
+// 切换上游密钥列表排序：点击表头按该列排序，再次点击反转方向
+function sortUpstreams(key){
   var s=state.upstreamSort;
   if(s.key===key)s.dir=-s.dir;else{s.key=key;s.dir=1;}
   renderUpstreams(state.upstreamData);
 }
-// 鍋滅敤/鍚敤涓婃父瀵嗛挜锛氳皟鐢?PUT 鍒囨崲鐘舵€佸悗鍒锋柊鍒楄〃
+// 停用/启用上游密钥：调用 PUT 切换状态后刷新列表
 function toggleUpstream(id,isActive){
-  gwConfirm(isActive?"纭畾鍋滅敤璇ヤ笂娓稿瘑閽ワ紵":"纭畾鍚敤璇ヤ笂娓稿瘑閽ワ紵").then(function(ok){
+  gwConfirm(isActive?"确定停用该上游密钥？":"确定启用该上游密钥？").then(function(ok){
     if(!ok)return;
     api("PUT","/upstreams/"+id,{status:isActive?"inactive":"active"})
-      .then(function(){toast(isActive?"宸插仠鐢?:"宸插惎鐢?,"success");loadUpstreams();})
+      .then(function(){toast(isActive?"已停用":"已启用","success");loadUpstreams();})
       .catch(function(e){toast(e.message,"error");});
   });
 }
 
-/* 瀹㈡埛绔鐞?*/
+/* 客户端管理 */
 function loadClients(){
-  $("#content").innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:15px">瀹㈡埛绔垪琛?/h3><button class="btn btn-primary" onclick="showClientModal()">+ 鍒涘缓瀹㈡埛绔?/button></div><div id="cl-list">'+setLoading()+'</div>';
-  api("GET","/clients?limit=500&offset=0").then(function(r){renderClients(r.data||[]);}).catch(function(e){$("#cl-list").innerHTML='<div class="empty">鍔犺浇澶辫触锛?+esc(e.message)+'</div>';});
+  $("#content").innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:15px">客户端列表</h3><button class="btn btn-primary" onclick="showClientModal()">+ 创建客户端</button></div><div id="cl-list">'+setLoading()+'</div>';
+  api("GET","/clients?limit=500&offset=0").then(function(r){renderClients(r.data||[]);}).catch(function(e){$("#cl-list").innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';});
 }
 function renderClients(data){
-  if(!data.length){$("#cl-list").innerHTML='<div class="empty">鏆傛棤瀹㈡埛绔?/div>';return;}
+  if(!data.length){$("#cl-list").innerHTML='<div class="empty">暂无客户端</div>';return;}
   var total=data.length, tp=Math.max(1,Math.ceil(total/state.clientPageSize));
   if(state.clientPage>tp)state.clientPage=tp;
   var start=(state.clientPage-1)*state.clientPageSize, rows=data.slice(start,start+state.clientPageSize);
-  var h='<div class="table-wrap"><table><thead><tr><th>ID</th><th>鍚嶇О</th><th>閭</th><th>鐢ㄦ埛绫诲瀷</th><th>鐘舵€?/th><th>鏃ラ檺棰?/th><th>宸茬敤</th><th>娉ㄥ唽鏃堕棿</th><th>鎿嶄綔</th></tr></thead><tbody>';
+  var h='<div class="table-wrap"><table><thead><tr><th>ID</th><th>名称</th><th>邮箱</th><th>用户类型</th><th>状态</th><th>日限额</th><th>已用</th><th>注册时间</th><th>操作</th></tr></thead><tbody>';
   rows.forEach(function(u){
     h+='<tr><td style="font-family:monospace;font-size:12px;color:var(--text2);font-weight:600">#'+esc(String(u.id))+'</td>'+
       '<td>'+esc(u.display_name||u.username||"-")+'</td><td style="color:var(--text2)">'+esc(u.email||"-")+'</td>'+
       '<td><span class="tag">'+esc(u.user_type||"-")+'</span></td><td>'+statusBadge(u.status)+'</td>'+
       '<td>'+fmtNum(u.daily_limit)+'</td><td>'+(u.daily_used!=null?fmtNum(u.daily_used):"-")+'</td>'+
       '<td style="color:var(--text2)">'+fmtTime(u.created_at)+'</td>'+
-      '<td class="actions"><button class="btn btn-sm" onclick="showClientModal(\''+u.id+'\')">缂栬緫</button>'+
-      '<button class="btn btn-sm" onclick="showClientKeys(\''+u.id+'\')">瀵嗛挜</button>'+
-      '<button class="btn btn-sm btn-danger" onclick="deleteClient(\''+u.id+'\',\''+esc(String(u.display_name||u.username||"")).replace(/'/g,"")+'\')">鍒犻櫎</button></td></tr>';
+      '<td class="actions"><button class="btn btn-sm" onclick="showClientModal(\''+u.id+'\')">编辑</button>'+
+      '<button class="btn btn-sm" onclick="showClientKeys(\''+u.id+'\')">密钥</button>'+
+      '<button class="btn btn-sm btn-danger" onclick="deleteClient(\''+u.id+'\',\''+esc(String(u.display_name||u.username||"")).replace(/'/g,"")+'\')">删除</button></td></tr>';
   });
   h+='</tbody></table></div>'+pagerHtml(state.clientPage,tp,total,"clientPage","loadClients");
   $("#cl-list").innerHTML=h;
@@ -510,58 +515,58 @@ function showClientModal(id){
 }
 function clientForm(u,isEdit){
   var ut=u.user_type||"old";
-  var utOpts=["old","new"].map(function(t){return '<option value="'+t+'"'+(ut===t?"selected":"")+">"+(t==="old"?"鑰佺敤鎴?:"鏂扮敤鎴?)+"</option>";}).join("");
-  var stRow=isEdit?'<div class="form-row"><label>鐘舵€?/label><select class="input" name="status"><option value="active"'+(u.status==="active"?"selected":"")+'>娲昏穬</option><option value="banned"'+(u.status==="banned"?"selected":"")+'>灏佺</option><option value="inactive"'+(u.status==="inactive"?"selected":"")+'>鍋滅敤</option></select></div>':'';
-  showModal(isEdit?"缂栬緫瀹㈡埛绔?:"鍒涘缓瀹㈡埛绔?,
-    '<form id="cl-form" onsubmit="return false"><div class="form-row"><label>鍚嶇О</label><input class="input" name="name" value="'+esc(u.name||"")+'" required></div>'+
-    '<div class="form-row"><label>鐢ㄦ埛绫诲瀷</label><select class="input" name="user_type">'+utOpts+'</select></div>'+stRow+'</form>',
-    '<button class="btn" onclick="closeModal()">鍙栨秷</button><button class="btn btn-primary" onclick="submitClient('+(isEdit?"'"+u.id+"'":"''")+')">'+(isEdit?"淇濆瓨":"鍒涘缓")+'</button>');
+  var utOpts=["old","new"].map(function(t){return '<option value="'+t+'"'+(ut===t?"selected":"")+">"+(t==="old"?"老用户":"新用户")+"</option>";}).join("");
+  var stRow=isEdit?'<div class="form-row"><label>状态</label><select class="input" name="status"><option value="active"'+(u.status==="active"?"selected":"")+'>活跃</option><option value="banned"'+(u.status==="banned"?"selected":"")+'>封禁</option><option value="inactive"'+(u.status==="inactive"?"selected":"")+'>停用</option></select></div>':'';
+  showModal(isEdit?"编辑客户端":"创建客户端",
+    '<form id="cl-form" onsubmit="return false"><div class="form-row"><label>名称</label><input class="input" name="name" value="'+esc(u.name||"")+'" required></div>'+
+    '<div class="form-row"><label>用户类型</label><select class="input" name="user_type">'+utOpts+'</select></div>'+stRow+'</form>',
+    '<button class="btn" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="submitClient('+(isEdit?"'"+u.id+"'":"''")+')">'+(isEdit?"保存":"创建")+'</button>');
 }
 function submitClient(id){
   var d=formToJson($("#cl-form"));
   if(id){
-    api("PUT","/clients/"+id,{status:d.status,user_type:d.user_type}).then(function(){toast("淇濆瓨鎴愬姛","success");closeModal();loadClients();}).catch(function(e){toast(e.message,"error");});
+    api("PUT","/clients/"+id,{status:d.status,user_type:d.user_type}).then(function(){toast("保存成功","success");closeModal();loadClients();}).catch(function(e){toast(e.message,"error");});
   }else{
-    api("POST","/clients",{name:d.name,user_type:d.user_type}).then(function(){toast("鍒涘缓鎴愬姛","success");closeModal();loadClients();}).catch(function(e){toast(e.message,"error");});
+    api("POST","/clients",{name:d.name,user_type:d.user_type}).then(function(){toast("创建成功","success");closeModal();loadClients();}).catch(function(e){toast(e.message,"error");});
   }
 }
-function deleteClient(id,name){gwConfirm("纭畾鍒犻櫎瀹㈡埛绔€?+name+"銆嶅強鍏舵墍鏈夊瘑閽ワ紵").then(function(ok){if(!ok)return;api("DELETE","/clients/"+id).then(function(){toast("宸插垹闄?,"success");loadClients();}).catch(function(e){toast(e.message,"error");});});}
+function deleteClient(id,name){gwConfirm("确定删除客户端「"+name+"」及其所有密钥？").then(function(ok){if(!ok)return;api("DELETE","/clients/"+id).then(function(){toast("已删除","success");loadClients();}).catch(function(e){toast(e.message,"error");});});}
 function showClientKeys(id){state.selectedClient=id;api("GET","/clients/"+id+"/keys").then(function(r){renderClientKeys(id,r.data||[]);}).catch(function(e){toast(e.message,"error");});}
 function renderClientKeys(id,keys){
-  var h='<div style="margin-bottom:12px;display:flex;justify-content:space-between"><span style="color:var(--text2)">瀹㈡埛绔?'+esc(id.slice(0,8))+' 鐨勫瘑閽?/span><button class="btn btn-primary btn-sm" onclick="createClientKey(\''+id+'\')">+ 鏂板缓瀵嗛挜</button></div>';
-  if(!keys.length){h+='<div class="empty">鏆傛棤瀵嗛挜</div>';}
+  var h='<div style="margin-bottom:12px;display:flex;justify-content:space-between"><span style="color:var(--text2)">客户端 '+esc(id.slice(0,8))+' 的密钥</span><button class="btn btn-primary btn-sm" onclick="createClientKey(\''+id+'\')">+ 新建密钥</button></div>';
+  if(!keys.length){h+='<div class="empty">暂无密钥</div>';}
   else{
-    h+='<div class="table-wrap"><table><thead><tr><th>鍓嶇紑</th><th>鐘舵€?/th><th>鍒涘缓鏃堕棿</th><th>鏈€鍚庝娇鐢?/th><th>鎿嶄綔</th></tr></thead><tbody>';
+    h+='<div class="table-wrap"><table><thead><tr><th>前缀</th><th>状态</th><th>创建时间</th><th>最后使用</th><th>操作</th></tr></thead><tbody>';
     keys.forEach(function(k){
       h+='<tr><td style="font-family:monospace">'+esc(k.key_prefix)+'</td><td>'+statusBadge(k.status)+'</td><td style="color:var(--text2)">'+fmtTime(k.created_at)+'</td><td style="color:var(--text2)">'+fmtTime(k.last_used_at)+'</td>'+
-        '<td class="actions"><button class="btn btn-sm" onclick="revealClientKey(\''+id+'\',\''+k.id+'\')">鏌ョ湅</button><button class="btn btn-sm btn-danger" onclick="deleteClientKey(\''+id+'\',\''+k.id+'\')">鍒犻櫎</button></td></tr>';
+        '<td class="actions"><button class="btn btn-sm" onclick="revealClientKey(\''+id+'\',\''+k.id+'\')">查看</button><button class="btn btn-sm btn-danger" onclick="deleteClientKey(\''+id+'\',\''+k.id+'\')">删除</button></td></tr>';
     });
     h+='</tbody></table></div>';
   }
-  showModal("瀵嗛挜绠＄悊",h,'<button class="btn" onclick="closeModal()">鍏抽棴</button>');
+  showModal("密钥管理",h,'<button class="btn" onclick="closeModal()">关闭</button>');
 }
 function createClientKey(id){
-  gwConfirm("涓鸿瀹㈡埛绔敓鎴愭柊瀵嗛挜锛?).then(function(ok){if(!ok)return;
+  gwConfirm("为该客户端生成新密钥？").then(function(ok){if(!ok)return;
   api("POST","/clients/"+id+"/keys").then(function(r){
-    showModal("鏂板瘑閽ュ凡鐢熸垚",
-      '<div class="empty" style="color:var(--warn);padding:8px 0;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg> 璇峰Ε鍠勪繚瀛橈紝浠呭湪鍒涘缓鏃舵樉绀轰竴娆?/div>'+
+    showModal("新密钥已生成",
+      '<div class="empty" style="color:var(--warn);padding:8px 0;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="18" r="0.5" fill="currentColor"/></svg> 请妥善保存，仅在创建时显示一次</div>'+
       '<div class="form-row"><label>API Key</label><textarea class="input" rows="3" id="new-key-text" readonly>'+esc(r.api_key)+'</textarea></div>'+
-      '<div class="kv"><span class="k">鍓嶇紑</span><span class="v">'+esc(r.key_prefix)+'</span></div>',
-      '<button class="btn" onclick="copyText(\'new-key-text\')">澶嶅埗</button><button class="btn btn-primary" onclick="closeModal();showClientKeys(\''+id+'\')">瀹屾垚</button>');
+      '<div class="kv"><span class="k">前缀</span><span class="v">'+esc(r.key_prefix)+'</span></div>',
+      '<button class="btn" onclick="copyText(\'new-key-text\')">复制</button><button class="btn btn-primary" onclick="closeModal();showClientKeys(\''+id+'\')">完成</button>');
   }).catch(function(e){toast(e.message,"error");});
   });}
 function revealClientKey(cid,kid){
   api("GET","/clients/"+cid+"/keys/"+kid+"/reveal").then(function(r){
-    showModal("鏌ョ湅瀵嗛挜鏄庢枃",
-      '<div class="kv"><span class="k">鍓嶇紑</span><span class="v">'+esc(r.key_prefix)+'</span></div>'+
-      '<div class="kv"><span class="k">鐘舵€?/span><span class="v">'+statusBadge(r.status)+'</span></div>'+
-      '<div class="form-row" style="margin-top:12px"><label>API Key 鏄庢枃</label><textarea class="input" rows="3" id="reveal-text" readonly>'+esc(r.api_key)+'</textarea></div>',
-      '<button class="btn" onclick="copyText(\'reveal-text\')">澶嶅埗</button><button class="btn btn-primary" onclick="closeModal()">鍏抽棴</button>');
+    showModal("查看密钥明文",
+      '<div class="kv"><span class="k">前缀</span><span class="v">'+esc(r.key_prefix)+'</span></div>'+
+      '<div class="kv"><span class="k">状态</span><span class="v">'+statusBadge(r.status)+'</span></div>'+
+      '<div class="form-row" style="margin-top:12px"><label>API Key 明文</label><textarea class="input" rows="3" id="reveal-text" readonly>'+esc(r.api_key)+'</textarea></div>',
+      '<button class="btn" onclick="copyText(\'reveal-text\')">复制</button><button class="btn btn-primary" onclick="closeModal()">关闭</button>');
   }).catch(function(e){toast(e.message,"error");});
 }
-function deleteClientKey(cid,kid){gwConfirm("纭畾鍒犻櫎璇ュ瘑閽ワ紵").then(function(ok){if(!ok)return;api("DELETE","/clients/"+cid+"/keys/"+kid).then(function(){toast("宸插垹闄?,"success");showClientKeys(cid);}).catch(function(e){toast(e.message,"error");});});}
+function deleteClientKey(cid,kid){gwConfirm("确定删除该密钥？").then(function(ok){if(!ok)return;api("DELETE","/clients/"+cid+"/keys/"+kid).then(function(){toast("已删除","success");showClientKeys(cid);}).catch(function(e){toast(e.message,"error");});});}
 
-/* 璇锋眰鏃ュ織 */
+/* 请求日志 */
 function loadLogs(){
   $("#content").innerHTML=setLoading();
   var offset=(state.logPage-1)*state.logPageSize;
@@ -572,26 +577,26 @@ function loadLogs(){
   if(state.logFilter.q)q+='&q='+encodeURIComponent(state.logFilter.q);
   Promise.all([api("GET","/request-logs-stats/summary"),api("GET",q)])
   .then(function(r){renderLogs(r[0],r[1].data||[],r[1].total||0);})
-  .catch(function(e){$("#content").innerHTML='<div class="empty">鍔犺浇澶辫触锛?+esc(e.message)+'</div>';});
+  .catch(function(e){$("#content").innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';});
 }
 function renderLogs(summary,logs,totalFromServer){
   state.logData=logs;
   var h='<div class="grid-stats" style="margin-bottom:14px">'+
-    '<div class="card"><div class="card-title">鎬昏姹?(24h)</div><div class="card-value">'+fmtNum(summary.total||0)+'</div></div>'+
-    '<div class="card"><div class="card-title">鎴愬姛鐜?/div>'+rateBadge(summary.success_rate||0)+'</div>'+
-    '<div class="card"><div class="card-title">澶辫触</div><div class="card-value danger">'+fmtNum(summary.failed||0)+'</div></div>'+
-    '<div class="card"><div class="card-title">閲嶈瘯</div><div class="card-value warn">'+fmtNum(summary.retried||0)+'</div></div>'+
-    '<div class="card"><div class="card-title">骞冲潎寤惰繜</div><div class="card-value">'+esc(summary.avg_latency_display||formatLatency((summary.avg_latency_ms||((summary.avg_latency_us||0)/1000))))+'</div></div>'+
-    '<div class="card"><div class="card-title">杈撳叆 Token</div><div class="card-value">'+fmtNum(summary.prompt_tokens_24h||0)+'</div></div>'+
-    '<div class="card"><div class="card-title">杈撳嚭 Token</div><div class="card-value">'+fmtNum(summary.completion_tokens_24h||0)+'</div></div>'+
-    '<div class="card"><div class="card-title">缂撳瓨 Token</div><div class="card-value">'+fmtNum(summary.cached_tokens_24h||0)+'</div></div>'+
-    '<div class="card"><div class="card-title">鎬?Token</div><div class="card-value">'+fmtNum(summary.total_tokens_24h||0)+'</div></div></div>';
+    '<div class="card"><div class="card-title">总请求 (24h)</div><div class="card-value">'+fmtNum(summary.total||0)+'</div></div>'+
+    '<div class="card"><div class="card-title">成功率</div>'+rateBadge(summary.success_rate||0)+'</div>'+
+    '<div class="card"><div class="card-title">失败</div><div class="card-value danger">'+fmtNum(summary.failed||0)+'</div></div>'+
+    '<div class="card"><div class="card-title">重试</div><div class="card-value warn">'+fmtNum(summary.retried||0)+'</div></div>'+
+    '<div class="card"><div class="card-title">平均延迟</div><div class="card-value">'+esc(summary.avg_latency_display||formatLatency((summary.avg_latency_ms||((summary.avg_latency_us||0)/1000))))+'</div></div>'+
+    '<div class="card"><div class="card-title">输入 Token</div><div class="card-value">'+fmtNum(summary.prompt_tokens_24h||0)+'</div></div>'+
+    '<div class="card"><div class="card-title">输出 Token</div><div class="card-value">'+fmtNum(summary.completion_tokens_24h||0)+'</div></div>'+
+    '<div class="card"><div class="card-title">缓存 Token</div><div class="card-value">'+fmtNum(summary.cached_tokens_24h||0)+'</div></div>'+
+    '<div class="card"><div class="card-title">总 Token</div><div class="card-value">'+fmtNum(summary.total_tokens_24h||0)+'</div></div></div>';
   h+='<div class="card" style="margin-bottom:12px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">'+
-    '<div style="flex:2;min-width:200px"><label>妯＄硦鎼滅储</label><input class="input" id="f-q" placeholder="妯″瀷/璺緞/閿欒/IP..." value="'+esc(state.logFilter.q||'')+'"></div>'+
-    '<div style="flex:1;min-width:120px"><label>鐘舵€佺爜</label><input class="input" id="f-code" placeholder="濡?429" value="'+esc(state.logFilter.code)+'"></div>'+
-    '<div style="flex:1;min-width:120px"><label>妯″瀷</label><input class="input" id="f-model" placeholder="妯″瀷鍚? value="'+esc(state.logFilter.model)+'"></div>'+
-    '<div style="flex:2;min-width:160px"><label>璺緞</label><input class="input" id="f-path" placeholder="璇锋眰璺緞" value="'+esc(state.logFilter.path)+'"></div>'+
-    '<button class="btn btn-primary" onclick="applyLogFilter()">绛涢€?/button><button class="btn" onclick="clearLogFilter()">閲嶇疆</button></div></div>';
+    '<div style="flex:2;min-width:200px"><label>模糊搜索</label><input class="input" id="f-q" placeholder="模型/路径/错误/IP..." value="'+esc(state.logFilter.q||'')+'"></div>'+
+    '<div style="flex:1;min-width:120px"><label>状态码</label><input class="input" id="f-code" placeholder="如 429" value="'+esc(state.logFilter.code)+'"></div>'+
+    '<div style="flex:1;min-width:120px"><label>模型</label><input class="input" id="f-model" placeholder="模型名" value="'+esc(state.logFilter.model)+'"></div>'+
+    '<div style="flex:2;min-width:160px"><label>路径</label><input class="input" id="f-path" placeholder="请求路径" value="'+esc(state.logFilter.path)+'"></div>'+
+    '<button class="btn btn-primary" onclick="applyLogFilter()">筛选</button><button class="btn" onclick="clearLogFilter()">重置</button></div></div>';
   h+='<div id="log-table"></div>';
   $("#content").innerHTML=h;
   renderLogRows(logs,totalFromServer);
@@ -606,73 +611,73 @@ function applyLogFilter(totalFromServer){
 }
 function renderLogRows(logs,total){
   state.logData=logs;
-  var h='<div style="color:var(--text2);margin-bottom:6px;font-size:12px">鍏?'+total+' 鏉¤褰?/div>';
-  if(!logs.length){h+='<div class="empty">鏆傛棤鏃ュ織</div>';}else{h+='<div class="table-wrap"><table><thead><tr><th>鏃堕棿</th><th>鐘舵€佺爜</th><th>妯″瀷</th><th>璺緞</th><th>鏂规硶</th><th>杈撳叆T</th><th>杈撳嚭T</th><th>缂撳瓨T</th><th>鎬籘</th><th>寤惰繜</th><th>瀹㈡埛绔疘P</th><th>鍒嗙被</th></tr></thead><tbody>';logs.forEach(function(l){var sc=l.status_code||0;var scCol=sc<300?"var(--success)":sc<400?"var(--text)":sc<500?"var(--warn)":"var(--danger)";var catHtml='-';if(l.error_type){var et=l.error_type;var ec=et.indexOf("429")>=0?"var(--warn)":et.indexOf("5xx")>=0||et.indexOf("conn")>=0?"var(--danger)":"var(--text)";catHtml='<span class="tag" style="color:'+ec+'">'+esc(et)+'</span>';}else if(l.log_category&&l.log_category!=="normal"){catHtml='<span class="tag">'+esc(l.log_category)+'</span>';}h+='<tr><td style="color:var(--text2);font-size:12px">'+fmtTime(l.created_at)+'</td><td><span style="color:'+scCol+'">'+sc+'</span></td><td>'+(l.model?esc(l.model):'-')+'</td><td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis">'+esc(l.request_path||"-")+'</td><td><span class="tag">'+esc(l.http_method||"-")+'</span></td><td style="color:var(--text2);font-size:12px">'+fmtNum(l.prompt_tokens||0)+'</td><td style="color:var(--text2);font-size:12px">'+fmtNum(l.completion_tokens||0)+'</td><td style="color:var(--text2);font-size:12px">'+fmtNum(l.cached_tokens||0)+'</td><td>'+fmtNum(l.total_tokens||0)+'</td><td style="color:var(--text2)">'+esc(l.latency_display||formatLatency(l.latency_ms||((l.latency_us||0)/1000)))+'</td><td style="font-family:monospace;font-size:12px">'+esc(l.client_ip||"-")+'</td><td>'+catHtml+'</td></tr>';});h+='</tbody></table></div>';}
+  var h='<div style="color:var(--text2);margin-bottom:6px;font-size:12px">共 '+total+' 条记录</div>';
+  if(!logs.length){h+='<div class="empty">暂无日志</div>';}else{h+='<div class="table-wrap"><table><thead><tr><th>时间</th><th>状态码</th><th>模型</th><th>路径</th><th>方法</th><th>输入T</th><th>输出T</th><th>缓存T</th><th>总T</th><th>延迟</th><th>客户端IP</th><th>分类</th></tr></thead><tbody>';logs.forEach(function(l){var sc=l.status_code||0;var scCol=sc<300?"var(--success)":sc<400?"var(--text)":sc<500?"var(--warn)":"var(--danger)";var catHtml='-';if(l.error_type){var et=l.error_type;var ec=et.indexOf("429")>=0?"var(--warn)":et.indexOf("5xx")>=0||et.indexOf("conn")>=0?"var(--danger)":"var(--text)";catHtml='<span class="tag" style="color:'+ec+'">'+esc(et)+'</span>';}else if(l.log_category&&l.log_category!=="normal"){catHtml='<span class="tag">'+esc(l.log_category)+'</span>';}h+='<tr><td style="color:var(--text2);font-size:12px">'+fmtTime(l.created_at)+'</td><td><span style="color:'+scCol+'">'+sc+'</span></td><td>'+(l.model?esc(l.model):'-')+'</td><td style="color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis">'+esc(l.request_path||"-")+'</td><td><span class="tag">'+esc(l.http_method||"-")+'</span></td><td style="color:var(--text2);font-size:12px">'+fmtNum(l.prompt_tokens||0)+'</td><td style="color:var(--text2);font-size:12px">'+fmtNum(l.completion_tokens||0)+'</td><td style="color:var(--text2);font-size:12px">'+fmtNum(l.cached_tokens||0)+'</td><td>'+fmtNum(l.total_tokens||0)+'</td><td style="color:var(--text2)">'+esc(l.latency_display||formatLatency(l.latency_ms||((l.latency_us||0)/1000)))+'</td><td style="font-family:monospace;font-size:12px">'+esc(l.client_ip||"-")+'</td><td>'+catHtml+'</td></tr>';});h+='</tbody></table></div>';}
   h+=pagerHtml(state.logPage,Math.max(1,Math.ceil(total/state.logPageSize)),total,"logPage","goLogPage");
   $("#log-table").innerHTML=h;
 }
 function goLogPage(){loadLogs();}
 function clearLogFilter(){state.logFilter={q:"",code:"",model:"",path:""};state.logPage=1;loadLogs();}
 
-/* 鍒嗛〉鍣?*/
+/* 分页器 */
 function pagerHtml(page,tp,total,key,fn){
-  if(tp<=1)return '<div class="pager"><span>鍏?'+total+' 鏉?/span></div>';
-  var h='<div class="pager"><span>鍏?'+total+' 鏉?/span>';
-  h+='<button onclick="'+(page<=1?'':'setPage(\''+key+'\','+(page-1)+',\''+fn+'\')')+'" '+(page<=1?'disabled':'')+'>鈥?/button>';
+  if(tp<=1)return '<div class="pager"><span>共 '+total+' 条</span></div>';
+  var h='<div class="pager"><span>共 '+total+' 条</span>';
+  h+='<button onclick="'+(page<=1?'':'setPage(\''+key+'\','+(page-1)+',\''+fn+'\')')+'" '+(page<=1?'disabled':'')+'>‹</button>';
   var from=Math.max(1,page-3), to=Math.min(tp,from+6);
-  if(from>1){h+='<button onclick="setPage(\''+key+'\',1,\''+fn+'\')">1</button>';if(from>2)h+='<span>鈥?/span>';}
+  if(from>1){h+='<button onclick="setPage(\''+key+'\',1,\''+fn+'\')">1</button>';if(from>2)h+='<span>…</span>';}
   for(var i=from;i<=to;i++){h+='<button class="'+(i===page?"active":"")+'" onclick="setPage(\''+key+'\','+i+',\''+fn+'\')">'+i+'</button>';}
-  if(to<tp){if(to<tp-1)h+='<span>鈥?/span>';h+='<button onclick="setPage(\''+key+'\','+tp+',\''+fn+'\')">'+tp+'</button>';}
-  h+='<button onclick="'+(page>=tp?'':'setPage(\''+key+'\','+(page+1)+',\''+fn+'\')')+'" '+(page>=tp?'disabled':'')+'>鈥?/button></div>';
+  if(to<tp){if(to<tp-1)h+='<span>…</span>';h+='<button onclick="setPage(\''+key+'\','+tp+',\''+fn+'\')">'+tp+'</button>';}
+  h+='<button onclick="'+(page>=tp?'':'setPage(\''+key+'\','+(page+1)+',\''+fn+'\')')+'" '+(page>=tp?'disabled':'')+'>›</button></div>';
   return h;
 }
 function setPage(key,val,fn){state[key]=val;if(fn==="goLogPage")goLogPage();else if(window[fn])window[fn]();}
 
-/* 绯荤粺閰嶇疆 */
+/* 系统配置 */
 function loadSettings(){
   $("#content").innerHTML=setLoading();
-  api("GET","/settings").then(function(r){renderSettings(r.data||[]);}).catch(function(e){$("#content").innerHTML='<div class="empty">鍔犺浇澶辫触锛?+esc(e.message)+'</div>';});
+  api("GET","/settings").then(function(r){renderSettings(r.data||[]);}).catch(function(e){$("#content").innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';});
 }
 function renderSettings(data){
   state.settings={};
   data.forEach(function(s){state.settings[s.key]=s.value;});
   var maint=state.settings["maintenance_mode"]==="true";
   var h='<div class="card" style="margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between">'+
-    '<div><div style="font-weight:500">缁存姢妯″紡</div><div style="color:var(--text2);font-size:12px">寮€鍚悗锛屾墍鏈夊鎴风璇锋眰灏嗚鎷掔粷</div></div>'+
+    '<div><div style="font-weight:500">维护模式</div><div style="color:var(--text2);font-size:12px">开启后，所有客户端请求将被拒绝</div></div>'+
     '<div class="switch '+(maint?"on":"")+'" id="maint-switch" onclick="toggleMaintenance()"></div></div></div>';
-  h+='<div class="card"><div style="font-weight:500;margin-bottom:12px">閰嶇疆椤圭鐞?/div><div id="settings-list">';
+  h+='<div class="card"><div style="font-weight:500;margin-bottom:12px">配置项管理</div><div id="settings-list">';
   h+=renderSettingsRows(data);
-  h+='</div><div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-primary" onclick="saveSettings()">淇濆瓨閰嶇疆</button><button class="btn" onclick="addSettingRow()">+ 鏂板閰嶇疆</button></div></div>';
+  h+='</div><div style="margin-top:12px;display:flex;gap:8px"><button class="btn btn-primary" onclick="saveSettings()">保存配置</button><button class="btn" onclick="addSettingRow()">+ 新增配置</button></div></div>';
   $("#content").innerHTML=h;
   setMaintTag(maint);
 }
 function renderSettingsRows(data){
-  if(!data.length)return '<div class="empty">鏆傛棤閰嶇疆椤?/div>';
+  if(!data.length)return '<div class="empty">暂无配置项</div>';
   var h='<div style="display:flex;flex-direction:column;gap:8px">';
   data.forEach(function(s){
     var ro=s.key==="maintenance_mode"?"readonly":"";
     h+='<div class="row" style="gap:8px"><input class="input" style="flex:1" value="'+esc(s.key)+'" '+ro+'>'+
       '<input class="input" style="flex:2" value="'+esc(s.value)+'">'+
-      '<button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">鍒犻櫎</button></div>';
+      '<button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">删除</button></div>';
   });
   return h+'</div>';
 }
 function addSettingRow(){
   var div=el("div",{class:"row",style:"gap:8px"});
-  div.innerHTML='<input class="input" style="flex:1" placeholder="key"><input class="input" style="flex:2" placeholder="value"><button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">鍒犻櫎</button>';
+  div.innerHTML='<input class="input" style="flex:1" placeholder="key"><input class="input" style="flex:2" placeholder="value"><button class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">删除</button>';
   $("#settings-list").appendChild(div);
 }
 function saveSettings(){
   var settings={}, rows=document.querySelectorAll("#settings-list .row");
   rows.forEach(function(r){var i=r.querySelectorAll("input");if(i[0].value.trim())settings[i[0].value.trim()]=i[1].value;});
-  if(!Object.keys(settings).length){toast("鏃犻厤缃彲淇濆瓨","warn");return;}
-  api("POST","/settings",{settings:settings}).then(function(){toast("閰嶇疆宸蹭繚瀛?,"success");loadSettings();}).catch(function(e){toast(e.message,"error");});
+  if(!Object.keys(settings).length){toast("无配置可保存","warn");return;}
+  api("POST","/settings",{settings:settings}).then(function(){toast("配置已保存","success");loadSettings();}).catch(function(e){toast(e.message,"error");});
 }
 function toggleMaintenance(){
   var maint=state.settings["maintenance_mode"]==="true", next=!maint;
-  gwConfirm(next?"纭畾寮€鍚淮鎶ゆā寮忥紵":"纭畾鍏抽棴缁存姢妯″紡锛?).then(function(ok){if(!ok)return;
+  gwConfirm(next?"确定开启维护模式？":"确定关闭维护模式？").then(function(ok){if(!ok)return;
   api("POST","/maintenance",{enabled:next}).then(function(){
-    toast(next?"缁存姢妯″紡宸插紑鍚?:"缁存姢妯″紡宸插叧闂?,"success");
+    toast(next?"维护模式已开启":"维护模式已关闭","success");
     state.settings["maintenance_mode"]=String(next);
     var sw=$("#maint-switch");if(sw)sw.className="switch "+(next?"on":"");
     setMaintTag(next);
@@ -680,81 +685,81 @@ function toggleMaintenance(){
   });}
 function setMaintTag(on){
   var t=$("#maint-tag");
-  if(on){t.innerHTML="缁存姢妯″紡";t.style.borderColor="var(--warn)";t.style.color="var(--warn)";}
-  else{t.innerHTML="杩愯涓?;t.style.borderColor="var(--success)";t.style.color="var(--success)";}
+  if(on){t.innerHTML="维护模式";t.style.borderColor="var(--warn)";t.style.color="var(--warn)";}
+  else{t.innerHTML="运行中";t.style.borderColor="var(--success)";t.style.color="var(--success)";}
 }
 
-/* 绯荤粺鐩戞帶 */
+/* 系统监控 */
 function loadMonitor(){
   $("#content").innerHTML=setLoading();
   Promise.all([api("GET","/global-status"),api("GET","/system/health"),api("GET","/circuit-breakers"),api("GET","/system/ip-monitor"),api("GET","/anomaly/stats")])
   .then(function(r){renderMonitor(r[0],r[1],r[2],r[3],r[4]);})
-  .catch(function(e){$("#content").innerHTML='<div class="empty">鍔犺浇澶辫触锛?+esc(e.message)+'</div>';});
+  .catch(function(e){$("#content").innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';});
 }
 function renderMonitor(global,health,cb,ipMon,anomaly){
   var overall=health.overall||"healthy";
   var dot=overall==="healthy"?"dot-ok":overall==="degraded"?"dot-warn":"dot-err";
   var h='<div class="grid-stats" style="margin-bottom:12px">'+
-    '<div class="card"><div class="card-title">绯荤粺鍋ュ悍搴?/div><div class="card-value '+(overall==="healthy"?"success":overall==="degraded"?"warn":"danger")+'"><span class="status-dot '+dot+'"></span>'+esc(overall)+'</div></div>'+
-    '<div class="card"><div class="card-title">鏁版嵁搴?/div><div class="card-value '+(health.database==="ok"?"success":"danger")+'">'+esc(health.database)+'</div></div>'+
-    '<div class="card"><div class="card-title">璋冨害鍣?/div><div class="card-value '+(health.scheduler==="ok"?"success":"danger")+'">'+esc(health.scheduler||"-")+'</div></div>'+
-    '<div class="card"><div class="card-title">鐔旀柇鍣?/div><div class="card-value '+(cb.circuit_active?"success":"danger")+'">'+(cb.circuit_active?"娲昏穬":"鍏抽棴")+'</div></div></div>';
+    '<div class="card"><div class="card-title">系统健康度</div><div class="card-value '+(overall==="healthy"?"success":overall==="degraded"?"warn":"danger")+'"><span class="status-dot '+dot+'"></span>'+esc(overall)+'</div></div>'+
+    '<div class="card"><div class="card-title">数据库</div><div class="card-value '+(health.database==="ok"?"success":"danger")+'">'+esc(health.database)+'</div></div>'+
+    '<div class="card"><div class="card-title">调度器</div><div class="card-value '+(health.scheduler==="ok"?"success":"danger")+'">'+esc(health.scheduler||"-")+'</div></div>'+
+    '<div class="card"><div class="card-title">熔断器</div><div class="card-value '+(cb.circuit_active?"success":"danger")+'">'+(cb.circuit_active?"活跃":"关闭")+'</div></div></div>';
   var s=global;
-  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:500;margin-bottom:8px">鍏ㄥ眬璋冨害鐘舵€?/div>'+
-    '<div class="kv"><span class="k">鎬绘《鏁?/span><span class="v">'+(s.total_buckets||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鍋ュ悍妗?/span><span class="v" style="color:var(--success)">'+(s.healthy_keys||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鍐峰嵈涓?/span><span class="v" style="color:var(--warn)">'+(s.cooling_keys||0)+'</span></div>'+
-    '<div class="kv"><span class="k">鑷剤涓?/span><span class="v">'+(s.healing_keys||0)+'</span></div>'+
-    '<div class="kv"><span class="k">褰撳墠骞跺彂</span><span class="v">'+(s.global_inflight||0)+'</span></div>'+
-    '<div class="kv"><span class="k">涓婃父鎬绘暟</span><span class="v">'+(s.upstream_total||0)+' (娲昏穬 '+(s.upstream_active||0)+')</span></div>'+
-    '<div class="kv"><span class="k">瀹㈡埛绔€绘暟</span><span class="v">'+(s.client_total||0)+' (娲昏穬 '+(s.client_active||0)+')</span></div></div>';
-  h+='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:500">鐔旀柇鍣ㄧ姸鎬?/div><button class="btn btn-sm" onclick="resetCircuitBreakers()">閲嶇疆鐔旀柇鍣?/button></div>'+
-    '<div class="kv"><span class="k">鐔旀柇鐘舵€?/span><span class="v">'+(cb.circuit_active?'<span style="color:var(--success)">婵€娲?/span>':'<span style="color:var(--text3)">鏈縺娲?/span>')+'</span></div>'+
-    '<div class="kv"><span class="k">429 鐔旀柇闃堝€?/span><span class="v">60s 鍐?5 娆?/span></div>'+
-    '<div class="kv"><span class="k">5xx 鐔旀柇闃堝€?/span><span class="v">60s 鍐?3 娆?/span></div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:500;margin-bottom:8px">全局调度状态</div>'+
+    '<div class="kv"><span class="k">总桶数</span><span class="v">'+(s.total_buckets||0)+'</span></div>'+
+    '<div class="kv"><span class="k">健康桶</span><span class="v" style="color:var(--success)">'+(s.healthy_keys||0)+'</span></div>'+
+    '<div class="kv"><span class="k">冷却中</span><span class="v" style="color:var(--warn)">'+(s.cooling_keys||0)+'</span></div>'+
+    '<div class="kv"><span class="k">自愈中</span><span class="v">'+(s.healing_keys||0)+'</span></div>'+
+    '<div class="kv"><span class="k">当前并发</span><span class="v">'+(s.global_inflight||0)+'</span></div>'+
+    '<div class="kv"><span class="k">上游总数</span><span class="v">'+(s.upstream_total||0)+' (活跃 '+(s.upstream_active||0)+')</span></div>'+
+    '<div class="kv"><span class="k">客户端总数</span><span class="v">'+(s.client_total||0)+' (活跃 '+(s.client_active||0)+')</span></div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:500">熔断器状态</div><button class="btn btn-sm" onclick="resetCircuitBreakers()">重置熔断器</button></div>'+
+    '<div class="kv"><span class="k">熔断状态</span><span class="v">'+(cb.circuit_active?'<span style="color:var(--success)">激活</span>':'<span style="color:var(--text3)">未激活</span>')+'</span></div>'+
+    '<div class="kv"><span class="k">429 熔断阈值</span><span class="v">60s 内 5 次</span></div>'+
+    '<div class="kv"><span class="k">5xx 熔断阈值</span><span class="v">60s 内 3 次</span></div></div>';
   var ip=ipMon.ip_monitor||{};
-  h+='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:500">IP 鐩戞帶</div><button class="btn btn-sm" onclick="loadBlockedIPs()">鏌ョ湅宸插皝绂?IP</button></div>'+
-    '<div class="kv"><span class="k">鐩戞帶 IP 鎬绘暟</span><span class="v">'+fmtNum(ipMon.db_total_ips||ip.total_ips||0)+'</span></div>'+
-    '<div class="kv"><span class="k">宸插皝绂?IP</span><span class="v" style="color:var(--danger)">'+fmtNum(ipMon.db_blocked_ips||ip.blocked_count||0)+'</span></div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:500">IP 监控</div><button class="btn btn-sm" onclick="loadBlockedIPs()">查看已封禁 IP</button></div>'+
+    '<div class="kv"><span class="k">监控 IP 总数</span><span class="v">'+fmtNum(ipMon.db_total_ips||ip.total_ips||0)+'</span></div>'+
+    '<div class="kv"><span class="k">已封禁 IP</span><span class="v" style="color:var(--danger)">'+fmtNum(ipMon.db_blocked_ips||ip.blocked_count||0)+'</span></div></div>';
   var an=anomaly||{};
-  h+='<div class="card"><div style="font-weight:500;margin-bottom:8px">寮傚父琛屼负妫€娴?/div>'+
-    '<div class="kv"><span class="k">璺熻釜瀹㈡埛绔暟</span><span class="v">'+fmtNum(an.tracked_clients||0)+'</span></div>'+
-    '<div class="kv"><span class="k">宸插皝绂佸鎴风</span><span class="v" style="color:var(--danger)">'+fmtNum(an.banned_count||0)+'</span></div></div>';
+  h+='<div class="card"><div style="font-weight:500;margin-bottom:8px">异常行为检测</div>'+
+    '<div class="kv"><span class="k">跟踪客户端数</span><span class="v">'+fmtNum(an.tracked_clients||0)+'</span></div>'+
+    '<div class="kv"><span class="k">已封禁客户端</span><span class="v" style="color:var(--danger)">'+fmtNum(an.banned_count||0)+'</span></div></div>';
   $("#content").innerHTML=h;
 }
-function resetCircuitBreakers(){gwConfirm("纭畾閲嶇疆鎵€鏈夌啍鏂櫒锛?).then(function(ok){if(!ok)return;api("POST","/circuit-breakers/reset").then(function(){toast("鐔旀柇鍣ㄥ凡閲嶇疆","success");loadMonitor();}).catch(function(e){toast(e.message,"error");});});}
+function resetCircuitBreakers(){gwConfirm("确定重置所有熔断器？").then(function(ok){if(!ok)return;api("POST","/circuit-breakers/reset").then(function(){toast("熔断器已重置","success");loadMonitor();}).catch(function(e){toast(e.message,"error");});});}
 function loadBlockedIPs(){
   api("GET","/system/ip-monitor/blocked").then(function(r){
-    var data=r.data||[], h='<div style="margin-bottom:8px;color:var(--text2)">鍏?'+data.length+' 涓凡灏佺 IP</div>';
-    if(!data.length){h+='<div class="empty">鏆傛棤灏佺 IP</div>';}
+    var data=r.data||[], h='<div style="margin-bottom:8px;color:var(--text2)">共 '+data.length+' 个已封禁 IP</div>';
+    if(!data.length){h+='<div class="empty">暂无封禁 IP</div>';}
     else{
-      h+='<div class="table-wrap"><table><thead><tr><th>IP</th><th>鍘熷洜</th><th>灏佺鏃堕棿</th><th>鎿嶄綔</th></tr></thead><tbody>';
-      data.forEach(function(b){h+='<tr><td style="font-family:monospace">'+esc(b.ip)+'</td><td style="color:var(--text2)">'+esc(b.reason||"-")+'</td><td style="color:var(--text2)">'+fmtTime(b.blocked_at)+'</td><td><button class="btn btn-sm" onclick="unblockIP(\''+esc(b.ip)+'\')">瑙ｅ皝</button></td></tr>';});
+      h+='<div class="table-wrap"><table><thead><tr><th>IP</th><th>原因</th><th>封禁时间</th><th>操作</th></tr></thead><tbody>';
+      data.forEach(function(b){h+='<tr><td style="font-family:monospace">'+esc(b.ip)+'</td><td style="color:var(--text2)">'+esc(b.reason||"-")+'</td><td style="color:var(--text2)">'+fmtTime(b.blocked_at)+'</td><td><button class="btn btn-sm" onclick="unblockIP(\''+esc(b.ip)+'\')">解封</button></td></tr>';});
       h+='</tbody></table></div>';
     }
-    showModal("宸插皝绂?IP 鍒楄〃",h,'<button class="btn" onclick="closeModal()">鍏抽棴</button>');
+    showModal("已封禁 IP 列表",h,'<button class="btn" onclick="closeModal()">关闭</button>');
   }).catch(function(e){toast(e.message,"error");});
 }
-function unblockIP(ip){gwConfirm("纭畾瑙ｅ皝 IP "+ip+"锛?).then(function(ok){if(!ok)return;api("POST","/system/ip-monitor/unblock",{ip:ip}).then(function(){toast("宸茶В灏?,"success");loadBlockedIPs();}).catch(function(e){toast(e.message,"error");});});}
+function unblockIP(ip){gwConfirm("确定解封 IP "+ip+"？").then(function(ok){if(!ok)return;api("POST","/system/ip-monitor/unblock",{ip:ip}).then(function(){toast("已解封","success");loadBlockedIPs();}).catch(function(e){toast(e.message,"error");});});}
 
-/* 杈呭姪 */
+/* 辅助 */
 function formToJson(form){var d={};form.querySelectorAll("input,select,textarea").forEach(function(e){d[e.name]=e.value;});return d;}
-// 澶嶅埗鏂囨湰鍒板壀璐存澘锛氫紭鍏?navigator.clipboard锛屽け璐ュ洖閫€鍒?textarea + execCommand
+// 复制文本到剪贴板：优先 navigator.clipboard，失败回退到 textarea + execCommand
 function copyText(id){
   var t=$("#"+id);if(!t)return;
   var text=t.value!=null?t.value:t.textContent;
   copyToClipboard(text);
 }
-// 澶嶅埗浠绘剰鏂囨湰鍒板壀璐存澘锛屾垚鍔熷悗寮瑰嚭 Toast
+// 复制任意文本到剪贴板，成功后弹出 Toast
 function copyToClipboard(text){
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(function(){toast("宸插鍒跺埌鍓创鏉?,"success");})
+    navigator.clipboard.writeText(text).then(function(){toast("已复制到剪贴板","success");})
       .catch(function(){fallbackCopy(text);});
   }else{
     fallbackCopy(text);
   }
 }
-// 鍥為€€鏂规锛氫复鏃?textarea + execCommand
+// 回退方案：临时 textarea + execCommand
 function fallbackCopy(text){
   try{
     var ta=document.createElement("textarea");
@@ -762,68 +767,68 @@ function fallbackCopy(text){
     document.body.appendChild(ta);ta.focus();ta.select();
     var ok=document.execCommand("copy");
     document.body.removeChild(ta);
-    if(ok)toast("宸插鍒跺埌鍓创鏉?,"success");else toast("澶嶅埗澶辫触","error");
-  }catch(e){toast("澶嶅埗澶辫触","error");}
+    if(ok)toast("已复制到剪贴板","success");else toast("复制失败","error");
+  }catch(e){toast("复制失败","error");}
 }
 
-/* 鐧诲綍琛ㄥ崟 */
+/* 登录表单 */
 $("#login-form").addEventListener("submit",function(e){
   e.preventDefault();
   var pwd=$("#login-password").value;
   if(!pwd)return;
   var btn=this.querySelector("button[type=submit]");
-  btn.disabled=true;btn.textContent="鐧诲綍涓?..";
+  btn.disabled=true;btn.textContent="登录中...";
   api("POST","/login",{password:pwd}).then(function(res){
     state.token=res.token;sSet(TOKEN_KEY,res.token);
     state.csrf=res.csrf_token||"";sSet(CSRF_KEY,state.csrf);
-    btn.disabled=false;btn.textContent="鐧诲綍";showApp();
-  }).catch(function(err){btn.disabled=false;btn.textContent="鐧诲綍";toast(err.message||"鐧诲綍澶辫触","error");});
+    btn.disabled=false;btn.textContent="登录";showApp();
+  }).catch(function(err){btn.disabled=false;btn.textContent="登录";toast(err.message||"登录失败","error");});
 });
 
 checkAuth();
 
-/* 閭欢绠＄悊 */
+/* 邮件管理 */
 function loadMail(){
   $("#content").innerHTML=setLoading();
   api("GET","/mail/list").then(function(r){
     renderMailList(r.mails||[]);
-  }).catch(function(e){$("#content").innerHTML='<div class="empty">鍔犺浇澶辫触锛?+esc(e.message)+'</div>';});
+  }).catch(function(e){$("#content").innerHTML='<div class="empty">加载失败：'+esc(e.message)+'</div>';});
 }
 function renderMailList(mails){
-  var h='<div style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0;color:var(--text)">鏀朵欢绠?<span style="color:var(--text2);font-weight:normal;font-size:13px">('+mails.length+'灏?</span></h3><button class="btn btn-sm" onclick="loadMail()">鍒锋柊</button></div><div class="table-wrap"><table><thead><tr><th style="width:60px">#</th><th>鍙戜欢浜?/th><th>涓婚</th><th style="width:160px">鏃堕棿</th><th style="width:60px">澶у皬</th></tr></thead><tbody>';
+  var h='<div style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0;color:var(--text)">收件箱 <span style="color:var(--text2);font-weight:normal;font-size:13px">('+mails.length+'封)</span></h3><button class="btn btn-sm" onclick="loadMail()">刷新</button></div><div class="table-wrap"><table><thead><tr><th style="width:60px">#</th><th>发件人</th><th>主题</th><th style="width:160px">时间</th><th style="width:60px">大小</th></tr></thead><tbody>';
   mails.forEach(function(m){
-    var subj=m.subject||"(鏃犱富棰?";
-    var from=m.from||"鏈煡";
+    var subj=m.subject||"(无主题)";
+    var from=m.from||"未知";
     if(from.indexOf("<")>0)from=from.split("<")[0].replace(/"/g,"").trim();
     var size=m.size>1024?(m.size/1024).toFixed(1)+"KB":m.size+"B";
     h+='<tr style="cursor:pointer" onclick="viewMail(\''+String(m.id).replace(/'/g,'')+'\')"><td>'+m.id+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis">'+esc(from)+'</td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;font-weight:'+((m.subject||"").indexOf("Re:")>=0?"bold":"normal")+'">'+esc(subj)+'</td><td style="font-size:12px">'+fmtTime(m.date)+'</td><td style="font-size:12px;color:var(--text2)">'+size+'</td></tr>';
   });
   h+='</tbody></table></div>';
-  if(mails.length===0)h+='<div class="empty">鏆傛棤閭欢</div>';
+  if(mails.length===0)h+='<div class="empty">暂无邮件</div>';
   h+='</div>';
   $("#content").innerHTML=h;
 }
 function viewMail(id){
-  showModal("閭欢璇︽儏",'<div style="padding:16px"><span class="loading"></span> 鍔犺浇涓?..</div>');
+  showModal("邮件详情",'<div style="padding:16px"><span class="loading"></span> 加载中...</div>');
   api("GET","/mail/detail?id="+id).then(function(r){
     var m=r.mail;if(!m){closeModal();return;}
     var body=m.body||"";
     var html=m.html||"";
-    // 浼樺厛鏄剧ずHTML锛屽惁鍒欐樉绀虹函鏂囨湰
+    // 优先显示HTML，否则显示纯文本
     var display=html||('<pre style="white-space:pre-wrap;font-family:inherit;margin:0;line-height:1.6">'+esc(body)+'</pre>');
     var h='<div style="max-height:70vh;overflow-y:auto">';
     h+='<div style="background:var(--bg);padding:12px;border-radius:6px;margin-bottom:12px;font-size:13px">';
-    h+='<div><strong>鍙戜欢浜?</strong> '+esc(m.from||"鏈煡")+'</div>';
-    h+='<div><strong>鏀朵欢浜?</strong> '+esc(m.to||"鏈煡")+'</div>';
-    h+='<div><strong>涓婚:</strong> '+esc(m.subject||"(鏃犱富棰?")+'</div>';
-    h+='<div><strong>鏃堕棿:</strong> '+fmtTime(m.date)+'</div>';
-    h+='<div><strong>澶у皬:</strong> '+(m.size>1024?(m.size/1024).toFixed(1)+"KB":m.size+"B")+'</div>';
+    h+='<div><strong>发件人:</strong> '+esc(m.from||"未知")+'</div>';
+    h+='<div><strong>收件人:</strong> '+esc(m.to||"未知")+'</div>';
+    h+='<div><strong>主题:</strong> '+esc(m.subject||"(无主题)")+'</div>';
+    h+='<div><strong>时间:</strong> '+fmtTime(m.date)+'</div>';
+    h+='<div><strong>大小:</strong> '+(m.size>1024?(m.size/1024).toFixed(1)+"KB":m.size+"B")+'</div>';
     h+='</div>';
     h+='<div style="border:1px solid var(--border);border-radius:6px;padding:16px;background:#fff;min-height:200px">'+display+'</div>';
     h+='</div>';
-    showModal("閭欢璇︽儏 - "+esc(m.subject||"(鏃犱富棰?"),h,
-      '<button class="btn" onclick="closeModal()">鍏抽棴</button>');
-  }).catch(function(e){closeModal();toast("鍔犺浇澶辫触: "+e.message,"error");});
+    showModal("邮件详情 - "+esc(m.subject||"(无主题)"),h,
+      '<button class="btn" onclick="closeModal()">关闭</button>');
+  }).catch(function(e){closeModal();toast("加载失败: "+e.message,"error");});
 }
 </script>
 </body>
