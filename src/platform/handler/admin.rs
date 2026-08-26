@@ -259,64 +259,68 @@ pub async fn create_user_handler(State(state): State<SharedState>, headers: Head
     let mut resp = if let Err(r) = require_admin_csrf(&state, &headers).await {
         r
     } else {
-        let req: Value = match serde_json::from_slice(&body) {
-            Ok(v) => v,
-            Err(_) => return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "Invalid JSON")),
-        };
-        let username = req.get("username").and_then(|u| u.as_str()).map(|s| s.trim().to_string()).unwrap_or_default();
-        let password = req.get("password").and_then(|p| p.as_str()).unwrap_or("").to_string();
-        let email = req.get("email").and_then(|e| e.as_str()).map(|s| s.trim().to_lowercase()).unwrap_or_default();
-        if username.is_empty() || password.is_empty() {
-            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "用户名和密码不能为空"));
-        }
-        if password.chars().count() < 6 {
-            return admin_headers(write_err(StatusCode::BAD_REQUEST, "invalid_request", "密码长度不能少于6位"));
-        }
-        // 检查用户名是否已存在
-        let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE LOWER(username)=LOWER($1))")
-            .bind(&username)
-            .fetch_one(&state.pool)
-            .await
-            .unwrap_or(false);
-        if exists {
-            return admin_headers(write_err(StatusCode::CONFLICT, "exists", "用户名已存在"));
-        }
-        let hash = match hash_password(&password) {
-            Ok(h) => h,
-            Err(e) => {
-                tracing::error!("hash password failed: {e}");
-                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "密码加密失败"));
-            }
-        };
-        let uuid = generate_id();
-        let email_val = if email.is_empty() { format!("{username}@local.generated") } else { email.clone() };
-        let row: Result<(i64, String), _> = sqlx::query_as(
-            "INSERT INTO users(uuid, username, email, password_hash, display_name, status, user_type, gw_client_id) \
-             VALUES($1, $2, $3, $4, $5, 'active', 'normal', nextval('client_id_seq')::text) RETURNING id, gw_client_id",
-        )
-        .bind(&uuid)
-        .bind(&username)
-        .bind(&email_val)
-        .bind(&hash)
-        .bind(&username)
-        .fetch_one(&state.pool)
-        .await;
-        let (user_id, gw_client_id) = match row {
-            Ok(v) => v,
-            Err(e) => {
-                tracing::error!("create user failed: {e}");
-                return admin_headers(write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "创建用户失败"));
-            }
-        };
-        let _ = sqlx::query("INSERT INTO clients(id, name, status, user_type) VALUES($1, $2, 'active', 'normal')")
-            .bind(&gw_client_id)
-            .bind(&username)
-            .execute(&state.pool)
-            .await;
-        write_ok(StatusCode::CREATED, json!({"id": user_id, "username": username, "password": password}))
+        create_user(&state, &body).await
     };
     admin_headers(&mut resp);
     resp
+}
+
+async fn create_user(state: &SharedState, body: &Bytes) -> Response {
+    let req: Value = match serde_json::from_slice(body) {
+        Ok(v) => v,
+        Err(_) => return write_err(StatusCode::BAD_REQUEST, "invalid_request", "Invalid JSON"),
+    };
+    let username = req.get("username").and_then(|u| u.as_str()).map(|s| s.trim().to_string()).unwrap_or_default();
+    let password = req.get("password").and_then(|p| p.as_str()).unwrap_or("").to_string();
+    let email = req.get("email").and_then(|e| e.as_str()).map(|s| s.trim().to_lowercase()).unwrap_or_default();
+    if username.is_empty() || password.is_empty() {
+        return write_err(StatusCode::BAD_REQUEST, "invalid_request", "用户名和密码不能为空");
+    }
+    if password.chars().count() < 6 {
+        return write_err(StatusCode::BAD_REQUEST, "invalid_request", "密码长度不能少于6位");
+    }
+    // 检查用户名是否已存在
+    let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE LOWER(username)=LOWER($1))")
+        .bind(&username)
+        .fetch_one(&state.pool)
+        .await
+        .unwrap_or(false);
+    if exists {
+        return write_err(StatusCode::CONFLICT, "exists", "用户名已存在");
+    }
+    let hash = match hash_password(&password) {
+        Ok(h) => h,
+        Err(e) => {
+            tracing::error!("hash password failed: {e}");
+            return write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "密码加密失败");
+        }
+    };
+    let uuid = generate_id();
+    let email_val = if email.is_empty() { format!("{username}@local.generated") } else { email.clone() };
+    let row: Result<(i64, String), _> = sqlx::query_as(
+        "INSERT INTO users(uuid, username, email, password_hash, display_name, status, user_type, gw_client_id) \
+         VALUES($1, $2, $3, $4, $5, 'active', 'normal', nextval('client_id_seq')::text) RETURNING id, gw_client_id",
+    )
+    .bind(&uuid)
+    .bind(&username)
+    .bind(&email_val)
+    .bind(&hash)
+    .bind(&username)
+    .fetch_one(&state.pool)
+    .await;
+    let (user_id, gw_client_id) = match row {
+        Ok(v) => v,
+        Err(e) => {
+            tracing::error!("create user failed: {e}");
+            return write_err(StatusCode::INTERNAL_SERVER_ERROR, "server_error", "创建用户失败");
+        }
+    };
+    let _ = sqlx::query("INSERT INTO clients(id, name, status, user_type) VALUES($1, $2, 'active', 'normal')")
+        .bind(&gw_client_id)
+        .bind(&username)
+        .execute(&state.pool)
+        .await;
+    write_ok(StatusCode::CREATED, json!({"id": user_id, "username": username, "password": password}))
 }
 
 /// DELETE /api/admin/users/{id}
